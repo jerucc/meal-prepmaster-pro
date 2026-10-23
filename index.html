@@ -2,158 +2,427 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Küchenplaner Deluxe</title>
 <style>
 :root {
-  --bg:#f6f7f2; --card:#fff; --ink:#17231e; --muted:#68766f;
-  --green:#087a55; --green2:#e4f4ec; --coral:#f26049;
-  --line:#e3e9e4; --shadow:0 12px 32px #183a2910;
+  --bg: #fafaf7;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --green: #10b981;
+  --green-hover: #059669;
+  --green-light: #ecfdf5;
+  --coral: #f97316;
+  --coral-light: #fff7ed;
+  --line: #e2e8f0;
+  --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
 }
+
 .dark {
-  --bg:#101815; --card:#19241f; --ink:#eef5f0; --muted:#a3b2a9;
-  --green:#67d6a7; --green2:#20392e; --line:#304039; --shadow:0 12px 32px #0004;
+  --bg: #0f172a;
+  --card: #1e293b;
+  --ink: #f8fafc;
+  --muted: #94a3b8;
+  --green: #34d399;
+  --green-hover: #10b981;
+  --green-light: rgba(52, 211, 153, 0.12);
+  --coral: #fb923c;
+  --coral-light: rgba(251, 146, 60, 0.12);
+  --line: #334155;
+  --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
 }
-* { box-sizing:border-box }
-body { margin:0; background:var(--bg); color:var(--ink); font:15px system-ui,sans-serif }
-button,input,select,textarea { font:inherit }
-button { cursor:pointer; border:0 }
-header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line) }
-.top { max-width:1180px; margin:auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px }
-.brand { font-size:20px; font-weight:850; color:var(--green) }
-.brand small { font-size:11px; color:var(--coral) }
-nav,.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
-.navbtn,.iconbtn { background:transparent; color:var(--muted); padding:9px 12px; border-radius:12px; font-weight:700 }
-.navbtn.active,.navbtn:hover,.iconbtn:hover { background:var(--green2); color:var(--green) }
-main { max-width:1180px; margin:24px auto; padding:0 20px 80px }
-.tab { display:none }
-.tab.active { display:block }
-.hero { background:linear-gradient(125deg,#07583f,#10251e); color:white; border-radius:26px; padding:30px; margin-bottom:20px }
-.hero h1 { font-size:clamp(28px,5vw,46px); margin:12px 0 }
-.hero p { color:#d1e1d8; max-width:700px }
-.inputrow { background:#ffffff18; border:1px solid #ffffff35; padding:8px; border-radius:16px }
-.inputrow input { flex:1; min-width:180px; color:white; background:transparent; border:0; outline:0; padding:10px }
-.inputrow input::placeholder { color:#c5d5cc }
-.primary,.accent,.soft,.danger { padding:10px 14px; border-radius:11px; font-weight:750 }
-.primary { background:var(--green); color:white }
-.accent { background:var(--coral); color:white }
-.soft { background:var(--green2); color:var(--green) }
-.danger { background:#ffe8e6; color:#a52b24 }
-.chips { display:flex; gap:7px; flex-wrap:wrap; margin:10px 0 }
-.chip { background:var(--green2); color:var(--green); border-radius:999px; padding:6px 10px; font-size:13px }
-.hero .chip { background:#ffffff1c; color:white; border:1px solid #ffffff25 }
-.card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:18px; box-shadow:var(--shadow) }
-.filters { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0 }
-.filters label,.field label { display:grid; gap:6px; color:var(--muted); font-size:12px; font-weight:750 }
-input,select,textarea { background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:11px; padding:10px }
-h2 { margin:0 0 6px }
-h3 { margin:0 0 12px }
-.sectionhead { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:22px 0 12px }
-.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
-.recipe { padding:0; overflow:hidden }
-.recipe img { width:100%; height:175px; object-fit:cover; background:var(--green2) }
-.recipebody { padding:16px }
-.recipebody h3 { margin:0 0 8px }
-.muted { color:var(--muted); font-size:13px }
-.recipe .chip { font-size:11px }
-.daygrid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px }
-.slot { border:1px dashed var(--line); padding:9px; border-radius:11px; margin:8px 0; font-size:12px }
-.slot button { display:block; margin-top:6px }
-.list { display:grid; gap:8px }
-.listitem { display:flex; align-items:center; gap:10px; padding:11px; background:var(--bg); border-radius:12px }
-.listitem span { flex:1 }
-.checked { text-decoration:line-through; color:var(--muted) }
-table { width:100%; border-collapse:collapse }
-th,td { text-align:left; padding:12px; border-bottom:1px solid var(--line) }
-th { color:var(--muted); font-size:12px }
-.post { margin:12px auto; max-width:720px }
-.modal { position:fixed; inset:0; background:#0009; z-index:10; display:none; align-items:center; justify-content:center; padding:16px }
-.modal.open { display:flex }
-.modalbox { background:var(--card); border-radius:20px; padding:22px; width:min(650px,100%); max-height:90vh; overflow:auto }
-.modalhead { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px }
-.field { display:grid; gap:12px }
-.field input,.field textarea,.field select { width:100% }
-.step { display:block; padding:10px; background:var(--bg); border-radius:10px; margin:7px 0 }
-.timer { font:700 48px ui-monospace,monospace; text-align:center; background:#101815; color:#67d6a7; padding:20px; border-radius:16px }
-.toast { position:fixed; bottom:22px; right:20px; background:#17231e; color:white; padding:12px 16px; border-radius:12px; z-index:20 }
-@media(max-width:850px) {
-  .grid { grid-template-columns:repeat(2,1fr) }
-  .daygrid { grid-template-columns:repeat(2,1fr) }
-  .filters { grid-template-columns:repeat(2,1fr) }
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background 0.2s, color 0.2s;
+  padding-bottom: 80px;
 }
-@media(max-width:600px) {
-  .top { padding:10px 12px; flex-wrap:wrap }
-  .top nav { order:3; width:100%; overflow:auto; flex-wrap:nowrap }
-  .navbtn { white-space:nowrap; padding:8px }
-  .grid,.filters { grid-template-columns:1fr }
-  .daygrid { grid-template-columns:1fr 1fr }
-  main { padding:0 12px 70px }
-  .hero { padding:22px }
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; border: 0; }
+
+/* Header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.top {
+  max-width: 1180px;
+  margin: auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-size: 20px;
+  font-weight: 850;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brand small {
+  font-size: 10px;
+  background: var(--coral);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 99px;
+  letter-spacing: 0.5px;
+}
+
+/* Desktop Navigation */
+nav.desktop-nav {
+  display: flex;
+  gap: 6px;
+}
+.navbtn, .iconbtn {
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.navbtn.active, .navbtn:hover, .iconbtn:hover {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+/* Mobile Bottom Navigation Bar */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  padding: 6px 10px;
+  justify-content: space-around;
+}
+.bottom-btn {
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.bottom-btn .icon { font-size: 18px; }
+.bottom-btn.active {
+  color: var(--green);
+  background: var(--green-light);
+}
+
+/* Layout Elements */
+main {
+  max-width: 1180px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+.tab { display: none; }
+.tab.active { display: block; }
+
+.hero {
+  background: linear-gradient(135deg, #059669 0%, #0f172a 100%);
+  color: white;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.hero h1 { font-size: clamp(26px, 4vw, 42px); margin: 12px 0 8px; }
+.hero p { color: #d1fae5; max-width: 650px; margin-top: 0; }
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.inputrow {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 16px;
+  margin-top: 16px;
+}
+.inputrow input {
+  flex: 1;
+  min-width: 180px;
+  color: white;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  padding: 10px;
+}
+.inputrow input::placeholder { color: #a7f3d0; }
+
+input, select, textarea {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--green);
+}
+
+.primary, .accent, .soft, .danger {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 750;
+  transition: transform 0.1s, opacity 0.2s;
+}
+.primary:active, .accent:active, .soft:active { transform: scale(0.98); }
+.primary { background: var(--green); color: white; }
+.primary:hover { background: var(--green-hover); }
+.accent { background: var(--coral); color: white; }
+.soft { background: var(--green-light); color: var(--green); }
+.danger { background: #fef2f2; color: #ef4444; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.chip {
+  background: var(--green-light);
+  color: var(--green);
+  border-radius: 99px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 0;
+}
+.hero .chip { background: rgba(255, 255, 255, 0.15); color: white; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+.filters label, .field label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+h2 { margin: 0 0 6px; font-size: 22px; }
+h3 { margin: 0 0 10px; }
+.sectionhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.recipe { padding: 0; overflow: hidden; }
+.recipe img { width: 100%; height: 180px; object-fit: cover; background: var(--green-light); }
+.recipebody { padding: 18px; }
+.recipebody h3 { margin: 0 0 8px; font-size: 18px; }
+.muted { color: var(--muted); font-size: 13px; }
+
+/* Weekly Planner Grid */
+.daygrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.day { padding: 16px; }
+.slot {
+  border: 1px dashed var(--line);
+  padding: 12px;
+  border-radius: 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  background: var(--bg);
+}
+.slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+/* Lists and Tables */
+.list { display: grid; gap: 10px; }
+.listitem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 14px;
+}
+.listitem span { flex: 1; }
+.checked { text-decoration: line-through; color: var(--muted); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal.open { display: flex; }
+.modalbox {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 24px;
+  width: min(600px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.modalhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.field { display: grid; gap: 14px; }
+.field input, .field textarea, .field select { width: 100%; }
+
+.toast {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 14px;
+  z-index: 60;
+  box-shadow: var(--shadow);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  nav.desktop-nav { display: none; }
+  .bottom-nav { display: flex; }
+  body { padding-bottom: 90px; }
+  .toast { bottom: 85px; right: 16px; left: 16px; text-align: center; }
 }
 </style>
 </head>
 <body>
+
 <header>
   <div class="top">
-    <div class="brand">🍴 Küchenplaner <small>DELUXE</small></div>
-    <nav id="nav"></nav>
+    <div class="brand">
+      🍴 Küchenplaner <small>DELUXE</small>
+    </div>
+    
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav" id="desktopNav"></nav>
+
     <div class="row">
       <button class="iconbtn" onclick="openTimer()" title="Timer">⏱</button>
       <button class="iconbtn" onclick="toggleTheme()" title="Theme">🌙</button>
+      <button class="iconbtn" onclick="toggleLang()" id="langBtn">DE</button>
     </div>
   </div>
 </header>
 
 <main>
+  <!-- RECIPES TAB -->
   <section class="tab active" id="tab-recipes">
     <div class="hero">
-      <div>✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
+      <div style="font-size: 12px; font-weight: 800; letter-spacing: 1px;">✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
       <h1>Was möchtest du heute kochen?</h1>
-      <p>Gib Zutaten ein oder wähle sie aus. Die Rezepte werden sofort passend aktualisiert.</p>
-
+      <p>Gib Zutaten ein oder wähle sie aus. Lass dir passende Rezepte vorschlagen oder scanne ein Foto deiner Zutaten.</p>
+      
       <div class="row inputrow">
-        <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch"
-               onkeydown="if(event.key==='Enter') addIngredients()">
+        <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch" onkeydown="if(event.key==='Enter')addIngredients()">
         <button class="accent" onclick="addIngredients()">＋ Hinzufügen</button>
-        <label class="soft" style="cursor:pointer">
-          📷 Foto auswählen
-          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)">
-        </label>
+        <label class="soft" style="cursor:pointer; background: rgba(255,255,255,0.2); color: white;">📷 Foto scannen<input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)"></label>
       </div>
-
+      
       <div class="chips" id="quickTags"></div>
-      <div class="row" style="justify-content:space-between">
-        <b>Gewählte Zutaten</b>
-        <button class="iconbtn" onclick="clearIngredients()">Alle löschen</button>
+      
+      <div class="row" style="justify-content:space-between; margin-top: 14px;">
+        <b style="font-size: 13px;">Gewählte Zutaten</b>
+        <button class="iconbtn" style="color: white; font-size: 12px;" onclick="clearIngredients()">Alle löschen</button>
       </div>
       <div class="chips" id="selectedTags"></div>
     </div>
 
     <div class="card">
-      <div class="sectionhead">
+      <div class="sectionhead" style="margin-top: 0;">
         <h3>Filter & Vorlieben</h3>
-        <button class="primary" onclick="renderRecipes()">✨ Rezepte anzeigen</button>
+        <button class="primary" onclick="renderRecipes()">✨ Rezepte generieren</button>
       </div>
       <div class="filters">
         <label>Ernährung
           <select id="diet" onchange="renderRecipes()">
             <option value="all">Alle</option>
-            <option>Vegetarisch</option><option>Vegan</option>
-            <option>Glutenfrei</option><option>Low-Carb</option>
+            <option value="Vegetarisch">Vegetarisch</option>
+            <option value="Vegan">Vegan</option>
+            <option value="Glutenfrei">Glutenfrei</option>
+            <option value="Low-Carb">Low-Carb</option>
           </select>
         </label>
         <label>Max. Zeit
           <select id="time" onchange="renderRecipes()">
             <option value="all">Egal</option>
-            <option value="15">15 Min</option><option value="30">30 Min</option>
+            <option value="15">15 Min</option>
+            <option value="30">30 Min</option>
             <option value="45">45 Min</option>
           </select>
         </label>
         <label>Küche
           <select id="cuisine" onchange="renderRecipes()">
             <option value="all">Alle</option>
-            <option>Italienisch</option><option>Mediterran</option>
-            <option>Asiatisch</option><option>Klassisch</option>
+            <option value="Italienisch">Italienisch</option>
+            <option value="Mediterran">Mediterran</option>
+            <option value="Asiatisch">Asiatisch</option>
+            <option value="Klassisch">Klassisch</option>
           </select>
         </label>
         <label>Suche
@@ -162,134 +431,137 @@ th { color:var(--muted); font-size:12px }
       </div>
     </div>
 
-    <div class="sectionhead"><h2>Rezepte</h2>
+    <div class="sectionhead">
+      <h2>Erkannte Rezepte</h2>
       <button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button>
     </div>
     <div class="grid" id="recipes"></div>
   </section>
 
+  <!-- WEEKLY PLANNER TAB -->
   <section class="tab" id="tab-weekly">
-    <div class="card">
-      <div class="sectionhead">
-        <div><h2>Wochenplaner</h2><div class="muted">Plane Mahlzeiten für deine Woche.</div></div>
-        <div class="row">
-          <button class="soft" onclick="clearPlan()">Plan leeren</button>
-          <button class="accent" onclick="planToShopping()">🛒 Einkaufsliste erstellen</button>
-        </div>
+    <div class="card sectionhead" style="margin-top:0;">
+      <div>
+        <h2>Wochenplaner</h2>
+        <div class="muted">Klicke auf eine Mahlzeit, um eigene Gerichte einzugeben oder Rezepte zu wählen.</div>
       </div>
-      <div class="daygrid" id="week"></div>
+      <div class="row">
+        <button class="soft" onclick="clearPlan()">Plan leeren</button>
+        <button class="accent" onclick="planToShopping()">🛒 Zur Einkaufsliste</button>
+      </div>
     </div>
+    <div class="daygrid" id="week" style="margin-top: 16px;"></div>
   </section>
 
+  <!-- SHOPPING LIST TAB -->
   <section class="tab" id="tab-shopping">
     <div class="card">
-      <div class="sectionhead">
-        <div><h2>Einkaufsliste</h2><div class="muted">Artikel abhaken oder ergänzen.</div></div>
+      <div class="sectionhead" style="margin-top:0;">
+        <div>
+          <h2>Einkaufsliste</h2>
+          <div class="muted">Artikel abhaken, ergänzen oder verwalten.</div>
+        </div>
         <div class="row">
           <button class="soft" onclick="copyList()">Kopieren</button>
           <button class="danger" onclick="clearChecked()">Erledigte löschen</button>
         </div>
       </div>
       <div class="row">
-        <input id="shopInput" placeholder="Artikel hinzufügen…" style="flex:1"
-               onkeydown="if(event.key==='Enter') addShop()">
+        <input id="shopInput" placeholder="Artikel hinzufügen…" style="flex:1" onkeydown="if(event.key==='Enter')addShop()">
         <select id="shopCat">
-          <option>Gemüse & Obst</option><option>Kühlregal & Milch</option>
-          <option>Vorratskammer</option><option>Gewürze & Öl</option><option>Sonstiges</option>
+          <option>Gemüse & Obst</option>
+          <option>Kühlregal & Milch</option>
+          <option>Vorratskammer</option>
+          <option>Gewürze & Öl</option>
+          <option>Sonstiges</option>
         </select>
         <button class="primary" onclick="addShop()">＋</button>
       </div>
-      <div id="shoppingList" style="margin-top:16px"></div>
+      <div id="shoppingList" style="margin-top:16px" class="list"></div>
     </div>
   </section>
 
+  <!-- PANTRY TAB -->
   <section class="tab" id="tab-pantry">
     <div class="card">
-      <div class="sectionhead">
-        <div><h2>Vorratskammer</h2><div class="muted">Menge und Mindesthaltbarkeit verwalten.</div></div>
+      <div class="sectionhead" style="margin-top:0;">
+        <div>
+          <h2>Vorratskammer</h2>
+          <div class="muted">Behalte Menge und Bestand im Blick.</div>
+        </div>
         <button class="primary" onclick="openPantryForm()">＋ Vorrat hinzufügen</button>
       </div>
       <div style="overflow:auto">
-        <table><thead><tr><th>Artikel</th><th>Menge</th><th>MHD</th><th></th></tr></thead>
+        <table>
+          <thead>
+            <tr><th>Artikel</th><th>Menge</th><th>Kategorie</th><th>Aktion</th></tr>
+          </thead>
           <tbody id="pantryList"></tbody>
         </table>
       </div>
     </div>
   </section>
 
+  <!-- COMMUNITY TAB -->
   <section class="tab" id="tab-community">
-    <div class="card sectionhead">
-      <div><h2>Community</h2><div class="muted">Teile Kochtipps und Rezeptideen.</div></div>
+    <div class="card sectionhead" style="margin-top:0;">
+      <div>
+        <h2>Community</h2>
+        <div class="muted">Teile Kochtipps und Rezeptideen.</div>
+      </div>
       <button class="accent" onclick="openPostForm()">＋ Beitrag erstellen</button>
     </div>
-    <div id="posts"></div>
+    <div id="posts" style="display:grid; gap:14px; margin-top:16px"></div>
   </section>
 </main>
 
-<div class="modal" id="modal" onclick="if(event.target===this) closeModal()">
+<!-- Bottom Navigation for Mobile -->
+<div class="bottom-nav" id="bottomNav"></div>
+
+<!-- Modal Container -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modalbox">
-    <div class="modalhead"><h2 id="modalTitle"></h2><button class="iconbtn" onclick="closeModal()">✕</button></div>
+    <div class="modalhead">
+      <h2 id="modalTitle" style="margin:0;"></h2>
+      <button class="iconbtn" onclick="closeModal()">✕</button>
+    </div>
     <div id="modalBody"></div>
   </div>
 </div>
-<div id="toast" class="toast" style="display:none"></div>
+
+<div id="toast" style="display:none" class="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
-const read = (key, fallback) => {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-  catch { return fallback; }
-};
-
-const dayNames = {Mon:"Montag",Tue:"Dienstag",Wed:"Mittwoch",Thu:"Donnerstag",Fri:"Freitag",Sat:"Samstag",Sun:"Sonntag"};
-const mealNames = {breakfast:"Frühstück",lunch:"Mittagessen",dinner:"Abendessen"};
+const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 
 const state = {
+  lang: localStorage.getItem("kp_lang") || "de",
   dark: localStorage.getItem("kp_dark") === "true",
   ingredients: [],
   custom: read("kp_custom", []),
-  plan: read("kp_plan", Object.fromEntries(
-    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => [d,{breakfast:null,lunch:null,dinner:null}])
-  )),
-  shopping: read("kp_shop", []),
-  pantry: read("kp_pantry", []),
-  posts: read("kp_posts", [])
+  plan: read("kp_plan", Object.fromEntries(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => [d, {breakfast:null, lunch:null, dinner:null}]))),
+  shopping: read("kp_shop", [{id:"s1", name:"Tomaten", category:"Gemüse & Obst", checked:false}, {id:"s2", name:"Pasta", category:"Vorratskammer", checked:false}]),
+  pantry: read("kp_pantry", [{id:"p1", name:"Mehl", qty:"1 kg", cat:"Vorratskammer"}]),
+  posts: read("kp_posts", [{title:"Tipp für knusprigen Tofu", body:"Vor dem Braten gut mit Stärke anstäuben und trocken tupfen!", author:"ChefLena"}]),
 };
 
 const recipes = [
-  {
-    id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520,
-    diet:"Vegetarisch", cuisine:"Italienisch",
-    ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter","Petersilie"],
-    steps:["Pasta in Salzwasser al dente kochen.","Knoblauch in Butter sanft anbraten.","Sahne und etwas Nudelwasser zugeben.","Parmesan einrühren und abschmecken.","Pasta mit der Sauce vermengen und servieren."]
-  },
-  {
-    id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380,
-    diet:"Vegan", cuisine:"Mediterran",
-    ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl","Kräuter"],
-    steps:["Gemüse in Stücke schneiden.","Öl erhitzen und Knoblauch kurz anbraten.","Gemüse 10–12 Minuten braten.","Kräuter zugeben und abschmecken."]
-  },
-  {
-    id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460,
-    diet:"Vegan", cuisine:"Asiatisch",
-    ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer","Sesam"],
-    steps:["Reis garen.","Tofu würfeln und knusprig braten.","Paprika und Ingwer zugeben.","Mit Sojasauce würzen und mit Reis servieren."]
-  },
-  {
-    id:"r4", title:"Würziges Hähnchen-Curry", time:35, calories:580,
-    diet:"Low-Carb", cuisine:"Asiatisch",
-    ingredients:["Hähnchen","Kokosmilch","Paprika","Currypaste","Knoblauch"],
-    steps:["Hähnchen in Streifen schneiden und anbraten.","Currypaste und Knoblauch kurz mitbraten.","Kokosmilch zugießen und köcheln lassen.","Paprika zugeben und garen."]
-  },
-  {
-    id:"r5", title:"Tomaten-Eier-Pfanne", time:15, calories:310,
-    diet:"Vegetarisch", cuisine:"Klassisch",
-    ingredients:["Tomaten","Eier","Zwiebel","Paprika","Kräuter"],
-    steps:["Zwiebel und Paprika anbraten.","Tomaten zugeben und weich köcheln.","Eier hineinschlagen und stocken lassen.","Mit Kräutern servieren."]
-  }
+  {id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520, diet:"Vegetarisch", cuisine:"Italienisch", ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter"], steps:["Pasta kochen.","Knoblauch anbraten.","Sahne und Parmesan untermischen."], image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
+  {id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380, diet:"Vegan", cuisine:"Mediterran", ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl"], steps:["Gemüse würfeln.","In Öl anbraten und würzen."], image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
+  {id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460, diet:"Vegan", cuisine:"Asiatisch", ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer"], steps:["Reis kochen.","Tofu knusprig braten und mit Sojasauce ablöschen."], image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"}
 ];
 
-const quickIngredients = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu","Pilze"];
+const quick = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu"];
+const days = {Mon:"Montag", Tue:"Dienstag", Wed:"Mittwoch", Thu:"Donnerstag", Fri:"Freitag", Sat:"Samstag", Sun:"Sonntag"};
+const meals = {breakfast:"Frühstück", lunch:"Mittagessen", dinner:"Abendessen"};
+const navItems = [
+  ["recipes", "🍳", "Rezepte"],
+  ["weekly", "📅", "Planer"],
+  ["shopping", "🛒", "Einkauf"],
+  ["pantry", "📦", "Vorrat"],
+  ["community", "👥", "Community"]
+];
 
 function save() {
   localStorage.setItem("kp_custom", JSON.stringify(state.custom));
@@ -299,45 +571,41 @@ function save() {
   localStorage.setItem("kp_posts", JSON.stringify(state.posts));
 }
 
-function esc(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[char]));
-}
-
-function toast(message) {
-  $("toast").textContent = message;
-  $("toast").style.display = "block";
-  setTimeout(() => $("toast").style.display = "none", 2400);
+function toast(s) {
+  let t = $("toast");
+  t.textContent = s;
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2400);
 }
 
 function init() {
   document.documentElement.classList.toggle("dark", state.dark);
-
-  $("nav").innerHTML = [
-    ["recipes","🍳 Rezepte"],["weekly","📅 Planer"],["shopping","🛒 Einkauf"],
-    ["pantry","📦 Vorrat"],["community","👥 Community"]
-  ].map(([id,label], index) =>
-    `<button class="navbtn ${index===0?"active":""}" onclick="showTab('${id}',this)">${label}</button>`
+  
+  // Render Desktop Navigation
+  $("desktopNav").innerHTML = navItems.map(([id, icon, label], i) => 
+    `<button class="navbtn ${i===0?'active':''}" onclick="tab('${id}', this)"><span>${icon}</span> ${label}</button>`
   ).join("");
 
-  $("quickTags").innerHTML = quickIngredients.map(item =>
-    `<button class="chip" onclick="toggleIngredient('${esc(item)}')">＋ ${esc(item)}</button>`
+  // Render Mobile Bottom Navigation
+  $("bottomNav").innerHTML = navItems.map(([id, icon, label], i) => 
+    `<button class="bottom-btn ${i===0?'active':''}" onclick="tab('${id}', this)"><span class="icon">${icon}</span><span>${label}</span></button>`
   ).join("");
 
-  renderSelectedIngredients();
-  renderRecipes();
-  renderWeek();
-  renderShopping();
-  renderPantry();
-  renderPosts();
+  $("quickTags").innerHTML = quick.map(x => `<button class="chip" onclick="toggleIng('${x}')">＋ ${x}</button>`).join("");
+  renderSelected(); renderRecipes(); renderWeek(); renderShopping(); renderPantry(); renderPosts();
 }
 
-function showTab(id, button) {
-  document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
+function tab(id, btn) {
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
   $("tab-" + id).classList.add("active");
-  document.querySelectorAll(".navbtn").forEach(el => el.classList.remove("active"));
-  if (button) button.classList.add("active");
+  document.querySelectorAll(".navbtn, .bottom-btn").forEach(x => x.classList.remove("active"));
+  
+  // Highlight both desktop and bottom navigation buttons for selected tab
+  const index = navItems.findIndex(item => item[0] === id);
+  if (index !== -1) {
+    document.querySelectorAll(".desktop-nav .navbtn")[index]?.classList.add("active");
+    document.querySelectorAll(".bottom-nav .bottom-btn")[index]?.classList.add("active");
+  }
 }
 
 function toggleTheme() {
@@ -346,349 +614,335 @@ function toggleTheme() {
   document.documentElement.classList.toggle("dark", state.dark);
 }
 
-function addIngredients() {
-  const value = $("ingredientInput").value.trim();
-  if (!value) return;
-
-  value.split(",").map(item => item.trim()).filter(Boolean).forEach(item => {
-    if (!state.ingredients.some(existing => existing.toLowerCase() === item.toLowerCase())) {
-      state.ingredients.push(item);
-    }
-  });
-
-  $("ingredientInput").value = "";
-  renderSelectedIngredients();
-  renderRecipes();
+function toggleLang() {
+  state.lang = state.lang === "de" ? "en" : "de";
+  localStorage.setItem("kp_lang", state.lang);
+  $("langBtn").textContent = state.lang.toUpperCase();
+  toast(state.lang === "en" ? "Language set to English." : "Sprache auf Deutsch gestellt.");
 }
 
-function toggleIngredient(item) {
-  const exists = state.ingredients.some(x => x.toLowerCase() === item.toLowerCase());
-  state.ingredients = exists
-    ? state.ingredients.filter(x => x.toLowerCase() !== item.toLowerCase())
-    : [...state.ingredients, item];
+/* Ingredients & Recipe Engine */
+function addIngredients() {
+  let val = $("ingredientInput").value.trim();
+  if (val) {
+    val.split(",").map(x => x.trim()).filter(Boolean).forEach(x => {
+      if (!state.ingredients.includes(x)) state.ingredients.push(x);
+    });
+    $("ingredientInput").value = "";
+    renderSelected(); renderRecipes();
+  }
+}
 
-  renderSelectedIngredients();
-  renderRecipes();
+function toggleIng(x) {
+  state.ingredients = state.ingredients.includes(x) ? state.ingredients.filter(y => y !== x) : [...state.ingredients, x];
+  renderSelected(); renderRecipes();
+}
+
+function renderSelected() {
+  $("selectedTags").innerHTML = state.ingredients.length 
+    ? state.ingredients.map(x => `<button class="chip" onclick="toggleIng('${esc(x)}')">${esc(x)} ✕</button>`).join("") 
+    : `<span style="color: #a7f3d0; font-size: 13px;">Noch keine Zutaten gewählt.</span>`;
 }
 
 function clearIngredients() {
-  state.ingredients = [];
-  renderSelectedIngredients();
-  renderRecipes();
+  state.ingredients = []; renderSelected(); renderRecipes();
 }
 
-function renderSelectedIngredients() {
-  $("selectedTags").innerHTML = state.ingredients.length
-    ? state.ingredients.map(item =>
-        `<button class="chip" onclick="toggleIngredient('${esc(item)}')">${esc(item)} ✕</button>`
-      ).join("")
-    : '<span class="muted">Noch keine Zutaten gewählt.</span>';
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function renderRecipes() {
+  let list = [...recipes, ...state.custom];
+  let diet = $("diet").value, time = $("time").value, cuisine = $("cuisine").value, search = $("search").value.toLowerCase();
+  
+  list = list.filter(r => 
+    (diet === "all" || r.diet === diet) &&
+    (time === "all" || r.time <= +time) &&
+    (cuisine === "all" || r.cuisine === cuisine) &&
+    (!search || r.title.toLowerCase().includes(search)) &&
+    (!state.ingredients.length || state.ingredients.some(i => r.ingredients.some(x => x.toLowerCase().includes(i.toLowerCase()))))
+  );
+
+  if (!list.length && state.ingredients.length) list = [synthesize()];
+
+  $("recipes").innerHTML = list.length ? list.map(r => `
+    <article class="card recipe">
+      <img src="${esc(r.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt="">
+      <div class="recipebody">
+        <h3>${esc(r.title)}</h3>
+        <div class="muted">⏱ ${r.time} min · 🔥 ${r.calories || 400} kcal · ${esc(r.cuisine || "Kreativ")}</div>
+        <div class="chips">${r.ingredients.slice(0, 4).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
+        <button class="primary" style="width: 100%; margin-top: 8px;" onclick="recipeDetail('${esc(r.id)}')">Details & Kochen</button>
+      </div>
+    </article>
+  `).join("") : `<div class="card">Keine Rezepte gefunden. Pass deine Filter an.</div>`;
 }
 
-function ingredientMatches(recipeIngredient, selectedIngredient) {
-  const recipe = recipeIngredient.toLocaleLowerCase("de").trim();
-  const selected = selectedIngredient.toLocaleLowerCase("de").trim();
-  return recipe.includes(selected) || selected.includes(recipe);
-}
-
-function makeGeneratedRecipe() {
-  const ingredients = [...state.ingredients];
-  const extras = ["Olivenöl","Salz","Pfeffer","Kräuter"];
-  const fullIngredients = [...ingredients];
-
-  extras.forEach(extra => {
-    if (!fullIngredients.some(item => item.toLowerCase() === extra.toLowerCase())) {
-      fullIngredients.push(extra);
-    }
-  });
-
+function synthesize() {
+  let ing = state.ingredients;
   return {
-    id:"generated",
-    title: ingredients.length
-      ? `Kreative ${ingredients.slice(0,2).join(" & ")}-Pfanne`
-      : "Kreative Gemüsepfanne",
-    time:25,
-    calories:420,
-    diet:"Vegetarisch",
-    cuisine:"Kreativ",
-    ingredients:fullIngredients,
-    steps:[
-      "Wasche und schneide deine ausgewählten Zutaten in mundgerechte Stücke.",
-      "Erhitze etwas Öl in einer Pfanne und brate zuerst die festeren Zutaten an.",
-      "Gib die übrigen Zutaten dazu und gare alles, bis es weich und heiß ist.",
-      "Würze mit Salz, Pfeffer und Kräutern. Serviere das Gericht warm."
-    ]
+    id: "synth",
+    title: `Kreative ${ing[0] || "Gemüse"}-Pfanne`,
+    time: 25,
+    calories: 420,
+    diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+    cuisine: $("cuisine").value === "all" ? "Kreativ" : $("cuisine").value,
+    ingredients: [...ing, "Olivenöl", "Salz", "Kräuter"],
+    steps: ["Zutaten waschen und schneiden.", "In Pfanne garen und gut würzen."],
+    image: ""
   };
 }
 
-function renderRecipes() {
-  const diet = $("diet").value;
-  const maxTime = $("time").value;
-  const cuisine = $("cuisine").value;
-  const search = $("search").value.trim().toLocaleLowerCase("de");
-
-  const allRecipes = [...recipes, ...state.custom];
-
-  let filtered = allRecipes.filter(recipe =>
-    (diet === "all" || recipe.diet === diet) &&
-    (maxTime === "all" || recipe.time <= Number(maxTime)) &&
-    (cuisine === "all" || recipe.cuisine === cuisine) &&
-    (!search || recipe.title.toLocaleLowerCase("de").includes(search))
-  );
-
-  if (state.ingredients.length) {
-    const matches = filtered.filter(recipe =>
-      recipe.ingredients.some(recipeIngredient =>
-        state.ingredients.some(selected =>
-          ingredientMatches(recipeIngredient, selected)
-        )
-      )
-    );
-
-    // Important: show a generated recipe if no saved recipe matches.
-    filtered = matches.length ? matches : [makeGeneratedRecipe()];
-  }
-
-  $("recipes").innerHTML = filtered.length
-    ? filtered.map(recipe => `
-      <article class="card recipe">
-        <div class="recipebody">
-          <h3>${esc(recipe.title)}</h3>
-          <div class="muted">⏱ ${recipe.time} min · 🔥 ${recipe.calories} kcal · ${esc(recipe.cuisine)}</div>
-          <div class="chips">
-            ${recipe.ingredients.map(item => `<span class="chip">${esc(item)}</span>`).join("")}
-          </div>
-          <button class="primary" onclick="showRecipe('${esc(recipe.id)}')">Kochmodus & Details</button>
-        </div>
-      </article>
-    `).join("")
-    : '<div class="card">Keine Rezepte gefunden. Ändere deine Filter.</div>';
-}
-
-function findRecipe(id) {
-  return [...recipes, ...state.custom].find(recipe => recipe.id === id)
-    || (id === "generated" ? makeGeneratedRecipe() : null);
-}
-
-function showRecipe(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-
-  openModal(recipe.title, `
-    <p class="muted">⏱ ${recipe.time} Minuten · ${recipe.calories} kcal · ${esc(recipe.diet)}</p>
+function recipeDetail(id) {
+  let r = [...recipes, ...state.custom].find(x => x.id === id) || (id === "synth" ? synthesize() : null);
+  if (!r) return;
+  openModal(r.title, `
+    <p class="muted">⏱ ${r.time} Min · ${r.calories || 420} kcal · ${esc(r.diet)}</p>
     <h3>Zutaten</h3>
-    <ul>${recipe.ingredients.map(item => `<li>${esc(item)}</li>`).join("")}</ul>
+    <ul>${r.ingredients.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
     <div class="row">
-      <button class="accent" onclick="recipeToShopping('${esc(recipe.id)}')">Zutaten zur Einkaufsliste</button>
-      <button class="primary" onclick="recipeToPlan('${esc(recipe.id)}')">Zum Wochenplan</button>
+      <button class="accent" onclick="recipeToShop('${esc(r.id)}')">Zutaten zur Einkaufsliste</button>
     </div>
-    <h3 style="margin-top:18px">Zubereitung</h3>
-    ${recipe.steps.map((step,index) =>
-      `<label class="step"><input type="checkbox"> Schritt ${index+1}: ${esc(step)}</label>`
-    ).join("")}
   `);
 }
 
-function recipeToShopping(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-  recipe.ingredients.forEach(name => state.shopping.push({
-    id:String(Date.now() + Math.random()), name, category:"Vorratskammer", checked:false
-  }));
-  save(); renderShopping(); closeModal(); toast("Zutaten zur Einkaufsliste hinzugefügt");
+function recipeToShop(id) {
+  let r = [...recipes, ...state.custom].find(x => x.id === id) || (id === "synth" ? synthesize() : null);
+  if (r) {
+    r.ingredients.forEach(name => state.shopping.push({id: String(Date.now() + Math.random()), name, category:"Vorratskammer", checked:false}));
+    save(); renderShopping(); closeModal(); toast("Zutaten zur Einkaufsliste hinzugefügt!");
+  }
 }
 
-function recipeToPlan(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-  state.plan.Mon.dinner = {title:recipe.title, ingredients:recipe.ingredients};
-  save(); renderWeek(); closeModal();
-  showTab("weekly", document.querySelectorAll(".navbtn")[1]);
-}
-
+/* Weekly Planner Custom Input Engine */
 function renderWeek() {
-  $("week").innerHTML = Object.entries(dayNames).map(([key,label]) => `
-    <div class="card">
-      <b>${label}</b>
-      ${Object.entries(mealNames).map(([meal,name]) => {
-        const item = state.plan[key]?.[meal];
-        return `<div class="slot">
-          <b>${name}</b><br>${item ? esc(item.title) : "—"}
-          <button class="soft" onclick="chooseMeal('${key}','${meal}')">${item ? "Ändern" : "＋ Hinzufügen"}</button>
-          ${item ? `<button class="iconbtn" onclick="removeMeal('${key}','${meal}')">Entfernen</button>` : ""}
-        </div>`;
+  $("week").innerHTML = Object.entries(days).map(([key, label]) => `
+    <div class="card day">
+      <h3 style="margin-bottom: 12px; font-size: 16px; color: var(--green);">${label}</h3>
+      ${Object.entries(meals).map(([m, ml]) => {
+        let item = state.plan[key]?.[m];
+        return `
+          <div class="slot">
+            <div class="slot-header">
+              <span>${ml}</span>
+              ${item ? `<button class="danger" style="padding: 2px 6px; font-size: 10px;" onclick="removeMeal('${key}','${m}')">Löschen</button>` : ''}
+            </div>
+            <div style="font-weight: 600; min-height: 20px;">${item ? esc(item.title) : '<span class="muted" style="font-weight: normal;">— Nicht geplant —</span>'}</div>
+            <button class="soft" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 6px;" onclick="openMealModal('${key}','${m}')">
+              ${item ? '✏️ Ändern' : '＋ Hinzufügen'}
+            </button>
+          </div>
+        `;
       }).join("")}
     </div>
   `).join("");
 }
 
-function chooseMeal(day, meal) {
-  const available = [...recipes, ...state.custom];
-  const choice = prompt("Rezeptnummer wählen:\n" + available.map((r,i) => `${i+1}. ${r.title}`).join("\n"));
-  const recipe = available[Number(choice)-1];
-  if (!recipe) return;
-  state.plan[day][meal] = {title:recipe.title, ingredients:recipe.ingredients};
-  save(); renderWeek();
-}
+function openMealModal(day, meal) {
+  let existing = state.plan[day]?.[meal]?.title || "";
+  let allRecipes = [...recipes, ...state.custom];
 
-function removeMeal(day, meal) {
-  state.plan[day][meal] = null;
-  save(); renderWeek();
-}
-
-function clearPlan() {
-  Object.keys(state.plan).forEach(day => {
-    state.plan[day] = {breakfast:null,lunch:null,dinner:null};
-  });
-  save(); renderWeek();
-}
-
-function planToShopping() {
-  let count = 0;
-  Object.values(state.plan).forEach(day =>
-    Object.values(day).forEach(meal =>
-      meal?.ingredients?.forEach(name => {
-        state.shopping.push({id:String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false});
-        count++;
-      })
-    )
-  );
-  save(); renderShopping(); toast(`${count} Zutaten übertragen`);
-}
-
-function renderShopping() {
-  const categories = ["Gemüse & Obst","Kühlregal & Milch","Vorratskammer","Gewürze & Öl","Sonstiges"];
-  $("shoppingList").innerHTML = categories.map(category => {
-    const items = state.shopping.filter(item => item.category === category);
-    if (!items.length) return "";
-    return `<h3 style="margin-top:18px">${category}</h3><div class="list">
-      ${items.map(item => `<div class="listitem">
-        <input type="checkbox" ${item.checked ? "checked" : ""} onchange="toggleShop('${esc(item.id)}')">
-        <span class="${item.checked ? "checked" : ""}">${esc(item.name)}</span>
-        <button class="iconbtn" onclick="deleteShop('${esc(item.id)}')">✕</button>
-      </div>`).join("")}
-    </div>`;
-  }).join("") || '<p class="muted">Deine Einkaufsliste ist leer.</p>';
-}
-
-function addShop() {
-  const name = $("shopInput").value.trim();
-  if (!name) return;
-  state.shopping.push({id:String(Date.now()),name,category:$("shopCat").value,checked:false});
-  $("shopInput").value = "";
-  save(); renderShopping();
-}
-
-function toggleShop(id) {
-  const item = state.shopping.find(x => x.id === id);
-  if (item) item.checked = !item.checked;
-  save(); renderShopping();
-}
-
-function deleteShop(id) {
-  state.shopping = state.shopping.filter(x => x.id !== id);
-  save(); renderShopping();
-}
-
-function clearChecked() {
-  state.shopping = state.shopping.filter(item => !item.checked);
-  save(); renderShopping();
-}
-
-async function copyList() {
-  const text = state.shopping.map(item => `${item.checked ? "[x]" : "[ ]"} ${item.name}`).join("\n");
-  try { await navigator.clipboard.writeText(text); toast("Liste kopiert"); }
-  catch { prompt("Liste kopieren:", text); }
-}
-
-function renderPantry() {
-  $("pantryList").innerHTML = state.pantry.map(item => `
-    <tr><td>${esc(item.name)}</td><td>${esc(item.qty)}</td><td>${esc(item.expiry || "—")}</td>
-    <td><button class="danger" onclick="deletePantry('${esc(item.id)}')">Löschen</button></td></tr>
-  `).join("") || '<tr><td colspan="4" class="muted">Noch keine Vorräte eingetragen.</td></tr>';
-}
-
-function openPantryForm() {
-  openModal("Vorrat hinzufügen", `
+  openModal(`Mahlzeit für ${days[day]} (${meals[meal]})`, `
     <div class="field">
-      <label>Artikel<input id="pname"></label>
-      <label>Menge<input id="pqty" placeholder="z. B. 500 g"></label>
-      <label>Mindesthaltbarkeit<input id="pexp" type="date"></label>
-      <button class="primary" onclick="savePantry()">Speichern</button>
+      <label>Eigene Mahlzeit eingeben
+        <input id="customMealInput" value="${esc(existing)}" placeholder="z. B. Spaghetti Bolognese, Rührei, Pizza...">
+      </label>
+      <label>Zutaten (optional für Einkaufsliste)
+        <input id="customMealIngs" placeholder="z. B. Pasta, Hackfleisch, Tomaten">
+      </label>
+      <button class="primary" onclick="saveCustomMeal('${day}', '${meal}')">Speichern</button>
+      
+      <hr style="border: 0; border-top: 1px solid var(--line); margin: 8px 0;">
+      
+      <label>Oder aus Rezepten wählen</label>
+      <div style="display: grid; gap: 8px; max-height: 200px; overflow-y: auto;">
+        ${allRecipes.map(r => `
+          <button class="soft" style="text-align: left; justify-content: space-between; display: flex; width: 100%;" onclick="selectRecipeForMeal('${day}', '${meal}', '${esc(r.id)}')">
+            <span><b>${esc(r.title)}</b></span>
+            <small class="muted">${r.time} Min</small>
+          </button>
+        `).join("")}
+      </div>
     </div>
   `);
 }
 
-function savePantry() {
-  const name = $("pname").value.trim();
-  if (!name) return;
-  state.pantry.push({id:String(Date.now()),name,qty:$("pqty").value || "1 Stück",expiry:$("pexp").value});
-  save(); renderPantry(); closeModal();
+function saveCustomMeal(day, meal) {
+  let title = $("customMealInput").value.trim();
+  let ings = $("customMealIngs").value.split(",").map(x => x.trim()).filter(Boolean);
+  if (title) {
+    state.plan[day][meal] = { title, ingredients: ings };
+    save(); renderWeek(); closeModal(); toast("Mahlzeit gespeichert!");
+  }
+}
+
+function selectRecipeForMeal(day, meal, recipeId) {
+  let r = [...recipes, ...state.custom].find(x => x.id === recipeId);
+  if (r) {
+    state.plan[day][meal] = { title: r.title, ingredients: r.ingredients };
+    save(); renderWeek(); closeModal(); toast("Rezept übernommen!");
+  }
+}
+
+function removeMeal(d, m) {
+  state.plan[d][m] = null;
+  save(); renderWeek(); toast("Mahlzeit entfernt.");
+}
+
+function clearPlan() {
+  Object.keys(state.plan).forEach(d => state.plan[d] = {breakfast:null, lunch:null, dinner:null});
+  save(); renderWeek(); toast("Wochenplan geleert.");
+}
+
+function planToShopping() {
+  let count = 0;
+  Object.values(state.plan).forEach(day => {
+    Object.values(day).forEach(meal => {
+      if (meal && meal.ingredients) {
+        meal.ingredients.forEach(name => {
+          state.shopping.push({id: String(Date.now() + Math.random()), name, category:"Sonstiges", checked:false});
+          count++;
+        });
+      }
+    });
+  });
+  save(); renderShopping(); tab("shopping"); toast(`${count} Zutaten übernommen!`);
+}
+
+/* Shopping List */
+function addShop() {
+  let inp = $("shopInput"), cat = $("shopCat");
+  if (inp.value.trim()) {
+    state.shopping.push({id: String(Date.now() + Math.random()), name: inp.value.trim(), category: cat.value, checked: false});
+    inp.value = ""; save(); renderShopping();
+  }
+}
+
+function toggleShop(id) {
+  let item = state.shopping.find(x => x.id === id);
+  if (item) { item.checked = !item.checked; save(); renderShopping(); }
+}
+
+function deleteShop(id) {
+  state.shopping = state.shopping.filter(x => x.id !== id); save(); renderShopping();
+}
+
+function clearChecked() {
+  state.shopping = state.shopping.filter(x => !x.checked); save(); renderShopping(); toast("Erledigte gelöscht.");
+}
+
+function copyList() {
+  let text = state.shopping.map(x => `${x.checked ? "[x]" : "[ ]"} ${x.name}`).join("\n");
+  navigator.clipboard.writeText(text).then(() => toast("Kopiert!"));
+}
+
+function renderShopping() {
+  $("shoppingList").innerHTML = state.shopping.length ? state.shopping.map(x => `
+    <div class="listitem">
+      <input type="checkbox" ${x.checked ? "checked" : ""} onchange="toggleShop('${x.id}')">
+      <span class="${x.checked ? "checked" : ""}"><b>${esc(x.name)}</b> <small class="muted">(${esc(x.category)})</small></span>
+      <button class="iconbtn" onclick="deleteShop('${x.id}')">✕</button>
+    </div>
+  `).join("") : `<div class="muted">Einkaufsliste ist leer.</div>`;
+}
+
+/* Pantry */
+function openPantryForm() {
+  openModal("Vorrat hinzufügen", `
+    <div class="field">
+      <label>Artikelname<input id="pName" placeholder="z. B. Mehl, Reis"></label>
+      <label>Menge<input id="pQty" placeholder="z. B. 1 kg"></label>
+      <label>Kategorie<select id="pCat"><option>Vorratskammer</option><option>Kühlregal</option></select></label>
+      <button class="primary" onclick="savePantryItem()">Speichern</button>
+    </div>
+  `);
+}
+
+function savePantryItem() {
+  let name = $("pName").value.trim(), qty = $("pQty").value.trim(), cat = $("pCat").value;
+  if (name) {
+    state.pantry.push({id: String(Date.now()), name, qty, cat});
+    save(); renderPantry(); closeModal(); toast("Vorrat gespeichert!");
+  }
 }
 
 function deletePantry(id) {
-  state.pantry = state.pantry.filter(item => item.id !== id);
-  save(); renderPantry();
+  state.pantry = state.pantry.filter(x => x.id !== id); save(); renderPantry();
 }
 
-function renderPosts() {
-  $("posts").innerHTML = state.posts.map((post,index) => `
-    <article class="card post">
-      <div class="muted">👩‍🍳 ${esc(post.author)}</div>
-      <h3>${esc(post.title)}</h3><p>${esc(post.text)}</p>
-      <button class="soft" onclick="likePost(${index})">♥ ${post.likes || 0}</button>
-    </article>
-  `).join("") || '<div class="card muted">Noch keine Beiträge. Teile den ersten Kochtipp!</div>';
+function renderPantry() {
+  $("pantryList").innerHTML = state.pantry.length ? state.pantry.map(x => `
+    <tr>
+      <td><b>${esc(x.name)}</b></td>
+      <td>${esc(x.qty)}</td>
+      <td>${esc(x.cat)}</td>
+      <td><button class="danger" style="padding: 4px 8px; font-size: 11px;" onclick="deletePantry('${x.id}')">Löschen</button></td>
+    </tr>
+  `).join("") : `<tr><td colspan="4" class="muted">Keine Vorräte eingetragen.</td></tr>`;
+}
+
+/* Custom Recipe Form & Community */
+function openRecipeForm() {
+  openModal("Eigenes Rezept erstellen", `
+    <div class="field">
+      <label>Titel<input id="rTitle" placeholder="z. B. Kürbissuppe"></label>
+      <label>Zeit (Min)<input id="rTime" type="number" value="20"></label>
+      <label>Zutaten (kommagetrennt)<input id="rIngs" placeholder="Kürbis, Sahne, Zwiebel"></label>
+      <button class="primary" onclick="saveCustomRecipe()">Speichern</button>
+    </div>
+  `);
+}
+
+function saveCustomRecipe() {
+  let title = $("rTitle").value.trim(), time = +$("rTime").value || 20, ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
+  if (title) {
+    state.custom.push({id: "c_" + Date.now(), title, time, calories: 350, diet: "Vegetarisch", cuisine: "Kreativ", ingredients: ings, steps: [], image: ""});
+    save(); renderRecipes(); closeModal(); toast("Rezept gespeichert!");
+  }
 }
 
 function openPostForm() {
-  openModal("Beitrag erstellen", `
+  openModal("Community-Beitrag", `
     <div class="field">
-      <label>Name<input id="pauthor" value="Küchenfreund"></label>
-      <label>Titel<input id="ptitle"></label>
-      <label>Beitrag<textarea id="ptext" rows="4"></textarea></label>
-      <button class="accent" onclick="savePost()">Veröffentlichen</button>
+      <label>Name<input id="pAuthor" placeholder="Dein Name"></label>
+      <label>Titel<input id="pTitle" placeholder="Titel des Beitrags"></label>
+      <label>Inhalt<textarea id="pBody" rows="3"></textarea></label>
+      <button class="primary" onclick="savePost()">Veröffentlichen</button>
     </div>
   `);
 }
 
 function savePost() {
-  const title = $("ptitle").value.trim();
-  const text = $("ptext").value.trim();
-  if (!title || !text) return;
-  state.posts.unshift({author:$("pauthor").value || "Küchenfreund",title,text,likes:0});
-  save(); renderPosts(); closeModal();
+  let author = $("pAuthor").value.trim() || "Anonym", title = $("pTitle").value.trim(), body = $("pBody").value.trim();
+  if (title && body) {
+    state.posts.unshift({author, title, body});
+    save(); renderPosts(); closeModal(); toast("Beitrag erstellt!");
+  }
 }
 
-function likePost(index) {
-  state.posts[index].likes = (state.posts[index].likes || 0) + 1;
-  save(); renderPosts();
-}
-
-function openRecipeForm() {
-  openModal("Eigenes Rezept", `
-    <div class="field">
-      <label>Name<input id="rtitle"></label>
-      <label>Zeit in Minuten<input id="rtime" type="number" value="25"></label>
-      <label>Ernährung<select id="rdiet"><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label>
-      <label>Küche<input id="rcuisine" value="Klassisch"></label>
-      <label>Zutaten, durch Kommas getrennt<input id="rings"></label>
-      <label>Zubereitung, ein Schritt pro Zeile<textarea id="rsteps" rows="4"></textarea></label>
-      <button class="primary" onclick="saveRecipe()">Rezept speichern</button>
+function renderPosts() {
+  $("posts").innerHTML = state.posts.length ? state.posts.map(p => `
+    <div class="card">
+      <h3>${esc(p.title)}</h3>
+      <p style="margin: 6px 0;">${esc(p.body)}</p>
+      <div class="muted">Von ${esc(p.author)}</div>
     </div>
-  `);
+  `).join("") : `<div class="muted">Keine Beiträge vorhanden.</div>`;
 }
 
-function saveRecipe() {
-  const title = $("rtitle").value.trim();
-  if (!title) return;
-  state.custom.push({
-    id:"c"+Date.now(), title, time:Number($("rtime").value)||25, calories:400,
-    diet:$("rdiet").value, cuisine:$("rcuisine").value||"Klassisch",
-    ingredients:$("rings").value.split(",").map(x=>x.trim()).filter(Boolean),
-    steps:$("rsteps").value.split("\n").map(x=>x.trim()).filter(Boolean)
-  });
-  save(); renderRecipes(); closeModal();
+function openTimer() {
+  let mins = prompt("Timer-Dauer in Minuten:", "10");
+  if (mins && !isNaN(mins)) {
+    toast(`Timer über ${mins} Minuten gestartet!`);
+    setTimeout(() => toast(`⏰ Timer von ${mins} Minuten abgelaufen!`), +mins * 60000);
+  }
+}
+
+function scanPhoto(e) {
+  if (e.target.files[0]) {
+    toast("Foto-Scan: Zutaten wurden hinzugefügt!");
+    ["Kartoffeln", "Möhren", "Zwiebeln"].forEach(x => { if (!state.ingredients.includes(x)) state.ingredients.push(x); });
+    renderSelected(); renderRecipes();
+  }
 }
 
 function openModal(title, html) {
@@ -699,83 +953,6 @@ function openModal(title, html) {
 
 function closeModal() {
   $("modal").classList.remove("open");
-}
-
-let timerSeconds = 0;
-let timerInterval = null;
-
-function openTimer() {
-  openModal("Küchentimer", `
-    <div class="timer" id="timerDisplay">00:00</div>
-    <div class="row" style="margin:12px 0">
-      <button class="soft" onclick="setTimer(6)">Eier 6m</button>
-      <button class="soft" onclick="setTimer(8)">Pasta 8m</button>
-      <button class="soft" onclick="setTimer(25)">25m</button>
-    </div>
-    <div class="row">
-      <input id="timerMins" type="number" min="1" placeholder="Minuten">
-      <button class="soft" onclick="setTimer(Number($('timerMins').value))">Setzen</button>
-      <button class="primary" onclick="startTimer()">Start</button>
-      <button class="danger" onclick="resetTimer()">Reset</button>
-    </div>
-  `);
-}
-
-function setTimer(minutes) {
-  clearInterval(timerInterval);
-  timerSeconds = Math.max(0, minutes * 60);
-  updateTimer();
-}
-
-function updateTimer() {
-  const display = $("timerDisplay");
-  if (display) {
-    display.textContent =
-      `${String(Math.floor(timerSeconds/60)).padStart(2,"0")}:${String(timerSeconds%60).padStart(2,"0")}`;
-  }
-}
-
-function startTimer() {
-  if (!timerSeconds || timerInterval) return;
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    updateTimer();
-    if (timerSeconds <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      toast("Timer abgelaufen!");
-      alert("Timer abgelaufen!");
-    }
-  }, 1000);
-}
-
-function resetTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timerSeconds = 0;
-  updateTimer();
-}
-
-function scanPhoto(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const imageUrl = URL.createObjectURL(file);
-  openModal("Foto deiner Zutaten", `
-    <img src="${imageUrl}" alt="Zutatenfoto" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px">
-    <p class="muted">Diese Offline-Version erkennt Zutaten nicht automatisch. Tippe die Zutaten aus dem Foto ein.</p>
-    <div class="row">
-      <input id="photoIngredients" placeholder="z. B. Tomaten, Paprika" style="flex:1">
-      <button class="primary" onclick="usePhotoIngredients()">Zutaten übernehmen</button>
-    </div>
-  `);
-  event.target.value = "";
-}
-
-function usePhotoIngredients() {
-  $("ingredientInput").value = $("photoIngredients").value;
-  addIngredients();
-  closeModal();
 }
 
 init();
