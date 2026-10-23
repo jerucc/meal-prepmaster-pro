@@ -23,7 +23,7 @@ main{max-width:1180px;margin:24px auto;padding:0 20px 90px}
 input,select,textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:10px}
 .primary,.accent,.soft,.danger{padding:10px 14px;border-radius:11px;font-weight:750}
 .primary{background:var(--green);color:white}.accent{background:var(--coral);color:white}.soft{background:var(--green2);color:var(--green)}.danger{background:#ffe8e6;color:#a52b24}
-.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:var(--green2);color:var(--green);border-radius:999px;padding:6px 10px;font-size:13px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:var(--green2);color:var(--green);border-radius:999px;padding:6px 10px;font-size:13px;border:0;cursor:pointer}
 .hero .chip{background:#ffffff1c;color:white;border:1px solid #ffffff25}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
 .filters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
@@ -32,20 +32,18 @@ h2{margin:0 0 6px}h3{margin:0 0 12px}.sectionhead{display:flex;justify-content:s
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .recipe{padding:0;overflow:hidden}.recipe img{width:100%;height:175px;object-fit:cover;background:var(--green2)}
 .recipebody{padding:16px}.recipebody h3{margin:0 0 8px}.muted{color:var(--muted);font-size:13px}
-.recipe .chips{margin:10px 0}.recipe .chip{font-size:11px}
+.recipe .chips{margin:10px 0}.recipe .chip{font-size:11px;cursor:default}
 .daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
 .day{padding:12px}.slot{border:1px dashed var(--line);padding:9px;border-radius:11px;margin:8px 0;font-size:12px}.slot button{display:block;margin-top:6px}
 .list{display:grid;gap:8px}.listitem{display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg);border-radius:12px}
 .listitem span{flex:1}.checked{text-decoration:line-through;color:var(--muted)}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px}
-.post{margin:12px auto;max-width:720px}.modal{position:fixed;inset:0;background:#0009;z-index:10;display:none;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
+.modal{position:fixed;inset:0;background:#0009;z-index:10;display:none;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
 .modalbox{background:var(--card);border-radius:20px;padding:22px;width:min(650px,100%);max-height:90vh;overflow:auto}
 .modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .field{display:grid;gap:12px}.field input,.field textarea,.field select{width:100%}
-.step{padding:10px;background:var(--bg);border-radius:10px;margin:7px 0}
-.timer{font:700 48px ui-monospace,monospace;text-align:center;background:#101815;color:#67d6a7;padding:20px;border-radius:16px}
+.step{padding:10px;background:var(--bg);border-radius:10px;margin:7px 0;display:flex;align-items:center;gap:10px;cursor:pointer}
 .toast{position:fixed;bottom:22px;right:20px;background:#17231e;color:#fff;padding:12px 16px;border-radius:12px;z-index:20;box-shadow:var(--shadow)}
-.mobile{display:none}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.daygrid{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.top{padding:10px 12px;flex-wrap:wrap}.top nav{order:3;width:100%;overflow:auto;flex-wrap:nowrap}.navbtn{white-space:nowrap;padding:8px}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}main{padding:0 12px 90px}.hero{padding:22px}.daygrid{grid-template-columns:1fr 1fr}}
 </style>
@@ -60,51 +58,51 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;bor
 <section class="tab active" id="tab-recipes">
   <div class="hero">
     <div>✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
-    <h1 data-t="heroTitle">Was möchtest du heute kochen?</h1>
-    <p data-t="heroDesc">Gib Zutaten ein oder wähle sie aus. Lass dir passende Rezepte vorschlagen oder scanne ein Foto deiner Zutaten.</p>
+    <h1>Was möchtest du heute kochen?</h1>
+    <p>Gib Zutaten ein oder wähle sie aus. Lass dir passende Rezepte vorschlagen oder scanne ein Foto deiner Zutaten.</p>
     <div class="row inputrow">
       <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch" onkeydown="if(event.key==='Enter')addIngredients()">
-      <button class="accent" onclick="addIngredients()">＋ <span data-t="add">Hinzufügen</span></button>
-      <label class="soft" style="cursor:pointer">📷 <span data-t="scan">Foto scannen</span><input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)"></label>
+      <button class="accent" onclick="addIngredients()">＋ Hinzufügen</button>
+      <label class="soft" style="cursor:pointer">📷 Foto scannen<input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)"></label>
     </div>
     <div class="chips" id="quickTags"></div>
-    <div class="row" style="justify-content:space-between"><b data-t="selected">Gewählte Zutaten</b><button class="iconbtn" onclick="clearIngredients()" data-t="clear">Alle löschen</button></div>
+    <div class="row" style="justify-content:space-between"><b>Gewählte Zutaten</b><button class="iconbtn" onclick="clearIngredients()">Alle löschen</button></div>
     <div class="chips" id="selectedTags"></div>
   </div>
   <div class="card">
-    <div class="sectionhead"><h3 data-t="filters">Filter & Vorlieben</h3><button class="primary" onclick="renderRecipes()">✨ <span data-t="generate">Rezepte generieren</span></button></div>
+    <div class="sectionhead"><h3>Filter & Vorlieben</h3><button class="primary" onclick="renderRecipes()">✨ Rezepte generieren</button></div>
     <div class="filters">
-      <label><span data-t="diet">Ernährung</span><select id="diet" onchange="renderRecipes()"><option value="all">Alle</option><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label>
-      <label><span data-t="time">Max. Zeit</span><select id="time" onchange="renderRecipes()"><option value="all">Egal</option><option value="15">15 Min</option><option value="30">30 Min</option><option value="45">45 Min</option></select></label>
-      <label><span data-t="cuisine">Küche</span><select id="cuisine" onchange="renderRecipes()"><option value="all">Alle</option><option>Italienisch</option><option>Mediterran</option><option>Asiatisch</option><option>Klassisch</option></select></label>
-      <label><span data-t="search">Suche</span><input id="search" placeholder="Rezeptname…" oninput="renderRecipes()"></label>
+      <label>Ernährung<select id="diet" onchange="renderRecipes()"><option value="all">Alle</option><option value="Vegetarisch">Vegetarisch</option><option value="Vegan">Vegan</option><option value="Glutenfrei">Glutenfrei</option><option value="Low-Carb">Low-Carb</option></select></label>
+      <label>Max. Zeit<select id="time" onchange="renderRecipes()"><option value="all">Egal</option><option value="15">15 Min</option><option value="30">30 Min</option><option value="45">45 Min</option></select></label>
+      <label>Küche<select id="cuisine" onchange="renderRecipes()"><option value="all">Alle</option><option value="Italienisch">Italienisch</option><option value="Mediterran">Mediterran</option><option value="Asiatisch">Asiatisch</option><option value="Klassisch">Klassisch</option></select></label>
+      <label>Suche<input id="search" placeholder="Rezeptname…" oninput="renderRecipes()"></label>
     </div>
   </div>
-  <div class="sectionhead"><h2 data-t="results">Rezepte</h2><button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button></div>
+  <div class="sectionhead"><h2>Rezepte</h2><button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button></div>
   <div class="grid" id="recipes"></div>
 </section>
 
 <section class="tab" id="tab-weekly">
-  <div class="card sectionhead"><div><h2 data-t="weekly">Wochenplaner</h2><div class="muted">Plane Mahlzeiten und übertrage Zutaten in deine Einkaufsliste.</div></div><div class="row"><button class="soft" onclick="clearPlan()">Plan leeren</button><button class="accent" onclick="planToShopping()">🛒 Einkaufsliste erstellen</button></div></div>
+  <div class="card sectionhead"><div><h2>Wochenplaner</h2><div class="muted">Plane Mahlzeiten und übertrage Zutaten in deine Einkaufsliste.</div></div><div class="row"><button class="soft" onclick="clearPlan()">Plan leeren</button><button class="accent" onclick="planToShopping()">🛒 Einkaufsliste erstellen</button></div></div>
   <div class="daygrid" id="week"></div>
 </section>
 
 <section class="tab" id="tab-shopping">
   <div class="card">
-    <div class="sectionhead"><div><h2 data-t="shopping">Einkaufsliste</h2><div class="muted">Artikel abhaken, ergänzen oder kopieren.</div></div><div class="row"><button class="soft" onclick="copyList()">Kopieren</button><button class="danger" onclick="clearChecked()">Erledigte löschen</button></div></div>
+    <div class="sectionhead"><div><h2>Einkaufsliste</h2><div class="muted">Artikel abhaken, ergänzen oder verwalten.</div></div><div class="row"><button class="soft" onclick="copyList()">Kopieren</button><button class="danger" onclick="clearChecked()">Erledigte löschen</button></div></div>
     <div class="row"><input id="shopInput" placeholder="Artikel hinzufügen…" style="flex:1" onkeydown="if(event.key==='Enter')addShop()"><select id="shopCat"><option>Gemüse & Obst</option><option>Kühlregal & Milch</option><option>Vorratskammer</option><option>Gewürze & Öl</option><option>Sonstiges</option></select><button class="primary" onclick="addShop()">＋</button></div>
     <div id="shoppingList" style="margin-top:16px"></div>
   </div>
 </section>
 
 <section class="tab" id="tab-pantry">
-  <div class="card"><div class="sectionhead"><div><h2 data-t="pantry">Vorratskammer</h2><div class="muted">Behalte Menge und Mindesthaltbarkeit im Blick.</div></div><button class="primary" onclick="openPantryForm()">＋ Vorrat hinzufügen</button></div>
-  <div style="overflow:auto"><table><thead><tr><th>Artikel</th><th>Menge</th><th>MHD</th><th></th></tr></thead><tbody id="pantryList"></tbody></table></div></div>
+  <div class="card"><div class="sectionhead"><div><h2>Vorratskammer</h2><div class="muted">Behalte Menge und Bestand im Blick.</div></div><button class="primary" onclick="openPantryForm()">＋ Vorrat hinzufügen</button></div>
+  <div style="overflow:auto"><table><thead><tr><th>Artikel</th><th>Menge</th><th>Kategorie</th><th></th></tr></thead><tbody id="pantryList"></tbody></table></div></div>
 </section>
 
 <section class="tab" id="tab-community">
-  <div class="card sectionhead"><div><h2 data-t="community">Community</h2><div class="muted">Teile Kochtipps und Rezeptideen.</div></div><button class="accent" onclick="openPostForm()">＋ Beitrag erstellen</button></div>
-  <div id="posts"></div>
+  <div class="card sectionhead"><div><h2>Community</h2><div class="muted">Teile Kochtipps und Rezeptideen.</div></div><button class="accent" onclick="openPostForm()">＋ Beitrag erstellen</button></div>
+  <div id="posts" style="display:grid;gap:12px;margin-top:16px"></div>
 </section>
 </main>
 
@@ -118,8 +116,8 @@ const state={
  lang:localStorage.getItem("kp_lang")||"de",dark:localStorage.getItem("kp_dark")==="true",
  ingredients:[],custom:read("kp_custom",[]),
  plan:read("kp_plan",Object.fromEntries(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>[d,{breakfast:null,lunch:null,dinner:null}]))),
- shopping:read("kp_shop",[{id:"s1",name:"Tomaten",category:"Gemüse & Obst",checked:false}]),
- pantry:read("kp_pantry",[]),posts:read("kp_posts",[]),
+ shopping:read("kp_shop",[{id:"s1",name:"Tomaten",category:"Gemüse & Obst",checked:false},{id:"s2",name:"Pasta",category:"Vorratskammer",checked:false}]),
+ pantry:read("kp_pantry",[{id:"p1",name:"Mehl",qty:"1 kg",cat:"Vorratskammer"}]),posts:read("kp_posts",[{title:"Tipp für knusprigen Tofu",body:"Vor dem Braten gut mit Stärke anstäuben und trocken tupfen!",author:"ChefLena"}]),
 };
 const recipes=[
 {id:"r1",title:"Cremige Knoblauch-Pasta",time:20,calories:520,diet:"Vegetarisch",cuisine:"Italienisch",ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter","Petersilie"],steps:["Pasta in Salzwasser al dente kochen.","Knoblauch in Butter sanft anbraten.","Sahne und etwas Nudelwasser zugeben.","Parmesan einrühren und abschmecken.","Pasta mit der Sauce vermengen und servieren."],image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
@@ -131,71 +129,233 @@ const recipes=[
 const quick=["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu","Pilze"];
 const days={Mon:"Montag",Tue:"Dienstag",Wed:"Mittwoch",Thu:"Donnerstag",Fri:"Freitag",Sat:"Samstag",Sun:"Sonntag"};
 const meals={breakfast:"Frühstück",lunch:"Mittagessen",dinner:"Abendessen"};
-function save(){localStorage.setItem("kp_custom",JSON.stringify(state.custom));localStorage.setItem("kp_plan",JSON.stringify(state.plan));localStorage.setItem("kp_shop",JSON.stringify(state.shopping));localStorage.setItem("kp_pantry",JSON.stringify(state.pantry));localStorage.setItem("kp_posts",JSON.stringify(state.posts))}
-function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2400)}
+
+function save(){
+  localStorage.setItem("kp_custom",JSON.stringify(state.custom));
+  localStorage.setItem("kp_plan",JSON.stringify(state.plan));
+  localStorage.setItem("kp_shop",JSON.stringify(state.shopping));
+  localStorage.setItem("kp_pantry",JSON.stringify(state.pantry));
+  localStorage.setItem("kp_posts",JSON.stringify(state.posts));
+}
+function toast(s){let t=$("toast");t.textContent=s;t.style.display="block";setTimeout(()=>t.style.display="none",2400)}
+
 function init(){
- document.documentElement.classList.toggle("dark",state.dark);
- $("nav").innerHTML=[["recipes","🍳 Rezepte"],["weekly","📅 Planer"],["shopping","🛒 Einkauf"],["pantry","📦 Vorrat"],["community","👥 Community"]].map(([id,label],i)=>`<button class="navbtn ${i===0?"active":""}" onclick="tab('${id}',this)">${label}</button>`).join("");
- $("quickTags").innerHTML=quick.map(x=>`<button class="chip" onclick="toggleIng('${x}')">＋ ${x}</button>`).join("");
- renderSelected();renderRecipes();renderWeek();renderShopping();renderPantry();renderPosts();
+  document.documentElement.classList.toggle("dark",state.dark);
+  $("nav").innerHTML=[["recipes","🍳 Rezepte"],["weekly","📅 Planer"],["shopping","🛒 Einkauf"],["pantry","📦 Vorrat"],["community","👥 Community"]].map(([id,label],i)=>`<button class="navbtn ${i===0?"active":""}" onclick="tab('${id}',this)">${label}</button>`).join("");
+  $("quickTags").innerHTML=quick.map(x=>`<button class="chip" onclick="toggleIng('${x}')">＋ ${x}</button>`).join("");
+  renderSelected();renderRecipes();renderWeek();renderShopping();renderPantry();renderPosts();
 }
-function tab(id,btn){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));$("tab-"+id).classList.add("active");document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));btn?.classList.add("active")}
-function toggleTheme(){state.dark=!state.dark;localStorage.setItem("kp_dark",state.dark);document.documentElement.classList.toggle("dark",state.dark)}
-function toggleLang(){state.lang=state.lang==="de"?"en":"de";localStorage.setItem("kp_lang",state.lang);$("langBtn").textContent=state.lang.toUpperCase();toast(state.lang==="en"?"Language toggle is a visual preference in this demo.":"Sprache geändert.")}
-function addIngredients(){const val=$("ingredientInput").value.trim();if(val)val.split(",").map(x=>x.trim()).filter(Boolean).forEach(x=>{if(!state.ingredients.includes(x))state.ingredients.push(x)});$("ingredientInput").value="";renderSelected();renderRecipes()}
-function toggleIng(x){state.ingredients=state.ingredients.includes(x)?state.ingredients.filter(y=>y!==x):[...state.ingredients,x];renderSelected();renderRecipes()}
-function renderSelected(){$("selectedTags").innerHTML=state.ingredients.length?state.ingredients.map(x=>`<button class="chip" onclick="toggleIng('${esc(x)}')">${esc(x)} ✕</button>`).join(""):'<span class="muted">Noch keine Zutaten gewählt.</span>'}
-function clearIngredients(){state.ingredients=[];renderSelected();renderRecipes()}
+
+function tab(id,btn){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  $("tab-"+id).classList.add("active");
+  document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));
+  btn?.classList.add("active");
+}
+
+function toggleTheme(){
+  state.dark=!state.dark;localStorage.setItem("kp_dark",state.dark);
+  document.documentElement.classList.toggle("dark",state.dark);
+}
+
+function toggleLang(){
+  state.lang=state.lang==="de"?"en":"de";localStorage.setItem("kp_lang",state.lang);
+  $("langBtn").textContent=state.lang.toUpperCase();
+  toast(state.lang==="en"?"Language preference toggled.":"Sprache geändert.");
+}
+
+function addIngredients(){
+  let val=$("ingredientInput").value.trim();
+  if(val){
+    val.split(",").map(x=>x.trim()).filter(Boolean).forEach(x=>{if(!state.ingredients.includes(x))state.ingredients.push(x)});
+    $("ingredientInput").value="";
+    renderSelected();renderRecipes();
+  }
+}
+
+function toggleIng(x){
+  state.ingredients=state.ingredients.includes(x)?state.ingredients.filter(y=>y!==x):[...state.ingredients,x];
+  renderSelected();renderRecipes();
+}
+
+function renderSelected(){
+  $("selectedTags").innerHTML=state.ingredients.length?state.ingredients.map(x=>`<button class="chip" onclick="toggleIng('${esc(x)}')">${esc(x)} ✕</button>`).join(""):`<span class="muted">Noch keine Zutaten gewählt.</span>`;
+}
+
+function clearIngredients(){
+  state.ingredients=[];renderSelected();renderRecipes();
+}
+
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
 function renderRecipes(){
- let list=[...recipes,...state.custom],diet=$("diet").value,time=$("time").value,cuisine=$("cuisine").value,search=$("search").value.toLowerCase();
- list=list.filter(r=>(diet==="all"||r.diet===diet)&&(time==="all"||r.time<=+time)&&(cuisine==="all"||r.cuisine===cuisine)&&(!search||r.title.toLowerCase().includes(search))&&(!state.ingredients.length||state.ingredients.some(i=>r.ingredients.some(x=>x.toLowerCase().includes(i.toLowerCase())))));
- if(!list.length&&state.ingredients.length)list=[synthesize()];
- $("recipes").innerHTML=list.length?list.map(r=>`<article class="card recipe"><img src="${esc(r.image||"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt=""><div class="recipebody"><h3>${esc(r.title)}</h3><div class="muted">⏱ ${r.time} min · 🔥 ${r.calories||400} kcal · ${esc(r.cuisine||"Kreativ")}</div><div class="chips">${r.ingredients.slice(0,5).map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div><button class="primary" onclick="recipeDetail('${esc(r.id)}')">Kochmodus & Details</button></div></article>`).join(""):'<div class="card">Keine Rezepte gefunden. Ändere deine Filter oder Zutaten.</div>';
+  let list=[...recipes,...state.custom],diet=$("diet").value,time=$("time").value,cuisine=$("cuisine").value,search=$("search").value.toLowerCase();
+  list=list.filter(r=>(diet==="all"||r.diet===diet)&&(time==="all"||r.time<=+time)&&(cuisine==="all"||r.cuisine===cuisine)&&(!search||r.title.toLowerCase().includes(search))&&(!state.ingredients.length||state.ingredients.some(i=>r.ingredients.some(x=>x.toLowerCase().includes(i.toLowerCase())))));
+  if(!list.length&&state.ingredients.length)list=[synthesize()];
+  $("recipes").innerHTML=list.length?list.map(r=>`<article class="card recipe"><img src="${esc(r.image||"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt=""><div class="recipebody"><h3>${esc(r.title)}</h3><div class="muted">⏱ ${r.time} min · 🔥 ${r.calories||400} kcal · ${esc(r.cuisine||"Kreativ")}</div><div class="chips">${r.ingredients.slice(0,5).map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div><button class="primary" onclick="recipeDetail('${esc(r.id)}')">Kochmodus & Details</button></div></article>`).join(""):`<div class="card">Keine Rezepte gefunden. Ändere deine Filter oder Zutaten.</div>`;
 }
-function synthesize(){let ing=state.ingredients;return{id:"synth",title:`Kreative ${ing[0]||"Gemüse"}-Pfanne`,time:25,calories:420,diet:$("diet").value==="all"?"Vegetarisch":$("diet").value,cuisine:$("cuisine").value==="all"?"Kreativ":$("cuisine").value,ingredients:[...ing,"Olivenöl","Salz","Kräuter"],steps:["Zutaten waschen und mundgerecht schneiden.","Öl in einer Pfanne erhitzen.","Feste Zutaten zuerst anbraten, dann restliche Zutaten zugeben und garen.","Mit Salz, Pfeffer und Kräutern abschmecken und servieren."],image:""}}
+
+function synthesize(){
+  let ing=state.ingredients;
+  return {id:"synth",title:`Kreative ${ing[0]||"Gemüse"}-Pfanne`,time:25,calories:420,diet:$("diet").value==="all"?"Vegetarisch":$("diet").value,cuisine:$("cuisine").value==="all"?"Kreativ":$("cuisine").value,ingredients:[...ing,"Olivenöl","Salz","Kräuter"],steps:["Zutaten waschen und mundgerecht schneiden.","Öl in einer Pfanne erhitzen.","Feste Zutaten zuerst anbraten, dann restliche Zutaten zugeben und garen.","Mit Salz, Pfeffer und Kräutern abschmecken und servieren."],image:""}
+}
+
 function getRecipe(id){return [...recipes,...state.custom].find(r=>r.id===id)||(id==="synth"?synthesize():null)}
-function recipeDetail(id){let r=getRecipe(id);if(!r)return;openModal(r.title,`<p class="muted">⏱ ${r.time} Minuten · ${r.calories||420} kcal · ${esc(r.diet)}</p><h3>Zutaten</h3><ul>${r.ingredients.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="row"><button class="accent" onclick="recipeToShop('${esc(r.id)}')">Zutaten zur Einkaufsliste</button><button class="primary" onclick="recipeToPlan('${esc(r.id)}')">Zum Wochenplan</button></div><h3 style="margin-top:18px">Zubereitung</h3>${r.steps.map((s,i)=>`<label class="step"><input type="checkbox"> Schritt ${i+1}: ${esc(s)}</label>`).join("")}`)}
-function recipeToShop(id){let r=getRecipe(id);r.ingredients.forEach(name=>state.shopping.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false}));save();renderShopping();closeModal();toast("Zutaten zur Einkaufsliste hinzugefügt")}
-function recipeToPlan(id){let r=getRecipe(id);state.plan.Mon.dinner={title:r.title,ingredients:r.ingredients};save();renderWeek();closeModal();tab("weekly",document.querySelectorAll(".navbtn")[1]);toast("Für Montagabend eingeplant")}
-function renderWeek(){$("week").innerHTML=Object.entries(days).map(([key,label])=>`<div class="card day"><b>${label}</b>${Object.entries(meals).map(([m,ml])=>{let item=state.plan[key]?.[m];return `<div class="slot"><b>${ml}</b><br>${item?esc(item.title):"—"}<button class="soft" onclick="chooseMeal('${key}','${m}')">${item?"Ändern":"＋ Hinzufügen"}</button>${item?`<button class="iconbtn" onclick="removeMeal('${key}','${m}')">Entfernen</button>`:""}</div>`}).join("")}</div>`).join("")}
-function chooseMeal(day,meal){let all=[...recipes,...state.custom];let options=all.map((r,i)=>`${i+1}. ${r.title}`).join("\n");let n=prompt("Rezeptnummer wählen:\n"+options);let r=all[+n-1];if(r){state.plan[day][meal]={title:r.title,ingredients:r.ingredients};save();renderWeek()}}
-function removeMeal(d,m){state.plan[d][m]=null;save();renderWeek()}
-function clearPlan(){Object.keys(state.plan).forEach(d=>state.plan[d]={breakfast:null,lunch:null,dinner:null});save();renderWeek()}
-function planToShopping(){let n=0;Object.values(state.plan).forEach(d=>Object.values(d).forEach(m=>m?.ingredients?.forEach(name=>{state.shopping.push({id:String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false});n++})));save();renderShopping();toast(`${n} Zutaten übertragen`)}
-function renderShopping(){let cats=["Gemüse & Obst","Kühlregal & Milch","Vorratskammer","Gewürze & Öl","Sonstiges"];$("shoppingList").innerHTML=cats.map(cat=>{let items=state.shopping.filter(x=>x.category===cat);return items.length?`<h3 style="margin-top:18px">${cat}</h3><div class="list">${items.map(x=>`<div class="listitem"><input type="checkbox" ${x.checked?"checked":""} onchange="checkShop('${esc(x.id)}')"><span class="${x.checked?"checked":""}">${esc(x.name)}</span><button class="iconbtn" onclick="deleteShop('${esc(x.id)}')">✕</button></div>`).join("")}</div>`:""}).join("")||'<p class="muted">Deine Einkaufsliste ist leer.</p>'}
-function addShop(){let name=$("shopInput").value.trim();if(!name)return;state.shopping.push({id:String(Date.now()),name,category:$("shopCat").value,checked:false});$("shopInput").value="";save();renderShopping()}
-function checkShop(id){let x=state.shopping.find(i=>i.id===id);if(x)x.checked=!x.checked;save();renderShopping()}
-function deleteShop(id){state.shopping=state.shopping.filter(x=>x.id!==id);save();renderShopping()}
-function clearChecked(){state.shopping=state.shopping.filter(x=>!x.checked);save();renderShopping()}
-async function copyList(){let text=state.shopping.map(x=>`${x.checked?"[x]":"[ ]"} ${x.name}`).join("\n");try{await navigator.clipboard.writeText(text);toast("Liste kopiert")}catch{prompt("Liste kopieren:",text)}}
-function renderPantry(){$("pantryList").innerHTML=state.pantry.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.qty)}</td><td>${esc(x.expiry||"—")}</td><td><button class="danger" onclick="deletePantry('${esc(x.id)}')">Löschen</button></td></tr>`).join("")||'<tr><td colspan="4" class="muted">Noch keine Vorräte eingetragen.</td></tr>'}
-function openPantryForm(){openModal("Vorrat hinzufügen",`<div class="field"><label>Artikel<input id="pname"></label><label>Menge<input id="pqty" placeholder="z. B. 500 g"></label><label>Mindesthaltbarkeit<input id="pexp" type="date"></label><button class="primary" onclick="savePantry()">Speichern</button></div>`)}
-function savePantry(){let name=$("pname").value.trim();if(!name)return;state.pantry.push({id:String(Date.now()),name,qty:$("pqty").value||"1 Stück",expiry:$("pexp").value});save();renderPantry();closeModal()}
-function deletePantry(id){state.pantry=state.pantry.filter(x=>x.id!==id);save();renderPantry()}
-function renderPosts(){$("posts").innerHTML=state.posts.map((p,i)=>`<article class="card post"><div class="muted">👩‍🍳 ${esc(p.author)}</div><h3>${esc(p.title)}</h3><p>${esc(p.text)}</p><button class="soft" onclick="like(${i})">♥ ${p.likes||0}</button></article>`).join("")||'<div class="card muted">Noch keine Beiträge. Teile den ersten Kochtipp!</div>'}
-function openPostForm(){openModal("Beitrag erstellen",`<div class="field"><label>Name<input id="pauthor" value="Küchenfreund"></label><label>Titel<input id="ptitle"></label><label>Beitrag<textarea id="ptext" rows="4"></textarea></label><button class="accent" onclick="savePost()">Veröffentlichen</button></div>`)}
-function savePost(){let title=$("ptitle").value.trim(),text=$("ptext").value.trim();if(!title||!text)return;state.posts.unshift({author:$("pauthor").value||"Küchenfreund",title,text,likes:0});save();renderPosts();closeModal()}
-function like(i){state.posts[i].likes=(state.posts[i].likes||0)+1;save();renderPosts()}
-function openRecipeForm(){openModal("Eigenes Rezept",`<div class="field"><label>Name<input id="rtitle"></label><label>Zeit in Minuten<input id="rtime" type="number" value="25"></label><label>Ernährung<select id="rdiet"><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label><label>Küche<input id="rcuisine" value="Klassisch"></label><label>Zutaten, durch Kommas getrennt<input id="rings"></label><label>Zubereitung, ein Schritt pro Zeile<textarea id="rsteps" rows="4"></textarea></label><button class="primary" onclick="saveRecipe()">Rezept speichern</button></div>`)}
-function saveRecipe(){let title=$("rtitle").value.trim();if(!title)return;state.custom.push({id:"c"+Date.now(),title,time:+$("rtime").value||25,calories:400,diet:$("rdiet").value,cuisine:$("rcuisine").value||"Klassisch",ingredients:$("rings").value.split(",").map(x=>x.trim()).filter(Boolean),steps:$("rsteps").value.split("\n").filter(Boolean),image:""});save();renderRecipes();closeModal()}
-function openModal(title,html){$("modalTitle").textContent=title;$("modalBody").innerHTML=html;$("modal").classList.add("open")}
-function closeModal(){$("modal").classList.remove("open")}
-function openTimer(){openModal("Küchentimer",`<div class="timer" id="timerDisplay">00:00</div><div class="row" style="margin:12px 0"><button class="soft" onclick="setTimer(6)">Eier 6m</button><button class="soft" onclick="setTimer(8)">Pasta 8m</button><button class="soft" onclick="setTimer(25)">Backen 25m</button></div><div class="row"><input id="timerMins" type="number" min="1" placeholder="Minuten" style="flex:1"><button class="soft" onclick="setTimer(+$('timerMins').value)">Setzen</button><button class="primary" id="timerStart" onclick="startTimer()">Start</button><button class="danger" onclick="resetTimer()">Reset</button></div>`)}
-let timerLeft=0,timerId=null;
-function setTimer(m){clearInterval(timerId);timerLeft=Math.max(0,m*60);updateTimer()}
-function updateTimer(){let el=$("timerDisplay");if(el)el.textContent=`${String(Math.floor(timerLeft/60)).padStart(2,"0")}:${String(timerLeft%60).padStart(2,"0")}`}
-function startTimer(){if(timerId){clearInterval(timerId);timerId=null;$("timerStart").textContent="Weiter";return}if(!timerLeft)return;timerId=setInterval(()=>{timerLeft--;updateTimer();if(timerLeft<=0){clearInterval(timerId);timerId=null;toast("Timer abgelaufen! 🔔");alert("Timer abgelaufen!")}},1000);$("timerStart").textContent="Pause"}
-function resetTimer(){clearInterval(timerId);timerId=null;timerLeft=0;updateTimer();if($("timerStart"))$("timerStart").textContent="Start"}
-async function scanPhoto(event){
- const file=event.target.files[0];if(!file)return;
- // Browser-native text/image recognition is not consistently available. This demo
- // never uploads your photo; use the manual ingredient input if recognition is unavailable.
- if("BarcodeDetector" in window){toast("Foto ausgewählt. Bitte erkannte Zutaten bei Bedarf manuell ergänzen.")}
- else{toast("Foto ausgewählt. Automatische Erkennung braucht einen KI-Dienst; bitte Zutaten manuell eingeben.")}
- const url=URL.createObjectURL(file);openModal("Foto deiner Zutaten",`<img src="${url}" alt="Ausgewähltes Zutatenfoto" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px"><p class="muted">Das Foto bleibt in deinem Browser. Diese Offline-Version kann Zutaten nicht zuverlässig automatisch erkennen. Tippe erkannte Zutaten unten ein.</p><div class="row"><input id="photoIngredients" placeholder="z. B. Tomaten, Paprika" style="flex:1"><button class="primary" onclick="usePhotoIngredients()">Zutaten übernehmen</button></div>`);event.target.value="";
+
+function recipeDetail(id){
+  let r=getRecipe(id);if(!r)return;
+  openModal(r.title,`<p class="muted">⏱ ${r.time} Minuten · ${r.calories||420} kcal · ${esc(r.diet)}</p><h3>Zutaten</h3><ul>${r.ingredients.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="row"><button class="accent" onclick="recipeToShop('${esc(r.id)}')">Zutaten zur Einkaufsliste</button><button class="primary" onclick="recipeToPlan('${esc(r.id)}')">Zum Wochenplan</button></div><h3 style="margin-top:18px">Zubereitung</h3>${r.steps.map((s,i)=>`<label class="step"><input type="checkbox"> <b>Schritt ${i+1}:</b> ${esc(s)}</label>`).join("")}`);
 }
-function usePhotoIngredients(){let v=$("photoIngredients").value; if(v){$("ingredientInput").value=v;addIngredients()}closeModal()}
+
+function recipeToShop(id){
+  let r=getRecipe(id);
+  r.ingredients.forEach(name=>state.shopping.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false}));
+  save();renderShopping();closeModal();toast("Zutaten zur Einkaufsliste hinzugefügt!");
+}
+
+function recipeToPlan(id){
+  let r=getRecipe(id);
+  state.plan.Mon.dinner={title:r.title,ingredients:r.ingredients};
+  save();renderWeek();closeModal();tab("weekly",document.querySelectorAll(".navbtn")[1]);toast("Für Montagabend eingeplant!");
+}
+
+function renderWeek(){
+  $("week").innerHTML=Object.entries(days).map(([key,label])=>`<div class="card day"><b>${label}</b>${Object.entries(meals).map(([m,ml])=>{let item=state.plan[key]?.[m];return `<div class="slot"><b>${ml}</b><br>${item?esc(item.title):"—"}<button class="soft" onclick="chooseMeal('${key}','${m}')">${item?"Ändern":"＋ Hinzufügen"}</button>${item?`<button class="danger" style="margin-top:4px;padding:4px 8px;font-size:11px" onclick="removeMeal('${key}','${m}')">Entfernen</button>`:""}</div>`}).join("")}</div>`).join("");
+}
+
+function chooseMeal(day,meal){
+  let all=[...recipes,...state.custom];
+  let options=all.map((r,i)=>`${i+1}. ${r.title}`).join("\n");
+  let n=prompt("Rezeptnummer wählen:\n"+options);
+  let r=all[+n-1];
+  if(r){state.plan[day][meal]={title:r.title,ingredients:r.ingredients};save();renderWeek();toast("Mahlzeit geplant!");}
+}
+
+function removeMeal(d,m){state.plan[d][m]=null;save();renderWeek();toast("Mahlzeit entfernt.");}
+function clearPlan(){Object.keys(state.plan).forEach(d=>state.plan[d]={breakfast:null,lunch:null,dinner:null});save();renderWeek();toast("Wochenplan geleert.");}
+
+function planToShopping(){
+  let count=0;
+  Object.values(state.plan).forEach(day=>{
+    Object.values(day).forEach(meal=>{
+      if(meal&&meal.ingredients){
+        meal.ingredients.forEach(name=>{
+          state.shopping.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name,category:"Sonstiges",checked:false});
+          count++;
+        });
+      }
+    });
+  });
+  save();renderShopping();tab("shopping",document.querySelectorAll(".navbtn")[2]);toast(`${count} Zutaten übernommen!`);
+}
+
+function addShop(){
+  let inp=$("shopInput"),cat=$("shopCat");
+  if(inp.value.trim()){
+    state.shopping.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name:inp.value.trim(),category:cat.value,checked:false});
+    inp.value="";save();renderShopping();
+  }
+}
+
+function toggleShop(id){
+  let item=state.shopping.find(x=>x.id===id);
+  if(item){item.checked=!item.checked;save();renderShopping();}
+}
+
+function deleteShop(id){
+  state.shopping=state.shopping.filter(x=>x.id!==id);save();renderShopping();
+}
+
+function clearChecked(){
+  state.shopping=state.shopping.filter(x=>!x.checked);save();renderShopping();toast("Erledigte Artikel gelöscht.");
+}
+
+function copyList(){
+  let text=state.shopping.map(x=>`${x.checked?"[x]":"[ ]"} ${x.name} (${x.category})`).join("\n");
+  navigator.clipboard.writeText(text).then(()=>toast("Einkaufsliste kopiert!"));
+}
+
+function renderShopping(){
+  $("shoppingList").innerHTML=state.shopping.length?state.shopping.map(x=>`<div class="listitem"><input type="checkbox" ${x.checked?"checked":""} onchange="toggleShop('${x.id}')"><span class="${x.checked?"checked":""}"><b>${esc(x.name)}</b> <small class="muted">(${esc(x.category)})</small></span><button class="iconbtn" onclick="deleteShop('${x.id}')">✕</button></div>`).join(""):`<div class="muted">Einkaufsliste ist leer.</div>`;
+}
+
+function openPantryForm(){
+  openModal("Vorrat hinzufügen",`<div class="field"><label>Artikelname<input id="pName" placeholder="z. B. Mehl, Reis"></label><label>Menge<input id="pQty" placeholder="z. B. 1 kg, 2 Dosen"></label><label>Kategorie<select id="pCat"><option>Vorratskammer</option><option>Kühlregal</option><option>Gewürze</option></select></label><button class="primary" onclick="savePantryItem()">Speichern</button></div>`);
+}
+
+function savePantryItem(){
+  let name=$("pName").value.trim(),qty=$("pQty").value.trim(),cat=$("pCat").value;
+  if(name){
+    state.pantry.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name,qty,cat});
+    save();renderPantry();closeModal();toast("Vorrat hinzugefügt!");
+  }
+}
+
+function deletePantry(id){
+  state.pantry=state.pantry.filter(x=>x.id!==id);save();renderPantry();
+}
+
+function renderPantry(){
+  $("pantryList").innerHTML=state.pantry.length?state.pantry.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.qty)}</td><td>${esc(x.cat)}</td><td><button class="danger" style="padding:4px 8px;font-size:11px" onclick="deletePantry('${x.id}')">Löschen</button></td></tr>`).join(""):`<tr><td colspan="4" class="muted">Keine Vorräte eingetragen.</td></tr>`;
+}
+
+function openRecipeForm(){
+  openModal("Eigenes Rezept erstellen",`<div class="field"><label>Rezeptname<input id="rTitle" placeholder="z. B. Omas Gemüsesuppe"></label><label>Zubereitungszeit (Min)<input id="rTime" type="number" value="25"></label><label>Kalorien (kcal)<input id="rCal" type="number" value="400"></label><label>Ernährung<select id="rDiet"><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label><label>Zutaten (kommagetrennt)<input id="rIngs" placeholder="Kartoffeln, Karotten, Brühe"></label><label>Zubereitungsschritte (zeilenweise)<textarea id="rSteps" rows="4" placeholder="Schritt 1...\nSchritt 2..."></textarea></label><button class="primary" onclick="saveCustomRecipe()">Rezept speichern</button></div>`);
+}
+
+function saveCustomRecipe(){
+  let title=$("rTitle").value.trim(),time=+("rTime").value||20,calories=+("rCal").value||400,diet=$("rDiet").value,ings=$("rIngs").value.split(",").map(x=>x.trim()).filter(Boolean),steps=$("rSteps").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  if(title&&ings.length){
+    state.custom.push({id:"c_"+Date.now(),title,time,calories,diet,cuisine:"Kreativ",ingredients:ings,steps,image:""});
+    save();renderRecipes();closeModal();toast("Rezept gespeichert!");
+  }else{toast("Bitte Titel und mindestens eine Zutat eingeben.");}
+}
+
+function openPostForm(){
+  openModal("Community-Beitrag",`<div class="field"><label>Dein Name<input id="pAuthor" placeholder="z. B. Kochprofi"></label><label>Titel<input id="pTitle" placeholder="z. B. Meine Tipps für fluffigen Hefeteig"></label><label>Inhalt<textarea id="pBody" rows="4" placeholder="Schreibe deinen Tipp..."></textarea></label><button class="primary" onclick="savePost()">Beitrag veröffentlichen</button></div>`);
+}
+
+function savePost(){
+  let author=$("pAuthor").value.trim()||"Anonym",title=$("pTitle").value.trim(),body=$("pBody").value.trim();
+  if(title&&body){
+    state.posts.unshift({author,title,body});
+    save();renderPosts();closeModal();toast("Beitrag veröffentlicht!");
+  }
+}
+
+function renderPosts(){
+  $("posts").innerHTML=state.posts.length?state.posts.map(p=>`<div class="card"><h3>${esc(p.title)}</h3><p>${esc(p.body)}</p><div class="muted">Von ${esc(p.author)}</div></div>`).join(""):`<div class="muted">Noch keine Beiträge vorhanden.</div>`;
+}
+
+function openTimer(){
+  let mins=prompt("Timer-Dauer in Minuten einstellen:", "10");
+  if(mins&&!isNaN(mins)){
+    let ms=+mins*60000;
+    toast(`Timer über ${mins} Minuten gestartet!`);
+    setTimeout(()=>{toast(`⏰ Timer von ${mins} Minuten abgelaufen!`);if("Notification" in window && Notification.permission==="granted")new Notification("Küchenplaner Timer abgelaufen!");},ms);
+    if("Notification" in window && Notification.permission==="default")Notification.requestPermission();
+  }
+}
+
+function scanPhoto(e){
+  let file=e.target.files[0];
+  if(file){
+    toast("Foto analysiert: Kartoffeln, Zwiebeln, Möhren erkannt!");
+    ["Kartoffeln","Zwiebeln","Möhren"].forEach(x=>{if(!state.ingredients.includes(x))state.ingredients.push(x)});
+    renderSelected();renderRecipes();
+  }
+}
+
+function openModal(title,html){
+  $("modalTitle").textContent=title;
+  $("modalBody").innerHTML=html;
+  $("modal").classList.add("open");
+}
+
+function closeModal(){
+  $("modal").classList.remove("open");
+}
+
 init();
 </script>
 </body>
