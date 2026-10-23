@@ -1,980 +1,1415 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useRef, useEffect, useId } from 'react';
-import {
-  ChefHat,
-  Plus,
-  X,
-  Sparkles,
-  Clock,
-  Users,
-  Flame,
-  Copy,
-  Check,
-  RotateCcw,
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  Timer,
-  UtensilsCrossed,
-  FileText,
-  LayoutGrid,
-  CheckCircle2,
-  AlertCircle,
-  Lightbulb,
-} from 'lucide-react';
-
-interface ParsedRecipe {
-  id: string;
-  title: string;
-  prepTime?: string;
-  cookTime?: string;
-  servings?: string;
-  ingredients: string[];
-  steps: string[];
-  notes?: string;
-  rawText: string;
-}
-
-const COMMON_PANTRY_ITEMS = [
-  'Tomatoes',
-  'Eggs',
-  'Garlic',
-  'Onion',
-  'Pasta',
-  'Rice',
-  'Olive oil',
-  'Cheese',
-  'Chicken breast',
-  'Potatoes',
-  'Butter',
-  'Bell pepper',
-];
-
-const PREFERENCE_TAGS = [
-  'Any Style',
-  'Quick (< 30 min)',
-  'Vegetarian',
-  'High Protein',
-  'Comfort Food',
-  'One-Pot Meal',
-];
-
-export default function App() {
-  const [ingredients, setIngredients] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [status, setStatus] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [recipesText, setRecipesText] = useState('');
-  const [parsedRecipes, setParsedRecipes] = useState<ParsedRecipe[]>([]);
-  const [viewMode, setViewMode] = useState<'cards' | 'raw'>('cards');
-  const [selectedPreference, setSelectedPreference] = useState('Any Style');
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
-  const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean>>({});
-  
-  // Audio narration state
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [speakingRecipeId, setSpeakingRecipeId] = useState<string | null>(null);
-
-  // Kitchen Timer state
-  const [timerSeconds, setTimerSeconds] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timerModalOpen, setTimerModalOpen] = useState(false);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  const resultsCardRef = useRef<HTMLDivElement>(null);
-  const statusId = useId();
-
-  // Parse markdown recipes into structured cards
-  const parseRecipesFromMarkdown = (text: string): ParsedRecipe[] => {
-    if (!text || !text.trim()) return [];
-
-    // Split roughly by recipe headers (### Recipe or ## Recipe or numbers)
-    const sections = text.split(/(?=###?\s+\d+[\.\:]|###?\s+Recipe\s+\d+|###?\s+[A-Z][^\n]+(?:\n\s*[-*]|\n\s*\*\*Prep))/i);
-    const validSections = sections.filter((s) => s.trim().length > 30);
-
-    if (validSections.length >= 2) {
-      return validSections.map((section, idx) => {
-        const lines = section.trim().split('\n');
-        let title = `Recipe ${idx + 1}`;
-        const firstLine = lines[0].replace(/^#+\s*/, '').replace(/^\d+[\.\:\-]\s*/, '').trim();
-        if (firstLine) {
-          title = firstLine.replace(/\*\*/g, '');
-        }
-
-        let prepTime: string | undefined;
-        let cookTime: string | undefined;
-        let servings: string | undefined;
-        const ingredientsList: string[] = [];
-        const stepsList: string[] = [];
-        const notesList: string[] = [];
-
-        let currentSection: 'meta' | 'ingredients' | 'steps' | 'notes' = 'meta';
-
-        for (let i = 1; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-
-          // Time & Servings regex
-          const prepMatch = line.match(/(?:prep(?:aration)?\s*time|prep):\s*([^\*,\n]+)/i);
-          if (prepMatch && !prepTime) prepTime = prepMatch[1].trim();
-
-          const cookMatch = line.match(/(?:cook(?:ing)?\s*time|cook):\s*([^\*,\n]+)/i);
-          if (cookMatch && !cookTime) cookTime = cookMatch[1].trim();
-
-          const servingsMatch = line.match(/(?:servings|yield|serves):\s*([^\*,\n]+)/i);
-          if (servingsMatch && !servings) servings = servingsMatch[1].trim();
-
-          // Section headers or inline lines
-          const inlineIngMatch = line.match(/^\*?\s*\*\*ingredients:?\*\*\s*(.+)/i);
-          if (inlineIngMatch) {
-            currentSection = 'ingredients';
-            const rawItems = inlineIngMatch[1].split(/,(?![^(]*\))/); // split commas not inside parentheses
-            rawItems.forEach((it) => {
-              const trimmed = it.trim().replace(/\.$/, '');
-              if (trimmed) ingredientsList.push(trimmed);
-            });
-            continue;
-          } else if (/^#*\s*\**ingredients:?/i.test(line)) {
-            currentSection = 'ingredients';
-            continue;
-          } else if (/^#*\s*\**(?:preparation(?:\s*steps)?|instructions|steps|directions|method):?/i.test(line)) {
-            currentSection = 'steps';
-            continue;
-          } else if (/^#*\s*\**(?:notes|tips|chef's\s*notes|variations):?/i.test(line)) {
-            currentSection = 'notes';
-            continue;
-          }
-
-          // Items
-          if (currentSection === 'ingredients') {
-            const cleanIng = line.replace(/^[-*•]\s*/, '').replace(/^\d+[\.\)]\s*/, '').replace(/^\*\*Ingredients:?\*\*\s*/i, '').trim();
-            if (cleanIng && !cleanIng.startsWith('**Prep') && !cleanIng.startsWith('**Cook')) {
-              ingredientsList.push(cleanIng);
-            }
-          } else if (currentSection === 'steps') {
-            const cleanStep = line.replace(/^\d+[\.\)]\s*/, '').replace(/^[-*•]\s*/, '').trim();
-            if (cleanStep) stepsList.push(cleanStep);
-          } else if (currentSection === 'notes') {
-            notesList.push(line.replace(/^[-*•]\s*/, ''));
-          }
-        }
-
-        return {
-          id: `recipe-${idx}`,
-          title,
-          prepTime,
-          cookTime,
-          servings,
-          ingredients: ingredientsList.length > 0 ? ingredientsList : ['Ingredients as detailed in recipe steps'],
-          steps: stepsList.length > 0 ? stepsList : lines.slice(1).filter((l) => l.trim().length > 10),
-          notes: notesList.join(' '),
-          rawText: section.trim(),
-        };
-      });
-    }
-
-    // Fallback if parsing didn't detect multiple sections
-    return [
-      {
-        id: 'recipe-all',
-        title: 'Suggested Recipes',
-        ingredients: [],
-        steps: [],
-        rawText: text.trim(),
-      },
-    ];
-  };
-
-  // Handle adding an ingredient
-  const handleAddIngredient = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const value = inputValue.trim();
-
-    if (!value) return;
-
-    if (ingredients.length >= 30) {
-      setStatus('You can add up to 30 ingredients.');
-      return;
-    }
-
-    if (ingredients.some((item) => item.toLowerCase() === value.toLowerCase())) {
-      setStatus('That ingredient is already on your list.');
-      return;
-    }
-
-    setIngredients((prev) => [...prev, value]);
-    setInputValue('');
-    setStatus('');
-    inputRef.current?.focus();
-  };
-
-  // Add quick pantry staple
-  const handleAddStaple = (staple: string) => {
-    if (ingredients.length >= 30) {
-      setStatus('You can add up to 30 ingredients.');
-      return;
-    }
-    if (ingredients.some((item) => item.toLowerCase() === staple.toLowerCase())) {
-      setStatus('That ingredient is already on your list.');
-      return;
-    }
-    setIngredients((prev) => [...prev, staple]);
-    setStatus('');
-  };
-
-  // Remove single ingredient
-  const handleRemoveIngredient = (indexToRemove: number) => {
-    setIngredients((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-    setStatus('');
-  };
-
-  // Clear all
-  const handleClearAll = () => {
-    setIngredients([]);
-    setStatus('');
-  };
-
-  // Suggest recipes (POST /api/recipes)
-  const handleGenerate = async () => {
-    if (!ingredients.length) {
-      setStatus('Add at least one ingredient first.');
-      return;
-    }
-
-    setIsGenerating(true);
-    setStatus('Creating recipe ideas…');
-    setRecipesText('');
-    setParsedRecipes([]);
-
-    try {
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ingredients,
-          preferences: selectedPreference !== 'Any Style' ? selectedPreference : undefined,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Request failed.');
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pantry Chef — Recipe Ideas</title>
+    <meta name="description" content="Enter ingredients you have, and get recipe ideas using Gemini AI." />
+    <meta property="og:title" content="Pantry Chef — Recipe Ideas" />
+    <meta property="og:description" content="Enter ingredients you have, and get recipe ideas using Gemini AI." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-canvas: #f7f7f2;
+        --text-main: #20251f;
+        --text-muted: #5e6859;
+        --brand-green: #286b45;
+        --brand-green-hover: #1e5536;
+        --brand-green-subtle: #edf3ed;
+        --brand-green-border: #d2e0d1;
+        --card-bg: #ffffff;
+        --border-color: #e6e8df;
+        --border-focus: #286b45;
+        --chip-bg: #edf3ed;
+        --accent-amber: #b45309;
+        --radius-lg: 16px;
+        --radius-md: 10px;
+        --radius-sm: 6px;
       }
 
-      const returnedRecipes = data.recipes || 'No recipes were returned.';
-      setRecipesText(returnedRecipes);
-      const parsed = parseRecipesFromMarkdown(returnedRecipes);
-      setParsedRecipes(parsed);
-      setStatus('');
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-      // Smooth scroll to results
-      setTimeout(() => {
-        resultsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
-      setStatus(msg);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+      body {
+        margin: 0;
+        padding: 0 16px 48px;
+        background-color: var(--bg-canvas);
+        color: var(--text-main);
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
 
-  // Copy to clipboard
-  const handleCopy = (text: string, index: number) => {
-    navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
+      /* Navigation header */
+      header {
+        max-width: 740px;
+        margin: 0 auto 24px;
+        padding: 20px 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-color);
+      }
 
-  // Text to speech narration
-  const handleToggleSpeak = (recipe: ParsedRecipe) => {
-    if (!('speechSynthesis' in window)) {
-      alert('Speech synthesis is not supported in this browser.');
-      return;
-    }
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-    if (isSpeaking && speakingRecipeId === recipe.id) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      setSpeakingRecipeId(null);
-      return;
-    }
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--brand-green);
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 2px 6px rgba(40, 107, 69, 0.2);
+      }
 
-    window.speechSynthesis.cancel();
-    const cleanReadText = `${recipe.title}. Ingredients: ${recipe.ingredients.join(', ')}. Instructions: ${recipe.steps.join('. ')}`;
-    const utterance = new SpeechSynthesisUtterance(cleanReadText);
-    utterance.rate = 0.95;
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      setSpeakingRecipeId(null);
-    };
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      setSpeakingRecipeId(null);
-    };
+      .logo-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #17422b;
+        line-height: 1.2;
+      }
 
-    setSpeakingRecipeId(recipe.id);
-    setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
-  };
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-  // Cooking Timer handlers
-  useEffect(() => {
-    if (timerRunning) {
-      timerIntervalRef.current = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerIntervalRef.current!);
-            setTimerRunning(false);
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('Timer Finished!', { body: 'Your cooking timer is complete.' });
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-    return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    };
-  }, [timerRunning]);
+      .timer-badge-btn {
+        background: white;
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+      }
 
-  const startTimerWithMinutes = (mins: number) => {
-    setTimerSeconds(mins * 60);
-    setTimerRunning(true);
-    setTimerModalOpen(true);
-  };
+      .timer-badge-btn:hover {
+        border-color: #c7cfc2;
+        color: var(--text-main);
+      }
 
-  const formatTimer = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
+      .timer-badge-btn.active {
+        background: #fffbeb;
+        border-color: #fcd34d;
+        color: #92400e;
+        animation: pulseTimer 1.5s infinite;
+      }
 
-  return (
-    <div className="min-h-screen bg-[#f7f7f2] text-[#20251f] flex flex-col font-sans">
-      {/* Top Navigation Bar */}
-      <header className="border-b border-[#e6e8df] bg-white/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-[#286b45] text-white flex items-center justify-center shadow-sm">
-              <ChefHat className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-serif font-bold text-xl tracking-tight text-[#1a4a2f]">
-                Pantry Chef
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-medium px-2 py-0.5 bg-[#edf3ed] text-[#286b45] rounded-full">
-                AI Recipe Assistant
-              </span>
-            </div>
+      @keyframes pulseTimer {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.75; }
+      }
+
+      /* Main container */
+      main {
+        max-width: 740px;
+        margin: 0 auto;
+      }
+
+      .hero {
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #17422b;
+        letter-spacing: -0.5px;
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 16px;
+      }
+
+      /* Card styling */
+      .card {
+        margin-top: 20px;
+        padding: 24px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      }
+
+      label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .label-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+
+      input {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 14px;
+        border: 1px solid #cdd2c7;
+        border-radius: var(--radius-md);
+        font: inherit;
+        font-size: 15px;
+        background: #fafbfa;
+        color: var(--text-main);
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      input:focus {
+        background: #ffffff;
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 3px rgba(40, 107, 69, 0.15);
+      }
+
+      button {
+        padding: 12px 20px;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: var(--brand-green);
+        color: white;
+        font: inherit;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background 0.15s ease, transform 0.05s ease;
+      }
+
+      button:hover:not(:disabled) {
+        background: var(--brand-green-hover);
+      }
+
+      button:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .secondary {
+        background: #e9eee8;
+        color: var(--text-main);
+      }
+
+      .secondary:hover:not(:disabled) {
+        background: #dde4dc;
+      }
+
+      /* Quick staples suggestion */
+      .staples-area {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f2eb;
+      }
+
+      .staples-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .staples-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .staple-btn {
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #fafbfa;
+        color: #384235;
+        border: 1px solid #e2e6dc;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .staple-btn:hover:not(:disabled) {
+        background: var(--brand-green-subtle);
+        border-color: var(--brand-green-border);
+        color: var(--brand-green);
+      }
+
+      .staple-btn:disabled {
+        opacity: 0.4;
+        text-decoration: line-through;
+        cursor: not-allowed;
+      }
+
+      /* Chips */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+        min-height: 38px;
+      }
+
+      .chips-empty {
+        width: 100%;
+        padding: 16px;
+        border: 1px dashed #d8ded4;
+        border-radius: var(--radius-md);
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        background: #fcfdfc;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--chip-bg);
+        border: 1px solid var(--brand-green-border);
+        color: #1a4a2f;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      }
+
+      .chip button {
+        padding: 0;
+        width: 18px;
+        height: 18px;
+        background: transparent;
+        color: #43624e;
+        font-size: 18px;
+        line-height: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .chip button:hover {
+        background: rgba(0, 0, 0, 0.08);
+        color: #c53030;
+      }
+
+      /* Preferences */
+      .preferences-area {
+        margin-bottom: 18px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f2eb;
+      }
+
+      .pref-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .pref-pill {
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #edf3ed;
+        color: #384235;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .pref-pill.selected {
+        background: var(--brand-green);
+        color: white;
+      }
+
+      /* Action controls */
+      .action-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .clear-btn {
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 8px 12px;
+      }
+
+      .clear-btn:hover {
+        background: transparent;
+        color: #c53030;
+      }
+
+      /* Status */
+      #status {
+        min-height: 24px;
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      .status-box {
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-box.info {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      .status-box.warn {
+        background: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+
+      .status-box.error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      /* Loading Spinner */
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Results */
+      #result-card {
+        margin-top: 28px;
+      }
+
+      .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #f0f2eb;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .results-header h2 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 24px;
+        color: #17422b;
+      }
+
+      .view-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .segmented-ctrl {
+        display: flex;
+        background: #edf3ed;
+        padding: 3px;
+        border-radius: var(--radius-sm);
+        gap: 2px;
+      }
+
+      .segmented-ctrl button {
+        padding: 5px 12px;
+        font-size: 12px;
+        background: transparent;
+        color: var(--text-muted);
+        border-radius: 4px;
+      }
+
+      .segmented-ctrl button.active {
+        background: white;
+        color: var(--brand-green);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      }
+
+      .icon-button {
+        padding: 6px 12px;
+        background: #f0f3ee;
+        color: var(--brand-green);
+        border: 1px solid #dce3d9;
+        font-size: 12px;
+        border-radius: var(--radius-sm);
+      }
+
+      .icon-button:hover {
+        background: #e2e8df;
+      }
+
+      /* Raw pre-wrap view */
+      #raw-results {
+        background: #fafbfa;
+        padding: 18px;
+        border: 1px solid #e8ebe3;
+        border-radius: var(--radius-md);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        color: var(--text-main);
+      }
+
+      /* Structured Recipe Card */
+      .recipe-card-item {
+        background: #fafbfa;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: border-color 0.15s ease;
+      }
+
+      .recipe-card-item:hover {
+        border-color: #c5d1bf;
+      }
+
+      .recipe-header {
+        background: white;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef1ea;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .recipe-num-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: #edf3ed;
+        color: var(--brand-green);
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+
+      .recipe-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 20px;
+        color: #17422b;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+
+      .meta-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .meta-pill {
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #f2f5ef;
+        color: var(--text-muted);
+        border-radius: var(--radius-sm);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .recipe-body {
+        padding: 20px;
+      }
+
+      .section-heading {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-main);
+        margin: 16px 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .section-heading:first-child {
+        margin-top: 0;
+      }
+
+      .section-heading::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--brand-green);
+      }
+
+      .ingredients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 8px;
+      }
+
+      .ingredient-check-item {
+        background: white;
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.1s ease;
+      }
+
+      .ingredient-check-item.done {
+        background: #edf3ed;
+        color: #7a8376;
+        text-decoration: line-through;
+      }
+
+      .steps-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .step-item {
+        background: white;
+        border: 1px solid var(--border-color);
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .step-item.done {
+        background: #edf3ed;
+        color: #7a8376;
+        text-decoration: line-through;
+      }
+
+      .step-num {
+        width: 22px;
+        height: 22px;
+        background: #edf3ed;
+        color: var(--brand-green);
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      .step-item.done .step-num {
+        background: var(--brand-green);
+        color: white;
+      }
+
+      /* Timer Popover modal */
+      #timer-popover {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        z-index: 100;
+        width: 280px;
+        display: none;
+      }
+
+      .timer-display {
+        font-family: ui-monospace, monospace;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        margin: 8px 0 14px;
+        color: #17422b;
+      }
+
+      .timer-presets {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .timer-presets button {
+        padding: 4px;
+        font-size: 11px;
+        background: #edf3ed;
+        color: var(--brand-green);
+      }
+
+      .timer-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .timer-controls button {
+        flex: 1;
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      /* Footer */
+      footer {
+        max-width: 740px;
+        margin: 40px auto 0;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      @media (max-width: 580px) {
+        body { padding: 0 12px 32px; }
+        .row { flex-direction: column; }
+        .recipe-header { flex-direction: column; }
+        .ingredients-grid { grid-template-columns: 1fr; }
+        #timer-popover { left: 16px; right: 16px; width: auto; bottom: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="logo-area">
+        <div class="logo-icon" aria-hidden="true">🍳</div>
+        <div>
+          <span class="logo-title">Pantry Chef</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="toggle-timer-btn" type="button" class="timer-badge-btn" aria-label="Open Kitchen Timer">
+          ⏱️ <span id="header-timer-label">Timer</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero">
+        <h1>Pantry Chef</h1>
+        <p class="subtitle">Enter ingredients you have, and get recipe ideas.</p>
+      </section>
+
+      <!-- Input Card -->
+      <section class="card">
+        <form id="ingredient-form">
+          <label for="ingredient-input">
+            <span>Add an ingredient</span>
+            <span id="ingredient-count" class="label-count">0/30 items</span>
+          </label>
+          <div class="row">
+            <input
+              id="ingredient-input"
+              maxlength="80"
+              placeholder="e.g. tomatoes, garlic, pasta..."
+              autocomplete="off"
+            />
+            <button type="submit" class="secondary">Add</button>
           </div>
+        </form>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setTimerModalOpen(!timerModalOpen)}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
-                timerRunning
-                  ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse'
-                  : 'bg-white border-[#e6e8df] text-[#525a4e] hover:border-[#cdd2c7]'
-              }`}
-              title="Kitchen Timer"
-            >
-              <Timer className="w-3.5 h-3.5" />
-              <span>{timerSeconds > 0 ? formatTimer(timerSeconds) : 'Timer'}</span>
-            </button>
+        <!-- Quick pantry suggestions -->
+        <div class="staples-area">
+          <div class="staples-title">Popular pantry items (tap to add):</div>
+          <div id="staples-list" class="staples-list"></div>
+        </div>
 
-            {ingredients.length > 0 && (
-              <span className="text-xs font-medium px-2.5 py-1 bg-[#edf3ed] text-[#286b45] rounded-full">
-                {ingredients.length}/30 items
-              </span>
-            )}
+        <!-- Ingredients Chips List -->
+        <div id="ingredients" class="chips" aria-live="polite"></div>
+
+        <!-- Dietary / Style Preferences -->
+        <div class="preferences-area">
+          <div class="staples-title">Cooking Style / Preference:</div>
+          <div id="preferences-list" class="pref-pills"></div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="action-row">
+          <button id="generate-button" type="button">
+            <span class="btn-text">Suggest recipes</span>
+          </button>
+          <button id="clear-button" type="button" class="clear-btn" style="display: none;">
+            Clear all
+          </button>
+        </div>
+
+        <p id="status" role="status" aria-live="polite"></p>
+      </section>
+
+      <!-- Results Card -->
+      <section id="result-card" class="card" hidden>
+        <div class="results-header">
+          <div>
+            <h2>Recipe ideas</h2>
+            <p id="results-subtitle" class="subtitle" style="font-size: 13px;">Crafted for your pantry</p>
+          </div>
+          <div class="view-controls">
+            <div class="segmented-ctrl">
+              <button id="view-cards-btn" type="button" class="active">Cards</button>
+              <button id="view-raw-btn" type="button">Plain Text</button>
+            </div>
+            <button id="copy-all-btn" type="button" class="icon-button">Copy All</button>
           </div>
         </div>
-      </header>
 
-      {/* Floating Kitchen Timer Widget / Modal */}
-      {timerModalOpen && (
-        <div className="max-w-4xl mx-auto px-4 w-full mt-3">
-          <div className="bg-white border border-[#e6e8df] rounded-xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-200">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
-                <Timer className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-[#7a8376] uppercase tracking-wider">Kitchen Timer</p>
-                <p className="text-2xl font-mono font-bold text-[#20251f]">{formatTimer(timerSeconds)}</p>
-              </div>
-            </div>
+        <!-- Formatted cards view -->
+        <div id="cards-view"></div>
 
-            {/* Quick minute pills */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {[3, 5, 10, 15, 20, 30].map((mins) => (
-                <button
-                  key={mins}
-                  type="button"
-                  onClick={() => startTimerWithMinutes(mins)}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#edf3ed] text-[#286b45] hover:bg-[#286b45] hover:text-white transition-colors"
-                >
-                  +{mins}m
-                </button>
-              ))}
-            </div>
+        <!-- Raw pre-wrap view -->
+        <div id="raw-results" style="display: none;"></div>
+      </section>
+    </main>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setTimerRunning(!timerRunning)}
-                className={`p-2 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors ${
-                  timerRunning
-                    ? 'bg-amber-600 text-white hover:bg-amber-700'
-                    : 'bg-[#286b45] text-white hover:bg-[#1a4a2f]'
-                }`}
-              >
-                {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                {timerRunning ? 'Pause' : 'Start'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTimerRunning(false);
-                  setTimerSeconds(0);
-                }}
-                className="p-2 rounded-lg border border-[#cdd2c7] text-[#525a4e] hover:bg-gray-100 text-xs font-semibold"
-                title="Reset timer"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTimerModalOpen(false)}
-                className="p-2 text-[#7a8376] hover:text-black text-xs"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Container matching the user's max-width 720px */}
-      <main className="flex-1 max-w-[760px] w-full mx-auto px-4 py-8 sm:py-12">
-        {/* Hero Title */}
-        <div className="text-center sm:text-left mb-6">
-          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#1a4a2f] tracking-tight">
-            Pantry Chef
-          </h1>
-          <p className="mt-1.5 text-base sm:text-lg text-[#525a4e]">
-            Enter ingredients you have, and get recipe ideas.
-          </p>
-        </div>
-
-        {/* Input Card Container */}
-        <section className="bg-white border border-[#e6e8df] rounded-2xl p-5 sm:p-7 shadow-sm transition-shadow hover:shadow-md">
-          {/* Ingredient Form */}
-          <form id="ingredient-form" onSubmit={handleAddIngredient} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label htmlFor="ingredient-input" className="block text-sm font-bold text-[#20251f]">
-                Add an ingredient
-              </label>
-              <span className="text-xs text-[#7a8376]">
-                {ingredients.length}/30 items added
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2.5">
-              <div className="relative flex-1">
-                <input
-                  id="ingredient-input"
-                  ref={inputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  maxLength={80}
-                  placeholder="e.g. tomatoes, garlic, pasta..."
-                  className="w-full px-4 py-3 bg-[#fafafa] focus:bg-white border border-[#cdd2c7] focus:border-[#286b45] focus:ring-2 focus:ring-[#286b45]/20 rounded-xl text-base text-[#20251f] placeholder-[#8f9888] outline-none transition-all"
-                />
-                {inputValue && (
-                  <button
-                    type="button"
-                    onClick={() => setInputValue('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-xl bg-[#e9eee8] hover:bg-[#d8e2d7] text-[#20251f] font-semibold text-base transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
-              >
-                <Plus className="w-4 h-4 text-[#286b45]" />
-                <span>Add</span>
-              </button>
-            </div>
-          </form>
-
-          {/* Quick pantry suggestions */}
-          <div className="mt-4 pt-3 border-t border-[#f0f2eb]">
-            <p className="text-xs font-semibold text-[#7a8376] uppercase tracking-wider mb-2 flex items-center gap-1">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
-              Popular pantry items (tap to add):
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {COMMON_PANTRY_ITEMS.map((item) => {
-                const isAdded = ingredients.some((i) => i.toLowerCase() === item.toLowerCase());
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    disabled={isAdded}
-                    onClick={() => handleAddStaple(item)}
-                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                      isAdded
-                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed line-through'
-                        : 'bg-[#fafbfa] border-[#e2e6dc] text-[#3a4237] hover:border-[#286b45] hover:bg-[#edf3ed] hover:text-[#286b45] cursor-pointer'
-                    }`}
-                  >
-                    + {item}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Added Ingredients Chips list */}
-          <div
-            id="ingredients"
-            className="flex flex-wrap gap-2 my-5 min-h-[40px] items-center"
-            aria-live="polite"
-          >
-            {ingredients.length === 0 ? (
-              <div className="w-full py-4 text-center rounded-xl border border-dashed border-[#d8ded4] bg-[#fbfcfb]">
-                <UtensilsCrossed className="w-6 h-6 mx-auto text-[#9eab99] mb-1.5" />
-                <p className="text-xs text-[#7a8376]">
-                  No ingredients added yet. Add items above or pick from common staples!
-                </p>
-              </div>
-            ) : (
-              ingredients.map((ingredient, index) => (
-                <span
-                  key={`${ingredient}-${index}`}
-                  className="chip inline-flex items-center gap-2 pl-3.5 pr-2 py-1.5 bg-[#edf3ed] border border-[#d6e3d5] text-[#1e4830] font-medium text-sm rounded-full shadow-xs animate-in fade-in zoom-in-95 duration-150"
-                >
-                  <span>{ingredient}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveIngredient(index)}
-                    aria-label={`Remove ${ingredient}`}
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[#40614f] hover:text-[#dc2626] hover:bg-white/80 transition-colors cursor-pointer text-base leading-none font-bold"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))
-            )}
-          </div>
-
-          {/* Meal Style & Dietary Filter Tags */}
-          <div className="mb-5 pt-3 border-t border-[#f0f2eb]">
-            <label className="block text-xs font-semibold text-[#7a8376] uppercase tracking-wider mb-2">
-              Style / Preference (Optional):
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {PREFERENCE_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setSelectedPreference(tag)}
-                  className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
-                    selectedPreference === tag
-                      ? 'bg-[#286b45] text-white shadow-xs'
-                      : 'bg-[#edf3ed] text-[#3a4237] hover:bg-[#dde6dc]'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Action Row */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-            <button
-              id="generate-button"
-              type="button"
-              disabled={isGenerating || ingredients.length === 0}
-              onClick={handleGenerate}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#286b45] hover:bg-[#1f5636] text-white font-semibold text-base transition-all shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
-            >
-              {isGenerating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating recipe ideas…</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                  <span>Suggest recipes</span>
-                </>
-              )}
-            </button>
-
-            {ingredients.length > 0 && (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="text-xs text-[#7a8376] hover:text-[#dc2626] px-3 py-2 font-medium transition-colors flex items-center justify-center gap-1"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Clear list
-              </button>
-            )}
-          </div>
-
-          {/* Status Message */}
-          <div
-            id="status"
-            role="status"
-            aria-live="polite"
-            className="min-h-[24px] mt-3.5 text-sm font-medium flex items-center gap-2 transition-opacity"
-          >
-            {status && (
-              <div
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg w-full ${
-                  status.includes('Creating')
-                    ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                    : status.includes('valid') || status.includes('least') || status.includes('already') || status.includes('error') || status.includes('wrong')
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : 'text-[#525a4e]'
-                }`}
-              >
-                {status.includes('already') || status.includes('valid') ? (
-                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-                ) : null}
-                <span>{status}</span>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Results Section (#result-card & #results) */}
-        {recipesText && (
-          <section
-            id="result-card"
-            ref={resultsCardRef}
-            className="mt-8 bg-white border border-[#e6e8df] rounded-2xl p-5 sm:p-7 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-4 duration-300"
-          >
-            {/* Header with Switch View & Copy All */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f0f2eb] gap-3">
-              <div>
-                <h2 className="font-serif text-2xl font-bold text-[#1a4a2f]">
-                  Recipe ideas
-                </h2>
-                <p className="text-xs text-[#7a8376] mt-0.5">
-                  Tailored to your {ingredients.length} pantry items
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                {/* View switcher */}
-                <div className="flex items-center bg-[#edf3ed] p-1 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('cards')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                      viewMode === 'cards'
-                        ? 'bg-white text-[#286b45] shadow-xs'
-                        : 'text-[#525a4e] hover:text-[#286b45]'
-                    }`}
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>Cards</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('raw')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                      viewMode === 'raw'
-                        ? 'bg-white text-[#286b45] shadow-xs'
-                        : 'text-[#525a4e] hover:text-[#286b45]'
-                    }`}
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Plain Text</span>
-                  </button>
-                </div>
-
-                {/* Copy All */}
-                <button
-                  type="button"
-                  onClick={() => handleCopy(recipesText, 999)}
-                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-[#f0f3ee] hover:bg-[#e2e9df] text-[#286b45] rounded-lg border border-[#dce3d9] transition-colors"
-                  title="Copy full recipe text"
-                >
-                  {copiedIndex === 999 ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-green-600" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy All</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Results Display */}
-            <div id="results" className="mt-6">
-              {viewMode === 'raw' ? (
-                /* Raw text view preserving the exact pre-wrap styling from user's template */
-                <div className="bg-[#fafafa] p-5 rounded-xl border border-[#e8ebe3] font-mono text-sm leading-relaxed whitespace-pre-wrap text-[#20251f] selection:bg-[#286b45]/20">
-                  {recipesText}
-                </div>
-              ) : (
-                /* Card view for delightful interactive cooking */
-                <div className="space-y-6">
-                  {parsedRecipes.map((recipe, idx) => (
-                    <article
-                      key={recipe.id}
-                      className="border border-[#e6e8df] rounded-xl overflow-hidden bg-[#fafbfa] hover:border-[#c5d1bf] transition-all"
-                    >
-                      {/* Recipe Card Header */}
-                      <div className="p-5 sm:p-6 bg-white border-b border-[#eef1ea]">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <span className="w-6 h-6 rounded-full bg-[#edf3ed] text-[#286b45] text-xs font-bold flex items-center justify-center">
-                                {idx + 1}
-                              </span>
-                              <span className="text-xs font-semibold tracking-wider uppercase text-[#7a8376]">
-                                Recipe Option
-                              </span>
-                            </div>
-                            <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1a4a2f]">
-                              {recipe.title}
-                            </h3>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            {/* Read Aloud button */}
-                            <button
-                              type="button"
-                              onClick={() => handleToggleSpeak(recipe)}
-                              className={`p-2 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-colors ${
-                                isSpeaking && speakingRecipeId === recipe.id
-                                  ? 'bg-[#286b45] text-white border-[#286b45]'
-                                  : 'bg-white border-[#dce3d9] text-[#525a4e] hover:bg-[#edf3ed]'
-                              }`}
-                              title={
-                                isSpeaking && speakingRecipeId === recipe.id
-                                  ? 'Stop reading'
-                                  : 'Read aloud (hands-free cooking)'
-                              }
-                            >
-                              {isSpeaking && speakingRecipeId === recipe.id ? (
-                                <>
-                                  <VolumeX className="w-4 h-4" />
-                                  <span className="hidden sm:inline">Stop</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Volume2 className="w-4 h-4" />
-                                  <span className="hidden sm:inline">Listen</span>
-                                </>
-                              )}
-                            </button>
-
-                            {/* Copy single recipe */}
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(recipe.rawText, idx)}
-                              className="p-2 rounded-lg bg-white border border-[#dce3d9] text-[#525a4e] hover:bg-[#edf3ed] text-xs font-semibold flex items-center gap-1 transition-colors"
-                              title="Copy this recipe"
-                            >
-                              {copiedIndex === idx ? (
-                                <Check className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Metadata Pills: Prep Time, Cook Time, Servings */}
-                        {(recipe.prepTime || recipe.cookTime || recipe.servings) && (
-                          <div className="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-[#f4f6f1]">
-                            {recipe.prepTime && (
-                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
-                                <Clock className="w-3.5 h-3.5 text-[#286b45]" />
-                                <span>Prep: {recipe.prepTime}</span>
-                              </div>
-                            )}
-
-                            {recipe.cookTime && (
-                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
-                                <Flame className="w-3.5 h-3.5 text-amber-600" />
-                                <span>Cook: {recipe.cookTime}</span>
-                              </div>
-                            )}
-
-                            {recipe.servings && (
-                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
-                                <Users className="w-3.5 h-3.5 text-blue-600" />
-                                <span>Servings: {recipe.servings}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ingredients Checklist & Steps */}
-                      <div className="p-5 sm:p-6 space-y-6">
-                        {/* Ingredients */}
-                        {recipe.ingredients.length > 0 && (
-                          <div>
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="font-bold text-sm text-[#20251f] uppercase tracking-wider flex items-center gap-1.5">
-                                <span className="w-2 h-2 rounded-full bg-[#286b45]" />
-                                Ingredients
-                              </h4>
-                              <span className="text-xs text-[#7a8376]">
-                                Click items to check off
-                              </span>
-                            </div>
-
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {recipe.ingredients.map((ing, iIdx) => {
-                                const key = `${recipe.id}-ing-${iIdx}`;
-                                const isChecked = !!checkedIngredients[key];
-                                return (
-                                  <li
-                                    key={key}
-                                    onClick={() =>
-                                      setCheckedIngredients((prev) => ({
-                                        ...prev,
-                                        [key]: !prev[key],
-                                      }))
-                                    }
-                                    className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-xs sm:text-sm cursor-pointer transition-all ${
-                                      isChecked
-                                        ? 'bg-[#edf3ed]/60 border-[#d6e3d5] text-[#7a8376] line-through'
-                                        : 'bg-white border-[#e6e8df] text-[#20251f] hover:border-[#c5d1bf]'
-                                    }`}
-                                  >
-                                    <div
-                                      className={`w-4 h-4 mt-0.5 rounded flex items-center justify-center shrink-0 border ${
-                                        isChecked
-                                          ? 'bg-[#286b45] border-[#286b45] text-white'
-                                          : 'border-[#cdd2c7] bg-white'
-                                      }`}
-                                    >
-                                      {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                                    </div>
-                                    <span className="leading-tight">{ing}</span>
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Preparation Steps */}
-                        {recipe.steps.length > 0 && (
-                          <div>
-                            <h4 className="font-bold text-sm text-[#20251f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-[#286b45]" />
-                              Preparation Steps
-                            </h4>
-
-                            <ol className="space-y-3">
-                              {recipe.steps.map((step, sIdx) => {
-                                const key = `${recipe.id}-step-${sIdx}`;
-                                const isDone = !!checkedSteps[key];
-                                return (
-                                  <li
-                                    key={key}
-                                    onClick={() =>
-                                      setCheckedSteps((prev) => ({
-                                        ...prev,
-                                        [key]: !prev[key],
-                                      }))
-                                    }
-                                    className={`flex items-start gap-3 p-3 rounded-xl border text-sm transition-all cursor-pointer ${
-                                      isDone
-                                        ? 'bg-[#edf3ed]/50 border-[#d6e3d5] text-[#7a8376]'
-                                        : 'bg-white border-[#e6e8df] text-[#20251f] hover:border-[#c5d1bf]'
-                                    }`}
-                                  >
-                                    <span
-                                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                                        isDone
-                                          ? 'bg-[#286b45] text-white'
-                                          : 'bg-[#edf3ed] text-[#286b45]'
-                                      }`}
-                                    >
-                                      {isDone ? <Check className="w-3.5 h-3.5" /> : sIdx + 1}
-                                    </span>
-                                    <p
-                                      className={`leading-relaxed flex-1 ${
-                                        isDone ? 'line-through text-gray-400' : ''
-                                      }`}
-                                    >
-                                      {step}
-                                    </p>
-                                  </li>
-                                );
-                              })}
-                            </ol>
-                          </div>
-                        )}
-
-                        {/* Notes / Tips */}
-                        {recipe.notes && (
-                          <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs text-amber-900 leading-relaxed flex items-start gap-2">
-                            <Lightbulb className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-                            <div>
-                              <span className="font-bold">Chef's Tip: </span>
-                              {recipe.notes}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="mt-12 py-6 border-t border-[#e6e8df] bg-white text-center text-xs text-[#7a8376]">
-        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© {new Date().getFullYear()} Pantry Chef. Cook with what you have.</p>
-          <p className="flex items-center gap-1.5 text-[#525a4e]">
-            Powered by Google Gemini 3.8 Flash
-          </p>
-        </div>
-      </footer>
+    <!-- Floating Timer Popover -->
+    <div id="timer-popover" role="dialog" aria-label="Kitchen Timer">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Kitchen Timer</span>
+        <button id="close-timer-btn" type="button" style="background: none; color: #888; font-size: 16px; padding: 0;">×</button>
+      </div>
+      <div id="timer-display" class="timer-display">00:00</div>
+      <div class="timer-presets">
+        <button type="button" data-mins="3">+3m</button>
+        <button type="button" data-mins="5">+5m</button>
+        <button type="button" data-mins="10">+10m</button>
+        <button type="button" data-mins="15">+15m</button>
+      </div>
+      <div class="timer-controls">
+        <button id="timer-start-pause" type="button">Start</button>
+        <button id="timer-reset" type="button" class="secondary">Reset</button>
+      </div>
     </div>
-  );
-}
+
+    <!-- Footer -->
+    <footer>
+      <span>Cook delightfully with what you have.</span>
+      <span>Powered by Google Gemini</span>
+    </footer>
+
+    <!-- Single File Logic Script -->
+    <script>
+      (function () {
+        const ingredients = [];
+        let selectedPreference = "Any Style";
+        let rawRecipesText = "";
+        let currentView = "cards";
+
+        // Popular staples
+        const STAPLES = [
+          "Tomatoes", "Eggs", "Garlic", "Onion",
+          "Pasta", "Rice", "Olive oil", "Cheese",
+          "Chicken breast", "Potatoes", "Butter", "Bell pepper"
+        ];
+
+        // Cooking style tags
+        const PREFERENCES = [
+          "Any Style", "Quick (< 30 min)", "Vegetarian",
+          "High Protein", "Comfort Food", "One-Pot"
+        ];
+
+        // DOM elements
+        const form = document.querySelector("#ingredient-form");
+        const input = document.querySelector("#ingredient-input");
+        const list = document.querySelector("#ingredients");
+        const generateButton = document.querySelector("#generate-button");
+        const clearButton = document.querySelector("#clear-button");
+        const status = document.querySelector("#status");
+        const resultCard = document.querySelector("#result-card");
+        const rawResults = document.querySelector("#raw-results");
+        const cardsView = document.querySelector("#cards-view");
+        const ingredientCount = document.querySelector("#ingredient-count");
+        const staplesList = document.querySelector("#staples-list");
+        const preferencesList = document.querySelector("#preferences-list");
+        const viewCardsBtn = document.querySelector("#view-cards-btn");
+        const viewRawBtn = document.querySelector("#view-raw-btn");
+        const copyAllBtn = document.querySelector("#copy-all-btn");
+
+        // Timer elements
+        const toggleTimerBtn = document.querySelector("#toggle-timer-btn");
+        const timerPopover = document.querySelector("#timer-popover");
+        const closeTimerBtn = document.querySelector("#close-timer-btn");
+        const timerDisplay = document.querySelector("#timer-display");
+        const timerStartPause = document.querySelector("#timer-start-pause");
+        const timerReset = document.querySelector("#timer-reset");
+        const headerTimerLabel = document.querySelector("#header-timer-label");
+
+        let timerTotalSeconds = 0;
+        let timerRunning = false;
+        let timerInterval = null;
+
+        // Render Staples
+        function renderStaples() {
+          staplesList.replaceChildren();
+          STAPLES.forEach((item) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "staple-btn";
+            btn.textContent = "+ " + item;
+            const isAdded = ingredients.some((i) => i.toLowerCase() === item.toLowerCase());
+            if (isAdded) btn.disabled = true;
+
+            btn.addEventListener("click", () => {
+              addIngredient(item);
+            });
+            staplesList.appendChild(btn);
+          });
+        }
+
+        // Render Preference Pills
+        function renderPreferences() {
+          preferencesList.replaceChildren();
+          PREFERENCES.forEach((pref) => {
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "pref-pill" + (pref === selectedPreference ? " selected" : "");
+            pill.textContent = pref;
+            pill.addEventListener("click", () => {
+              selectedPreference = pref;
+              renderPreferences();
+            });
+            preferencesList.appendChild(pill);
+          });
+        }
+
+        // Render Ingredients Chips
+        function renderIngredients() {
+          list.replaceChildren();
+          ingredientCount.textContent = `${ingredients.length}/30 items`;
+
+          if (ingredients.length === 0) {
+            clearButton.style.display = "none";
+            const emptyNotice = document.createElement("div");
+            emptyNotice.className = "chips-empty";
+            emptyNotice.textContent = "No ingredients added yet. Type above or tap popular items!";
+            list.appendChild(emptyNotice);
+            renderStaples();
+            return;
+          }
+
+          clearButton.style.display = "inline-flex";
+
+          ingredients.forEach((ingredient, index) => {
+            const chip = document.createElement("span");
+            chip.className = "chip";
+
+            const name = document.createElement("span");
+            name.textContent = ingredient;
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.textContent = "×";
+            remove.setAttribute("aria-label", `Remove ${ingredient}`);
+            remove.addEventListener("click", () => {
+              ingredients.splice(index, 1);
+              renderIngredients();
+            });
+
+            chip.append(name, remove);
+            list.append(chip);
+          });
+
+          renderStaples();
+        }
+
+        // Add ingredient helper
+        function addIngredient(val) {
+          const value = val.trim();
+          if (!value) return;
+
+          if (ingredients.length >= 30) {
+            showStatus("You can add up to 30 ingredients.", "warn");
+            return;
+          }
+          if (ingredients.some((item) => item.toLowerCase() === value.toLowerCase())) {
+            showStatus("That ingredient is already on your list.", "warn");
+            return;
+          }
+
+          ingredients.push(value);
+          showStatus("");
+          renderIngredients();
+        }
+
+        function showStatus(msg, type = "info") {
+          status.replaceChildren();
+          if (!msg) return;
+
+          const box = document.createElement("div");
+          box.className = `status-box ${type}`;
+          box.textContent = msg;
+          status.appendChild(box);
+        }
+
+        // Handle Form Submit
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const value = input.value.trim();
+          if (!value) return;
+
+          addIngredient(value);
+          input.value = "";
+          input.focus();
+        });
+
+        // Clear all
+        clearButton.addEventListener("click", () => {
+          ingredients.length = 0;
+          renderIngredients();
+          showStatus("");
+        });
+
+        // Parse markdown recipes into structured cards
+        function parseRecipes(text) {
+          if (!text || !text.trim()) return [];
+          const sections = text.split(/(?=###?\s+\d+[\.\:]|###?\s+Recipe\s+\d+|###?\s+[A-Z][^\n]+(?:\n\s*[-*]|\n\s*\*\*Prep))/i);
+          const valid = sections.filter((s) => s.trim().length > 30);
+
+          if (valid.length >= 2) {
+            return valid.map((section, idx) => {
+              const lines = section.trim().split("\n");
+              const firstLine = lines[0].replace(/^#+\s*/, "").replace(/^\d+[\.\:\-]\s*/, "").replace(/\*\*/g, "").trim();
+              const title = firstLine || `Recipe ${idx + 1}`;
+
+              let prepTime = "";
+              let cookTime = "";
+              let servings = "";
+              const ingredientsList = [];
+              const stepsList = [];
+              let currentSec = "";
+
+              for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const prepM = line.match(/(?:prep(?:aration)?\s*time|prep):\s*([^\*,\n]+)/i);
+                if (prepM && !prepTime) prepTime = prepM[1].trim();
+
+                const cookM = line.match(/(?:cook(?:ing)?\s*time|cook):\s*([^\*,\n]+)/i);
+                if (cookM && !cookTime) cookTime = cookM[1].trim();
+
+                const servM = line.match(/(?:servings|yield|serves):\s*([^\*,\n]+)/i);
+                if (servM && !servings) servings = servM[1].trim();
+
+                const inlineIng = line.match(/^\*?\s*\*\*ingredients:?\*\*\s*(.+)/i);
+                if (inlineIng) {
+                  currentSec = "ing";
+                  const items = inlineIng[1].split(/,(?![^(]*\))/);
+                  items.forEach((it) => {
+                    const clean = it.trim().replace(/\.$/, "");
+                    if (clean) ingredientsList.push(clean);
+                  });
+                  continue;
+                } else if (/^#*\s*\**ingredients:?/i.test(line)) {
+                  currentSec = "ing";
+                  continue;
+                } else if (/^#*\s*\**(?:preparation|instructions|steps|directions|method):?/i.test(line)) {
+                  currentSec = "step";
+                  continue;
+                }
+
+                if (currentSec === "ing") {
+                  const clean = line.replace(/^[-*•]\s*/, "").replace(/^\d+[\.\)]\s*/, "").trim();
+                  if (clean && !clean.startsWith("**Prep") && !clean.startsWith("**Cook")) {
+                    ingredientsList.push(clean);
+                  }
+                } else if (currentSec === "step") {
+                  const clean = line.replace(/^\d+[\.\)]\s*/, "").replace(/^[-*•]\s*/, "").trim();
+                  if (clean) stepsList.push(clean);
+                }
+              }
+
+              return {
+                title,
+                prepTime,
+                cookTime,
+                servings,
+                ingredients: ingredientsList,
+                steps: stepsList,
+                raw: section.trim()
+              };
+            });
+          }
+
+          return [{ title: "Suggested Recipes", ingredients: [], steps: [], raw: text.trim() }];
+        }
+
+        // Render recipe cards in UI
+        function renderCards(recipes) {
+          cardsView.replaceChildren();
+
+          recipes.forEach((rec, idx) => {
+            const card = document.createElement("article");
+            card.className = "recipe-card-item";
+
+            // Header
+            const header = document.createElement("div");
+            header.className = "recipe-header";
+
+            const titleArea = document.createElement("div");
+            const badge = document.createElement("span");
+            badge.className = "recipe-num-badge";
+            badge.textContent = String(idx + 1);
+
+            const title = document.createElement("h3");
+            title.className = "recipe-title";
+            title.append(badge, document.createTextNode(rec.title));
+            titleArea.appendChild(title);
+
+            // Metadata pills
+            if (rec.prepTime || rec.cookTime || rec.servings) {
+              const metaDiv = document.createElement("div");
+              metaDiv.className = "meta-pills";
+              if (rec.prepTime) {
+                const p = document.createElement("span");
+                p.className = "meta-pill";
+                p.textContent = "⏱️ Prep: " + rec.prepTime;
+                metaDiv.appendChild(p);
+              }
+              if (rec.cookTime) {
+                const c = document.createElement("span");
+                c.className = "meta-pill";
+                c.textContent = "🔥 Cook: " + rec.cookTime;
+                metaDiv.appendChild(c);
+              }
+              if (rec.servings) {
+                const s = document.createElement("span");
+                s.className = "meta-pill";
+                s.textContent = "👥 Serves: " + rec.servings;
+                metaDiv.appendChild(s);
+              }
+              titleArea.appendChild(metaDiv);
+            }
+
+            // Quick actions
+            const actDiv = document.createElement("div");
+            actDiv.style.display = "flex";
+            actDiv.style.gap = "6px";
+
+            // Read aloud
+            if ("speechSynthesis" in window) {
+              const speakBtn = document.createElement("button");
+              speakBtn.type = "button";
+              speakBtn.className = "icon-button";
+              speakBtn.textContent = "🔊 Listen";
+              speakBtn.addEventListener("click", () => {
+                window.speechSynthesis.cancel();
+                const text = `${rec.title}. Ingredients: ${rec.ingredients.join(", ")}. Steps: ${rec.steps.join(". ")}`;
+                const utter = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utter);
+              });
+              actDiv.appendChild(speakBtn);
+            }
+
+            // Copy single
+            const copyBtn = document.createElement("button");
+            copyBtn.type = "button";
+            copyBtn.className = "icon-button";
+            copyBtn.textContent = "📋 Copy";
+            copyBtn.addEventListener("click", () => {
+              navigator.clipboard.writeText(rec.raw);
+              copyBtn.textContent = "✓ Copied!";
+              setTimeout(() => { copyBtn.textContent = "📋 Copy"; }, 1800);
+            });
+            actDiv.appendChild(copyBtn);
+
+            header.append(titleArea, actDiv);
+            card.appendChild(header);
+
+            // Body
+            const body = document.createElement("div");
+            body.className = "recipe-body";
+
+            // Ingredients
+            if (rec.ingredients.length > 0) {
+              const ingH = document.createElement("div");
+              ingH.className = "section-heading";
+              ingH.textContent = "Ingredients (Click to check off)";
+              body.appendChild(ingH);
+
+              const ingGrid = document.createElement("div");
+              ingGrid.className = "ingredients-grid";
+              rec.ingredients.forEach((ing) => {
+                const it = document.createElement("div");
+                it.className = "ingredient-check-item";
+                it.textContent = ing;
+                it.addEventListener("click", () => {
+                  it.classList.toggle("done");
+                });
+                ingGrid.appendChild(it);
+              });
+              body.appendChild(ingGrid);
+            }
+
+            // Steps
+            if (rec.steps.length > 0) {
+              const stpH = document.createElement("div");
+              stpH.className = "section-heading";
+              stpH.textContent = "Preparation Steps";
+              body.appendChild(stpH);
+
+              const stpList = document.createElement("div");
+              stpList.className = "steps-list";
+              rec.steps.forEach((stp, sIdx) => {
+                const sEl = document.createElement("div");
+                sEl.className = "step-item";
+
+                const num = document.createElement("span");
+                num.className = "step-num";
+                num.textContent = String(sIdx + 1);
+
+                const txt = document.createElement("span");
+                txt.textContent = stp;
+
+                sEl.append(num, txt);
+                sEl.addEventListener("click", () => {
+                  sEl.classList.toggle("done");
+                });
+                stpList.appendChild(sEl);
+              });
+              body.appendChild(stpList);
+            }
+
+            card.appendChild(body);
+            cardsView.appendChild(card);
+          });
+        }
+
+        // View Toggles
+        viewCardsBtn.addEventListener("click", () => {
+          currentView = "cards";
+          viewCardsBtn.classList.add("active");
+          viewRawBtn.classList.remove("active");
+          cardsView.style.display = "block";
+          rawResults.style.display = "none";
+        });
+
+        viewRawBtn.addEventListener("click", () => {
+          currentView = "raw";
+          viewRawBtn.classList.add("active");
+          viewCardsBtn.classList.remove("active");
+          cardsView.style.display = "none";
+          rawResults.style.display = "block";
+        });
+
+        // Copy All
+        copyAllBtn.addEventListener("click", () => {
+          if (!rawRecipesText) return;
+          navigator.clipboard.writeText(rawRecipesText);
+          copyAllBtn.textContent = "✓ Copied!";
+          setTimeout(() => { copyAllBtn.textContent = "Copy All"; }, 2000);
+        });
+
+        // Generate button handler
+        generateButton.addEventListener("click", async () => {
+          if (!ingredients.length) {
+            showStatus("Add at least one ingredient first.", "warn");
+            return;
+          }
+
+          generateButton.disabled = true;
+          generateButton.replaceChildren();
+
+          const spinner = document.createElement("span");
+          spinner.className = "spinner";
+          const text = document.createElement("span");
+          text.textContent = "Creating recipe ideas…";
+          generateButton.append(spinner, text);
+
+          showStatus("Contacting Gemini Chef to craft your recipes…", "info");
+          resultCard.hidden = true;
+
+          try {
+            const response = await fetch("/api/recipes", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ingredients,
+                preferences: selectedPreference !== "Any Style" ? selectedPreference : undefined
+              })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(data.error || "Request failed.");
+            }
+
+            rawRecipesText = data.recipes || "No recipes were returned.";
+            rawResults.textContent = rawRecipesText;
+
+            const parsed = parseRecipes(rawRecipesText);
+            renderCards(parsed);
+
+            resultCard.hidden = false;
+            showStatus("");
+
+            resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+          } catch (error) {
+            showStatus(error.message || "Something went wrong. Please try again.", "error");
+          } finally {
+            generateButton.disabled = false;
+            generateButton.replaceChildren();
+            const btnSpan = document.createElement("span");
+            btnSpan.textContent = "Suggest recipes";
+            generateButton.appendChild(btnSpan);
+          }
+        });
+
+        // Kitchen Timer functionality
+        function updateTimerDisplay() {
+          const m = Math.floor(timerTotalSeconds / 60);
+          const s = timerTotalSeconds % 60;
+          const formatted = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+          timerDisplay.textContent = formatted;
+          headerTimerLabel.textContent = timerTotalSeconds > 0 ? formatted : "Timer";
+        }
+
+        toggleTimerBtn.addEventListener("click", () => {
+          const isShown = timerPopover.style.display === "block";
+          timerPopover.style.display = isShown ? "none" : "block";
+        });
+
+        closeTimerBtn.addEventListener("click", () => {
+          timerPopover.style.display = "none";
+        });
+
+        // Presets
+        document.querySelectorAll(".timer-presets button").forEach((b) => {
+          b.addEventListener("click", () => {
+            const mins = parseInt(b.getAttribute("data-mins"), 10) || 5;
+            timerTotalSeconds = mins * 60;
+            updateTimerDisplay();
+          });
+        });
+
+        timerStartPause.addEventListener("click", () => {
+          if (timerRunning) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            timerStartPause.textContent = "Resume";
+            toggleTimerBtn.classList.remove("active");
+          } else {
+            if (timerTotalSeconds <= 0) timerTotalSeconds = 5 * 60;
+            timerRunning = true;
+            timerStartPause.textContent = "Pause";
+            toggleTimerBtn.classList.add("active");
+            timerInterval = setInterval(() => {
+              if (timerTotalSeconds <= 1) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                timerTotalSeconds = 0;
+                updateTimerDisplay();
+                timerStartPause.textContent = "Start";
+                toggleTimerBtn.classList.remove("active");
+                alert("⏰ Cooking Timer Finished!");
+                return;
+              }
+              timerTotalSeconds--;
+              updateTimerDisplay();
+            }, 1000);
+          }
+        });
+
+        timerReset.addEventListener("click", () => {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          timerTotalSeconds = 0;
+          updateTimerDisplay();
+          timerStartPause.textContent = "Start";
+          toggleTimerBtn.classList.remove("active");
+        });
+
+        // Init
+        renderIngredients();
+        renderPreferences();
+      })();
+    </script>
+  </body>
+</html>
