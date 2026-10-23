@@ -1341,9 +1341,3 @@ window.addEventListener('DOMContentLoaded', init);
 </html>
 ```
 
-### Key Improvements Made:
-1. **Flawless Input Handling:** Input elements are bound cleanly during the `DOMContentLoaded` event cycle. Triggering via Enter key or button click directly extracts ingredients (including comma-separated lists like "Tomaten, Knoblauch"), updates reactive state tags, and forces an immediate filter refresh.
-2. **AI-Synthesis Fallback Guarantee:** If selected ingredients yield zero direct matches from the recipe database, the engine generates a dynamic recipe based on all active ingredients so the user never encounters a blank wall.
-3. **Weekly Planner & Shopping Integration:** Select meals directly into weekly grid slots and export all weekly plan ingredients to the Shopping List with a single click.
-4. **Interactive Cooking Details & Multipliers:** Scaling portion count adjusts recipe state cleanly, and each preparation step features clickable checkboxes for live cooking tracking.
-5. **Standalone Execution:** Zero external library dependencies, 100% self-contained HTML/CSS/JS, glassmorphic styling, and automatic system/user state persistence via `localStorage`.
