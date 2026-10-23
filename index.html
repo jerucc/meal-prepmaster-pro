@@ -1,1201 +1,971 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr" class="dark">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal PrepMaster Deluxe - Your Intelligent Kitchen Assistant</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            900: '#14532d',
-                        },
-                        accent: {
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', 'Tajawal', sans-serif; }
-        .glow-emerald { box-shadow: 0 0 25px -5px rgba(34, 197, 94, 0.4); }
-        .glow-purple { box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.4); }
-        /* Custom scrollbars */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.5); }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meal PrepMaster Deluxe</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --orange: #f97316;
+  --orange-hover: #ea580c;
+  --orange-light: #fff7ed;
+  --line: #e2e8f0;
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --ink: #f8fafc;
+  --muted: #94a3b8;
+  --orange: #fb923c;
+  --orange-hover: #f97316;
+  --orange-light: rgba(251, 146, 60, 0.15);
+  --line: #334155;
+  --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+[dir="rtl"] { direction: rtl; text-align: right; }
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background 0.2s, color 0.2s;
+  padding-bottom: 95px;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; border: 0; }
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.top {
+  max-width: 1100px;
+  margin: auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-size: 19px;
+  font-weight: 850;
+  color: var(--orange);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-icon {
+  background: var(--orange);
+  color: white;
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+.brand small {
+  font-size: 10px;
+  background: #0f172a;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+/* Bottom Navigation Bar (Active across all screens) */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--card) 95%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-around;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+}
+.bottom-btn {
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.bottom-btn .icon { font-size: 18px; }
+.bottom-btn.active {
+  color: var(--orange);
+  background: var(--orange-light);
+}
+
+main {
+  max-width: 1100px;
+  margin: 16px auto;
+  padding: 0 16px;
+}
+.tab { display: none; }
+.tab.active { display: block; }
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.inputrow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.inputrow input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.primary-btn {
+  background: var(--orange);
+  color: white;
+  font-weight: 800;
+  padding: 12px 20px;
+  border-radius: 14px;
+  width: 100%;
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+  transition: transform 0.1s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.primary-btn:active { transform: scale(0.98); }
+.primary-btn:hover { background: var(--orange-hover); }
+
+.iconbtn {
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+}
+.iconbtn:hover { background: var(--orange-light); color: var(--orange); }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.chip {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip.selected {
+  background: var(--orange);
+  color: white;
+  border-color: var(--orange);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.filters label, .field label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+input, select, textarea {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.recipe-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.recipe-card img { width: 100%; height: 160px; object-fit: cover; }
+.recipe-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+.recipe-body h3 { margin: 0 0 6px; font-size: 17px; }
+.recipe-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+.recipe-ings { font-size: 13px; margin-bottom: 14px; flex: 1; color: var(--ink); }
+
+.daygrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.slot {
+  border: 1px dashed var(--line);
+  padding: 10px;
+  border-radius: 12px;
+  margin: 8px 0;
+  background: var(--bg);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal.open { display: flex; }
+.modalbox {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 24px;
+  width: min(550px, 100%);
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.toast {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 14px;
+  z-index: 60;
+  box-shadow: var(--shadow);
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .toast { right: 16px; left: 16px; text-align: center; }
+}
+</style>
 </head>
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors duration-300 flex flex-col selection:bg-brand-500 selection:text-white">
+<body>
 
-    <!-- TOP NAVIGATION -->
-    <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <!-- Brand Logo & Subtitle -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-accent-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-brand-500/30 transform hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 via-emerald-500 to-accent-500 bg-clip-text text-transparent">
-                        Meal PrepMaster Deluxe
-                    </h1>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium" data-i18n="subtitle">
-                        Your Intelligent Kitchen Assistant
-                    </p>
-                </div>
-            </div>
+<header>
+  <div class="top">
+    <div class="brand">
+      <span class="brand-icon">🍴</span> Meal PrepMaster <small>DELUXE</small>
+    </div>
+    <div class="row">
+      <select id="langSelect" onchange="changeLanguage(this.value)" style="width: auto; padding: 6px 10px; font-size: 12px; font-weight: 700;">
+        <option value="en">EN</option>
+        <option value="de" selected>DE</option>
+        <option value="fr">FR</option>
+        <option value="it">IT</option>
+        <option value="tr">TR</option>
+        <option value="ar">AR</option>
+      </select>
+      <button class="iconbtn" onclick="openTimer()" title="Timer">⏱</button>
+      <button class="iconbtn" onclick="toggleTheme()" title="Theme">🌙</button>
+    </div>
+  </div>
+</header>
 
-            <!-- Controls (Language Selector, Dark Mode, Quick Sound Timer Trigger) -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <!-- Language Selector -->
-                <div class="relative inline-block text-left">
-                    <select id="langSelect" onchange="changeLanguage(this.value)" class="bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-semibold py-1.5 px-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer shadow-sm">
-                        <option value="de">🇩🇪 DE</option>
-                        <option value="en">🇬🇧 EN</option>
-                        <option value="fr">🇫🇷 FR</option>
-                        <option value="it">🇮🇹 IT</option>
-                        <option value="tr">🇹🇷 TR</option>
-                        <option value="ar">🇸🇦 AR</option>
-                    </select>
-                </div>
+<main>
+  <!-- RECIPES TAB -->
+  <section class="tab active" id="tab-recipes">
+    <div class="card">
+      <div style="font-size: 11px; font-weight: 800; color: var(--orange); letter-spacing: 0.5px;" data-t="subtitle">YOUR INTELLIGENT KITCHEN ASSISTANT</div>
+      <h2 style="margin-top: 4px;" data-t="heroTitle">What would you like to cook today?</h2>
+      
+      <div class="inputrow">
+        <input id="ingredientInput" placeholder="Enter ingredients (e.g. Pasta, Tomatoes)..." onkeydown="if(event.key==='Enter')addIngredientFromInput()">
+        <button class="iconbtn" onclick="startVoiceInput()" title="Voice Command">🎙️</button>
+        <button class="iconbtn" onclick="document.getElementById('photoInput').click()" title="Scan Photo">📷</button>
+        <input id="photoInput" type="file" accept="image/*" hidden onchange="scanPhoto(event)">
+      </div>
 
-                <!-- Theme Toggle -->
-                <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all border border-gray-200 dark:border-slate-700">
-                    <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
-                </button>
+      <div style="margin-top: 14px; font-size: 12px; font-weight: 700; color: var(--muted);" data-t="quickSelect">QUICK SELECT INGREDIENTS:</div>
+      <div class="chips" id="quickTags"></div>
 
-                <!-- Kitchen Timer Toggle -->
-                <button onclick="toggleTimerModal()" class="relative p-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all border border-gray-200 dark:border-slate-700" title="Kitchen Timer">
-                    <i class="fa-solid fa-stopwatch text-base"></i>
-                    <span id="timerBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">!</span>
-                </button>
-            </div>
-        </div>
+      <button class="primary-btn" style="margin-top: 16px;" onclick="generateRecipesAction()">
+        ✨ <span data-t="generateBtn">Generate Recipes</span> (<span id="selectedCount">0</span>)
+      </button>
 
-        <!-- MAIN TABS NAVIGATION -->
-        <nav class="border-t border-gray-200/60 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4">
-            <div class="max-w-7xl mx-auto flex space-x-2 sm:space-x-8 overflow-x-auto no-scrollbar py-2" id="navTabs">
-                <button onclick="switchTab('studio')" id="tab-studio" class="tab-btn px-4 py-2 text-sm font-semibold rounded-xl flex items-center gap-2 whitespace-nowrap transition-all bg-brand-500 text-white shadow-md shadow-brand-500/20">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span data-i18n="navStudio">Recipe Studio</span>
-                </button>
-                <button onclick="switchTab('planner')" id="tab-planner" class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    <span data-i18n="navPlanner">Meal Planner</span>
-                </button>
-                <button onclick="switchTab('pantry')" id="tab-pantry" class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all">
-                    <i class="fa-solid fa-boxes-packing"></i>
-                    <span data-i18n="navPantry">Pantry</span>
-                </button>
-                <button onclick="switchTab('shopping')" id="tab-shopping" class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span data-i18n="navShopping">Shopping List</span>
-                </button>
-                <button onclick="switchTab('community')" id="tab-community" class="tab-btn px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all">
-                    <i class="fa-solid fa-users-rays"></i>
-                    <span data-i18n="navCommunity">Community</span>
-                </button>
-            </div>
-        </nav>
-    </header>
-
-    <!-- MAIN APP CONTENT HUB -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-
-        <!-- TAB 1: RECIPE STUDIO / GENERATOR -->
-        <section id="view-studio" class="space-y-6">
-            <!-- Hero Prompt Card -->
-            <div class="bg-gradient-to-br from-brand-500/10 via-accent-500/5 to-transparent dark:from-slate-800 dark:to-slate-800/50 p-6 sm:p-8 rounded-3xl border border-brand-500/20 shadow-xl relative overflow-hidden">
-                <div class="max-w-2xl">
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2" data-i18n="studioTitle">
-                        Smart Recipe Synthesis
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base mb-6" data-i18n="studioSubtitle">
-                        Enter ingredients, use voice input or scan your fridge photo to generate customized gourmet meals & desserts.
-                    </p>
-
-                    <!-- Input Bar with Voice & Scan -->
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <div class="relative flex-grow">
-                            <input type="text" id="ingredientInput" onkeypress="if(event.key==='Enter') addIngredientFromInput()" placeholder="e.g. Tomato, Pasta, Cheese, Milk..." class="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-2xl py-3.5 pl-4 pr-24 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white shadow-inner">
-                            <div class="absolute inset-y-0 right-2 flex items-center gap-1">
-                                <!-- Voice Input Button -->
-                                <button onclick="startVoiceRecognition()" id="micBtn" title="Voice Input" class="p-2 text-gray-400 hover:text-brand-500 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-microphone text-base"></i>
-                                </button>
-                                <!-- Camera Photo Scan Simulator -->
-                                <button onclick="simulatePhotoScan()" title="Scan Fridge Photo" class="p-2 text-gray-400 hover:text-accent-500 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-camera text-base"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button onclick="addIngredientFromInput()" class="bg-gray-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white font-semibold px-6 py-3.5 rounded-2xl text-sm transition-all shadow-md shrink-0 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-plus"></i>
-                            <span data-i18n="addBtn">Add</span>
-                        </button>
-                    </div>
-
-                    <!-- Selected Ingredients Tag Cloud -->
-                    <div class="mt-4 flex flex-wrap gap-2 items-center" id="activeIngredients">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <!-- Generate Trigger -->
-                    <div class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200/50 dark:border-slate-700/50 pt-4">
-                        <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-500"></i> <span data-i18n="aiPowered">AI Synthesis Ready</span></span>
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-leaf text-brand-500"></i> <span data-i18n="zeroWaste">Zero-Waste Engine</span></span>
-                        </div>
-                        <button onclick="generateRecipes()" class="w-full sm:w-auto bg-gradient-to-r from-brand-500 to-accent-600 hover:from-brand-600 hover:to-accent-700 text-white font-bold px-8 py-3.5 rounded-2xl text-sm shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all transform active:scale-95 flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            <span data-i18n="generateRecipesBtn">Synthesize Recipes</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recipe Results Container -->
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-plate-wheat text-brand-500"></i>
-                        <span data-i18n="suggestedRecipes">Synthesized Suggestions</span>
-                    </h3>
-                    <span id="recipeCount" class="text-xs bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 px-3 py-1 rounded-full font-bold">0 Recipes</span>
-                </div>
-
-                <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Recipe Cards injected here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 2: WEEKLY MEAL PLANNER -->
-        <section id="view-planner" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="plannerTitle">Weekly Meal Preparation Schedule</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="plannerSubtitle">Organize your weekly routines and auto-generate batch shopping lists.</p>
-                </div>
-                <button onclick="exportPlanToShoppingList()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-5 py-2.5 rounded-2xl text-sm shadow-md transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-cart-arrow-down"></i>
-                    <span data-i18n="exportShopping">Export to Shopping List</span>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-7 gap-4" id="weeklyGrid">
-                <!-- 7 Days Grid rendered by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 3: PANTRY TRACKER -->
-        <section id="view-pantry" class="hidden space-y-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="pantryTitle">Kitchen Pantry & Inventory</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="pantrySubtitle">Track available items, quantities, and expiration statuses.</p>
-                </div>
-                <button onclick="openAddPantryModal()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-5 py-2.5 rounded-2xl text-sm shadow-md transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span data-i18n="addPantryItem">Add Item</span>
-                </button>
-            </div>
-
-            <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase font-bold border-b border-gray-200 dark:border-slate-700">
-                                <th class="p-4" data-i18n="itemName">Item</th>
-                                <th class="p-4" data-i18n="category">Category</th>
-                                <th class="p-4" data-i18n="quantity">Quantity</th>
-                                <th class="p-4" data-i18n="status">Expiry Status</th>
-                                <th class="p-4 text-right" data-i18n="actions">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pantryTableBody" class="divide-y divide-gray-100 dark:divide-slate-700/50 text-sm">
-                            <!-- Pantry items rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: DYNAMIC SHOPPING LIST -->
-        <section id="view-shopping" class="hidden space-y-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="shoppingTitle">Smart Shopping List</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="shoppingSubtitle">Auto-categorized groceries synchronized with your prep plans.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="clearCompletedShopping()" class="bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-bold px-4 py-2.5 rounded-2xl text-sm transition-all">
-                        <span data-i18n="clearDone">Clear Checked</span>
-                    </button>
-                    <button onclick="addCustomShoppingItemPrompt()" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-5 py-2.5 rounded-2xl text-sm shadow-md transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span data-i18n="addItem">Add Item</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="shoppingListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Shopping Categories Rendered Here -->
-            </div>
-        </section>
-
-        <!-- TAB 5: COMMUNITY HUB -->
-        <section id="view-community" class="hidden space-y-6">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white" data-i18n="communityTitle">Chef Community & Prep Share</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400" data-i18n="communitySubtitle">Discover routines, share kitchen wisdom, and inspect top meal preps.</p>
-                </div>
-                <button onclick="shareRecipeModal()" class="bg-accent-500 hover:bg-accent-600 text-white font-bold px-5 py-2.5 rounded-2xl text-sm shadow-md transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes"></i>
-                    <span data-i18n="sharePrep">Share Routine</span>
-                </button>
-            </div>
-
-            <div id="communityFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Community posts rendered by JS -->
-            </div>
-        </section>
-
-    </main>
-
-    <!-- STEP-BY-STEP COOKING MODAL -->
-    <div id="cookingModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 relative">
-            <button onclick="closeCookingModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div id="modalContent">
-                <!-- Dynamically filled with interactive recipe, serving calculator, step checklists -->
-            </div>
-        </div>
+      <div class="filters">
+        <label><span data-t="dietLabel">Diet</span>
+          <select id="diet" onchange="renderRecipes()">
+            <option value="all" data-t="optAllDiets">All Diets</option>
+            <option value="Vegetarisch" data-t="optVeg">Vegetarian</option>
+            <option value="Vegan" data-t="optVegan">Vegan</option>
+            <option value="Glutenfrei" data-t="optGluten">Gluten-Free</option>
+            <option value="Low-Carb" data-t="optLowCarb">Low-Carb</option>
+          </select>
+        </label>
+        <label><span data-t="timeLabel">Max Time</span>
+          <select id="time" onchange="renderRecipes()">
+            <option value="all" data-t="optAnyTime">Any Time</option>
+            <option value="15">15 Min</option>
+            <option value="30">30 Min</option>
+            <option value="45">45 Min</option>
+          </select>
+        </label>
+        <label><span data-t="catLabel">Category</span>
+          <select id="cuisine" onchange="renderRecipes()">
+            <option value="all" data-t="optAllCats">All Categories</option>
+            <option value="Italienisch">Italian</option>
+            <option value="Mediterran">Mediterranean</option>
+            <option value="Asiatisch">Asian</option>
+            <option value="Klassisch">Classic</option>
+            <option value="Nachtisch">🍨 Desserts</option>
+          </select>
+        </label>
+      </div>
     </div>
 
-    <!-- KITCHEN TIMER MODAL -->
-    <div id="timerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-gray-200 dark:border-slate-800 shadow-2xl p-6 relative text-center">
-            <button onclick="toggleTimerModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-stopwatch text-brand-500"></i>
-                <span data-i18n="timerTitle">Kitchen Assistant Timer</span>
-            </h3>
+    <div class="row" style="justify-content:space-between; margin-bottom: 14px;">
+      <h2 style="margin:0;"><span data-t="recipesTitle">Recipes & Desserts</span> (<span id="recipeCount">0</span>)</h2>
+      <button class="iconbtn" onclick="openRecipeForm()" data-t="addCustomRecipe">＋ Custom Recipe</button>
+    </div>
+    
+    <div class="grid" id="recipes"></div>
+  </section>
 
-            <div class="text-5xl font-black font-mono my-6 text-brand-600 dark:text-brand-400 tracking-wider" id="timerDisplay">
-                05:00
-            </div>
-
-            <div class="flex items-center justify-center gap-3 mb-6">
-                <button onclick="adjustTimer(60)" class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">+1 Min</button>
-                <button onclick="adjustTimer(-60)" class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">-1 Min</button>
-                <button onclick="adjustTimer(300)" class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">+5 Min</button>
-            </div>
-
-            <div class="flex gap-3">
-                <button id="startTimerBtn" onclick="toggleTimerRunning()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl transition-all">Start</button>
-                <button onclick="resetTimer()" class="bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-bold px-5 py-3 rounded-2xl">Reset</button>
-            </div>
+  <!-- WEEKLY PLANNER TAB -->
+  <section class="tab" id="tab-weekly">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <h2 style="margin:0;" data-t="plannerTitle">Weekly Meal Planner</h2>
+          <div style="color:var(--muted); font-size:13px;" data-t="plannerDesc">Organize your weekly meals.</div>
         </div>
-    </div>
-
-    <!-- PANTRY EDIT MODAL -->
-    <div id="pantryModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-gray-200 dark:border-slate-800 shadow-2xl p-6 relative">
-            <button onclick="closePantryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4" data-i18n="addPantryItem">Add Pantry Item</h3>
-            
-            <form onsubmit="savePantryItem(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1" data-i18n="itemName">Item Name</label>
-                    <input type="text" id="pantryInputName" required class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1" data-i18n="category">Category</label>
-                        <select id="pantryInputCat" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
-                            <option value="Produce">Produce</option>
-                            <option value="Dairy">Dairy & Eggs</option>
-                            <option value="Meat">Meat & Seafood</option>
-                            <option value="Pantry">Dry Pantry</option>
-                            <option value="Spices">Spices & Sauces</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1" data-i18n="quantity">Quantity</label>
-                        <input type="text" id="pantryInputQty" required placeholder="e.g. 500g, 2 pcs" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1" data-i18n="status">Status</label>
-                    <select id="pantryInputStatus" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
-                        <option value="Fresh">Fresh</option>
-                        <option value="Expiring Soon">Expiring Soon</option>
-                        <option value="Low Stock">Low Stock</option>
-                    </select>
-                </div>
-                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl transition-all shadow-md mt-2" data-i18n="save">Save Item</button>
-            </form>
+        <div class="row">
+          <button class="iconbtn" onclick="clearPlan()" data-t="clear">Clear</button>
+          <button class="primary-btn" style="width:auto; padding:8px 14px; font-size:13px;" onclick="planToShopping()" data-t="toShopping">🛒 To Shopping List</button>
         </div>
+      </div>
     </div>
+    <div class="daygrid" id="week"></div>
+  </section>
 
-    <!-- NOTIFICATION TOAST HUB -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white dark:bg-slate-800 dark:text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-700 pointer-events-none">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-brand-400 text-lg"></i>
-        <span id="toastMsg" class="text-sm font-semibold">Notification</span>
+  <!-- SHOPPING LIST TAB -->
+  <section class="tab" id="tab-shopping">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; margin-bottom: 12px;">
+        <h2 style="margin:0;" data-t="shoppingTitle">Shopping List</h2>
+        <div class="row">
+          <button class="iconbtn" onclick="copyList()" data-t="copy">Copy</button>
+          <button class="iconbtn" style="color:red;" onclick="clearChecked()" data-t="clearDone">Clear Done</button>
+        </div>
+      </div>
+      <div class="row">
+        <input id="shopInput" placeholder="Add item..." style="flex:1" onkeydown="if(event.key==='Enter')addShop()">
+        <select id="shopCat" style="width:auto;">
+          <option data-t="catVeg">Produce</option>
+          <option data-t="catDairy">Dairy</option>
+          <option data-t="catPantry">Pantry</option>
+          <option data-t="catSpices">Spices</option>
+          <option data-t="catDessert">Dessert</option>
+          <option data-t="catOther">Other</option>
+        </select>
+        <button class="primary-btn" style="width:auto;" onclick="addShop()">＋</button>
+      </div>
+      <div id="shoppingList" style="margin-top:16px;"></div>
     </div>
+  </section>
 
-    <!-- MAIN JAVASCRIPT LOGIC ENGINE -->
-    <script>
-        /* -------------------------------------------------------------------
-           1. TRANSLATION & DICTIONARY ENGINE (DE, EN, FR, IT, TR, AR)
-        ------------------------------------------------------------------- */
-        const translations = {
-            de: {
-                subtitle: "Ihr intelligenter Küchenassistent",
-                navStudio: "Rezept-Studio",
-                navPlanner: "Wochenplaner",
-                navPantry: "Vorratskammer",
-                navShopping: "Einkaufsliste",
-                navCommunity: "Community",
-                studioTitle: "Intelligente Rezept-Synthese",
-                studioSubtitle: "Zutaten eingeben, Sprachbefehl nutzen oder Foto scannen für Gourmet-Gerichte & Desserts.",
-                addBtn: "Hinzufügen",
-                aiPowered: "KI-Synthese Bereit",
-                zeroWaste: "Zero-Waste Motor",
-                generateRecipesBtn: "Rezepte Synthetisieren",
-                suggestedRecipes: "Synthetisierte Vorschläge",
-                plannerTitle: "Wöchentlicher Meal-Prep Planer",
-                plannerSubtitle: "Organisieren Sie Ihre Woche und erstellen Sie automatische Einkaufslisten.",
-                exportShopping: "In Einkaufsliste Exportieren",
-                pantryTitle: "Vorratskammer & Inventar",
-                pantrySubtitle: "Überblicken Sie Vorräte, Mengen und Mindesthaltbarkeit.",
-                addPantryItem: "Artikel Hinzufügen",
-                itemName: "Artikel",
-                category: "Kategorie",
-                quantity: "Menge",
-                status: "Status",
-                actions: "Aktionen",
-                shoppingTitle: "Smart Einkaufsliste",
-                shoppingSubtitle: "Automatisch kategorisierte Zutaten für Ihren Meal Prep.",
-                clearDone: "Erledigte Löschen",
-                addItem: "Hinzufügen",
-                communityTitle: "Community & Prep-Austausch",
-                communitySubtitle: "Entdecken Sie neue Rezepte und teilen Sie Ihre Meal-Prep Routine.",
-                sharePrep: "Routine Teilen",
-                timerTitle: "Küchen-Timer Assistent",
-                save: "Speichern"
-            },
-            en: {
-                subtitle: "Your Intelligent Kitchen Assistant",
-                navStudio: "Recipe Studio",
-                navPlanner: "Meal Planner",
-                navPantry: "Pantry",
-                navShopping: "Shopping List",
-                navCommunity: "Community",
-                studioTitle: "Smart Recipe Synthesis",
-                studioSubtitle: "Enter ingredients, use voice input or scan your fridge photo to generate gourmet meals & desserts.",
-                addBtn: "Add",
-                aiPowered: "AI Synthesis Ready",
-                zeroWaste: "Zero-Waste Engine",
-                generateRecipesBtn: "Synthesize Recipes",
-                suggestedRecipes: "Synthesized Suggestions",
-                plannerTitle: "Weekly Meal Preparation Schedule",
-                plannerSubtitle: "Organize your weekly routines and auto-generate batch shopping lists.",
-                exportShopping: "Export to Shopping List",
-                pantryTitle: "Kitchen Pantry & Inventory",
-                pantrySubtitle: "Track available items, quantities, and expiration statuses.",
-                addPantryItem: "Add Item",
-                itemName: "Item",
-                category: "Category",
-                quantity: "Quantity",
-                status: "Expiry Status",
-                actions: "Actions",
-                shoppingTitle: "Smart Shopping List",
-                shoppingSubtitle: "Auto-categorized groceries synchronized with your prep plans.",
-                clearDone: "Clear Checked",
-                addItem: "Add Item",
-                communityTitle: "Chef Community & Prep Share",
-                communitySubtitle: "Discover routines, share kitchen wisdom, and inspect top meal preps.",
-                sharePrep: "Share Routine",
-                timerTitle: "Kitchen Assistant Timer",
-                save: "Save Item"
-            },
-            fr: {
-                subtitle: "Votre Assistant de Cuisine Intelligent",
-                navStudio: "Studio Recettes",
-                navPlanner: "Planning Repas",
-                navPantry: "Garde-Manger",
-                navShopping: "Liste de Courses",
-                navCommunity: "Communauté",
-                studioTitle: "Synthèse Intelligente de Recettes",
-                studioSubtitle: "Entrez des ingrédients, utilisez la voix ou scannez votre frigo pour créer des plats gourmands.",
-                addBtn: "Ajouter",
-                aiPowered: "IA Prête",
-                zeroWaste: "Moteur Anti-Gaspillage",
-                generateRecipesBtn: "Générer les Recettes",
-                suggestedRecipes: "Propositions Synthétisées",
-                plannerTitle: "Planning Hebdomadaire Meal Prep",
-                plannerSubtitle: "Organisez vos repas de la semaine et exportez votre liste de courses.",
-                exportShopping: "Exporter vers la Liste",
-                pantryTitle: "Garde-Manger & Inventaire",
-                pantrySubtitle: "Suivez vos stocks, quantités et dates d'expiration.",
-                addPantryItem: "Ajouter un Élément",
-                itemName: "Article",
-                category: "Catégorie",
-                quantity: "Quantité",
-                status: "Statut",
-                actions: "Actions",
-                shoppingTitle: "Liste de Courses Intelligente",
-                shoppingSubtitle: "Ingrédients classés automatiquement selon vos plans.",
-                clearDone: "Effacer Cochés",
-                addItem: "Ajouter",
-                communityTitle: "Communauté & Partage Prep",
-                communitySubtitle: "Découvrez des routines et partagez vos astuces culinaires.",
-                sharePrep: "Partager Routine",
-                timerTitle: "Minuteur de Cuisine Assistant",
-                save: "Enregistrer"
-            },
-            it: {
-                subtitle: "Il Tuo Assistente di Cucina Intelligente",
-                navStudio: "Studio Ricette",
-                navPlanner: "Piano Pasti",
-                navPantry: "Dispensa",
-                navShopping: "Lista Spesa",
-                navCommunity: "Community",
-                studioTitle: "Sintesi Intelligente Ricette",
-                studioSubtitle: "Inserisci ingredienti, usa il comando vocale o scansiona il frigo per creare piatti e dessert.",
-                addBtn: "Aggiungi",
-                aiPowered: "Sintesi IA Pronta",
-                zeroWaste: "Motore Zero Sprechi",
-                generateRecipesBtn: "Sintetizza Ricette",
-                suggestedRecipes: "Suggerimenti Generati",
-                plannerTitle: "Pianificazione Settimanale Pasti",
-                plannerSubtitle: "Organizza la tua routine e genera la lista spesa automatica.",
-                exportShopping: "Esporta in Lista Spesa",
-                pantryTitle: "Dispensa & Inventario",
-                pantrySubtitle: "Controlla scorte, quantità e scadenze dei prodotti.",
-                addPantryItem: "Aggiungi Prodotto",
-                itemName: "Articolo",
-                category: "Categoria",
-                quantity: "Quantità",
-                status: "Stato Scadenza",
-                actions: "Azioni",
-                shoppingTitle: "Lista Spesa Intelligente",
-                shoppingSubtitle: "Ingredienti categorizzati in automatico per il tuo meal prep.",
-                clearDone: "Rimuovi Spuntati",
-                addItem: "Aggiungi",
-                communityTitle: "Community & Condivisione Prep",
-                communitySubtitle: "Scopri ricette e condividi la tua routine in cucina.",
-                sharePrep: "Condividi Routine",
-                timerTitle: "Timer di Cucina Assistente",
-                save: "Salva Articolo"
-            },
-            tr: {
-                subtitle: "Akıllı Mutfak Asistanınız",
-                navStudio: "Tarif Stüdyosu",
-                navPlanner: "Yemek Planlayıcı",
-                navPantry: "Kiler",
-                navShopping: "Alışveriş Listesi",
-                navCommunity: "Topluluk",
-                studioTitle: "Akıllı Tarif Sentezi",
-                studioSubtitle: "Malzemeleri girin, sesli komut kullanın veya buzdolabı fotoğrafı taratarak yemekler oluşturun.",
-                addBtn: "Ekle",
-                aiPowered: "Yapay Zeka Hazır",
-                zeroWaste: "Sıfır Atık Motoru",
-                generateRecipesBtn: "Tarifleri Oluştur",
-                suggestedRecipes: "Önerilen Sentez Tarifler",
-                plannerTitle: "Haftalık Yemek Hazırlık Planı",
-                plannerSubtitle: "Haftalık rutininizi organize edin ve otomatik alışveriş listesi çıkarın.",
-                exportShopping: "Listeye Aktar",
-                pantryTitle: "Mutfak Kileri & Envanter",
-                pantrySubtitle: "Ürünlerinizi, miktarlarını ve son kullanma durumlarını takip edin.",
-                addPantryItem: "Ürün Ekle",
-                itemName: "Ürün",
-                category: "Kategori",
-                quantity: "Miktar",
-                status: "Durum",
-                actions: "İşlemler",
-                shoppingTitle: "Akıllı Alışveriş Listesi",
-                shoppingSubtitle: "Yemek planlarınıza göre otomatik kategorize edilen malzemeler.",
-                clearDone: "Tamamlananları Temizle",
-                addItem: "Ekle",
-                communityTitle: "Topluluk & Prep Paylaşımı",
-                communitySubtitle: "Yeni tarifler keşfedin ve mutfak rutinlerinizi paylaşın.",
-                sharePrep: "Rutini Paylaş",
-                timerTitle: "Mutfak Asistanı Zamanlayıcı",
-                save: "Kaydet"
-            },
-            ar: {
-                subtitle: "مساعد المطبخ الذكي الخاص بك",
-                navStudio: "استوديو الوصفات",
-                navPlanner: "مخطط الوجبات",
-                navPantry: "خزانة المؤن",
-                navShopping: "قائمة التسوق",
-                navCommunity: "المجتمع",
-                studioTitle: "التخليق الذكي للوصفات",
-                studioSubtitle: "أدخل المكونات، استخدم الأمر الصوتي أو مسح صورة الثلاجة لابتكار أطباق وحلويات فاخرة.",
-                addBtn: "إضافة",
-                aiPowered: "التخليق الذكي جاهز",
-                zeroWaste: "محرك محاربة الهدر",
-                generateRecipesBtn: "تخليق الوصفات",
-                suggestedRecipes: "المقترحات المصنعة",
-                plannerTitle: "جدول تحضير الوجبات الأسبوعي",
-                plannerSubtitle: "نظم روتينك الأسبوعي وأنشئ قائمة تسوق تلقائية.",
-                exportShopping: "تصدير إلى قائمة التسوق",
-                pantryTitle: "خزانة المؤن والمخزون",
-                pantrySubtitle: "تتبع العناصر المتاحة والكميات وحالات انتهاء الصلاحية.",
-                addPantryItem: "إضافة عنصر",
-                itemName: "العنصر",
-                category: "الفئة",
-                quantity: "الكمية",
-                status: "حالة الصلاحية",
-                actions: "الإجراءات",
-                shoppingTitle: "قائمة التسوق الذكية",
-                shoppingSubtitle: "بقالة مصنفة تلقائياً ومتزامنة مع خطط التحضير.",
-                clearDone: "مسح المكتمل",
-                addItem: "إضافة",
-                communityTitle: "مجتمع الطهاة ومشاركة التحضير",
-                communitySubtitle: "اكتشف الوصفات وشارك خبراتك وروتين التحضير المفضل.",
-                sharePrep: "مشاركة الروتين",
-                timerTitle: "مؤقت المطبخ المساعد",
-                save: "حفظ"
-            }
-        };
+  <!-- PANTRY TAB -->
+  <section class="tab" id="tab-pantry">
+    <div class="card">
+      <div class="row" style="justify-content:space-between; margin-bottom: 12px;">
+        <h2 style="margin:0;" data-t="pantryTitle">Pantry Tracker</h2>
+        <button class="primary-btn" style="width:auto; font-size:13px;" onclick="openPantryForm()" data-t="addPantry">＋ Add Item</button>
+      </div>
+      <div style="overflow:auto">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); text-align:left; color:var(--muted); font-size:12px;">
+              <th style="padding:8px" data-t="item">Item</th>
+              <th style="padding:8px" data-t="qty">Qty</th>
+              <th style="padding:8px" data-t="cat">Category</th>
+              <th style="padding:8px" data-t="action">Action</th>
+            </tr>
+          </thead>
+          <tbody id="pantryList"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-        /* -------------------------------------------------------------------
-           2. STATE MANAGEMENT & INITIALIZATION
-        ------------------------------------------------------------------- */
-        let currentLang = localStorage.getItem('mpm_lang') || 'de';
-        let currentIngredients = ['Tomato', 'Garlic', 'Pasta', 'Olive Oil', 'Basil'];
-        let pantryItems = JSON.parse(localStorage.getItem('mpm_pantry')) || [
-            { id: 1, name: 'Eggs', category: 'Dairy', quantity: '12 pcs', status: 'Fresh' },
-            { id: 2, name: 'Milk', category: 'Dairy', quantity: '1 L', status: 'Expiring Soon' },
-            { id: 3, name: 'Chicken Breast', category: 'Meat', quantity: '600 g', status: 'Fresh' },
-            { id: 4, name: 'Rice', category: 'Pantry', quantity: '2 kg', status: 'Fresh' }
-        ];
-        let shoppingItems = JSON.parse(localStorage.getItem('mpm_shopping')) || [
-            { id: 101, name: 'Heavy Cream', category: 'Dairy', checked: false },
-            { id: 102, name: 'Parmesan', category: 'Dairy', checked: true },
-            { id: 103, name: 'Fresh Basil', category: 'Produce', checked: false }
-        ];
-        let weeklyPlan = JSON.parse(localStorage.getItem('mpm_plan')) || {
-            Mon: { main: 'Pesto Pasta Deliziosa', dessert: 'Lemon Sorbet' },
-            Tue: { main: 'Grilled Chicken Salad', dessert: 'Berry Bowl' },
-            Wed: { main: 'Creamy Mushroom Risotto', dessert: 'Vanilla Pudding' },
-            Thu: { main: 'Garlic Butter Shrimp', dessert: 'Fruit Cup' },
-            Fri: { main: 'Homemade Margherita Pizza', dessert: 'Tiramisu' },
-            Sat: { main: 'Vegetable Stir Fry', dessert: 'Chocolate Mousse' },
-            Sun: { main: 'Roasted Vegetable Bowl', dessert: 'Apple Crumble' }
-        };
-        let communityPosts = [
-            { id: 1, author: 'Chef Elena', title: 'Ultimate 5-Day Mediterranean Meal Prep', likes: 142, desc: 'Batch cook high-protein quinoa bowls and roasted herbs.' },
-            { id: 2, author: 'Marco K.', title: 'Zero-Waste Creamy Tomato Pasta Special', likes: 89, desc: 'How to utilize leftover herbs and parmesan rinds effortlessly.' }
-        ];
+  <!-- COMMUNITY TAB -->
+  <section class="tab" id="tab-community">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <h2 style="margin:0;" data-t="communityTitle">Community & Tips</h2>
+        <button class="primary-btn" style="width:auto; font-size:13px;" onclick="openPostForm()" data-t="addPost">＋ Create Post</button>
+      </div>
+    </div>
+    <div id="posts" style="display:grid; gap:14px;"></div>
+  </section>
+</main>
 
-        // Sample Recipe Database for Synthesis Engine
-        const recipeDatabase = [
-            {
-                id: 'r1',
-                title: 'Tuscan Garlic Tomato Pasta',
-                type: 'Main Dish',
-                prepTime: '20 min',
-                calories: '450 kcal',
-                ingredients: ['Pasta', 'Tomato', 'Garlic', 'Olive Oil', 'Basil', 'Parmesan'],
-                steps: [
-                    'Boil salted water and cook pasta until al dente.',
-                    'Heat olive oil in a pan, sauté crushed garlic until fragrant.',
-                    'Add chopped tomatoes and simmer for 10 minutes.',
-                    'Toss pasta into sauce and garnish with fresh basil.'
-                ]
-            },
-            {
-                id: 'r2',
-                title: 'Creamy Garlic Butter Chicken',
-                type: 'Main Dish',
-                prepTime: '25 min',
-                calories: '580 kcal',
-                ingredients: ['Chicken Breast', 'Garlic', 'Butter', 'Cream', 'Spinach'],
-                steps: [
-                    'Sear chicken breasts on medium-high heat until golden brown.',
-                    'Melt butter and sauté minced garlic.',
-                    'Pour in heavy cream, add spinach, and let simmer until chicken is fully cooked.'
-                ]
-            },
-            {
-                id: 'r3',
-                title: 'Velvety Berry Vanilla Parfait',
-                type: 'Dessert',
-                prepTime: '10 min',
-                calories: '220 kcal',
-                ingredients: ['Milk', 'Berries', 'Honey', 'Yogurt', 'Vanilla'],
-                steps: [
-                    'Layer Greek yogurt and vanilla in a serving glass.',
-                    'Add fresh berries and drizzle with honey.',
-                    'Chill for 15 minutes before serving.'
-                ]
-            }
-        ];
+<!-- Bottom Navigation Bar -->
+<div class="bottom-nav" id="bottomNav"></div>
 
-        // Timer State
-        let timerSeconds = 300;
-        let timerInterval = null;
-        let timerRunning = false;
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modalbox">
+    <div class="row" style="justify-content:space-between; margin-bottom:12px;">
+      <h3 id="modalTitle" style="margin:0;"></h3>
+      <button class="iconbtn" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
 
-        /* -------------------------------------------------------------------
-           3. APPLICATION LIFECYCLE & RENDERERS
-        ------------------------------------------------------------------- */
-        window.onload = function() {
-            initDarkMode();
-            changeLanguage(currentLang);
-            renderIngredientsTags();
-            renderPantryTable();
-            renderShoppingList();
-            renderWeeklyPlanner();
-            renderCommunityFeed();
-            generateRecipes();
-        };
+<div id="toast" style="display:none" class="toast"></div>
 
-        function initDarkMode() {
-            if (localStorage.getItem('mpm_theme') === 'dark' || (!('mpm_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400';
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.getElementById('themeIcon').className = 'fa-solid fa-moon text-gray-600';
-            }
-        }
+<script>
+const $ = id => document.getElementById(id);
+const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('mpm_theme', isDark ? 'dark' : 'light');
-            document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon text-gray-600';
-        }
+const translations = {
+  en: {
+    subtitle: "YOUR INTELLIGENT KITCHEN ASSISTANT",
+    heroTitle: "What would you like to cook today?",
+    quickSelect: "QUICK SELECT INGREDIENTS:",
+    generateBtn: "Generate Recipes",
+    dietLabel: "Diet", optAllDiets: "All Diets", optVeg: "Vegetarian", optVegan: "Vegan", optGluten: "Gluten-Free", optLowCarb: "Low-Carb",
+    timeLabel: "Max Time", optAnyTime: "Any Time",
+    catLabel: "Category", optAllCats: "All Categories",
+    recipesTitle: "Recipes & Desserts", addCustomRecipe: "＋ Custom Recipe",
+    plannerTitle: "Weekly Meal Planner", plannerDesc: "Organize your weekly meals.", clear: "Clear", toShopping: "🛒 To Shopping List",
+    shoppingTitle: "Shopping List", copy: "Copy", clearDone: "Clear Done",
+    catVeg: "Produce", catDairy: "Dairy", catPantry: "Pantry", catSpices: "Spices", catDessert: "Dessert", catOther: "Other",
+    pantryTitle: "Pantry Tracker", addPantry: "＋ Add Item", item: "Item", qty: "Qty", cat: "Category", action: "Action",
+    communityTitle: "Community & Tips", addPost: "＋ Create Post",
+    navRecipes: "Recipes", navPlanner: "Plan", navShopping: "Shopping", navPantry: "Pantry", navCommunity: "Community"
+  },
+  de: {
+    subtitle: "DEIN INTELLIGERTER KÜCHENASSISTENT",
+    heroTitle: "Was möchtest du heute kochen?",
+    quickSelect: "SCHNELLAUSWAHL ZUTATEN:",
+    generateBtn: "Rezepte generieren",
+    dietLabel: "Ernährung", optAllDiets: "Alle Ernährungsformen", optVeg: "Vegetarisch", optVegan: "Vegan", optGluten: "Glutenfrei", optLowCarb: "Low-Carb",
+    timeLabel: "Max Zeit", optAnyTime: "Egal wie lange",
+    catLabel: "Kategorie", optAllCats: "Alle Kategorien",
+    recipesTitle: "Rezepte & Desserts", addCustomRecipe: "＋ Eigenes Rezept",
+    plannerTitle: "Wochenplaner", plannerDesc: "Plane deine Mahlzeiten für die Woche.", clear: "Leeren", toShopping: "🛒 Zur Einkaufsliste",
+    shoppingTitle: "Einkaufsliste", copy: "Kopieren", clearDone: "Erledigte löschen",
+    catVeg: "Gemüse & Obst", catDairy: "Kühlregal", catPantry: "Vorratskammer", catSpices: "Gewürze", catDessert: "Dessert", catOther: "Sonstiges",
+    pantryTitle: "Vorratskammer", addPantry: "＋ Vorrat hinzufügen", item: "Artikel", qty: "Menge", cat: "Kategorie", action: "Aktion",
+    communityTitle: "Community & Tipps", addPost: "＋ Beitrag erstellen",
+    navRecipes: "Rezepte", navPlanner: "Planer", navShopping: "Einkauf", navPantry: "Vorrat", navCommunity: "Community"
+  },
+  fr: {
+    subtitle: "VOTRE ASSISTANT DE CUISINE INTELLIGENT",
+    heroTitle: "Que souhaitez-vous cuisiner aujourd'hui ?",
+    quickSelect: "SÉLECTION RAPIDE D'INGRÉDIENTS :",
+    generateBtn: "Générer des recettes",
+    dietLabel: "Régime", optAllDiets: "Tous les régimes", optVeg: "Végétarien", optVegan: "Végétalien", optGluten: "Sans gluten", optLowCarb: "Pauvre en glucides",
+    timeLabel: "Temps max", optAnyTime: "N'importe quand",
+    catLabel: "Catégorie", optAllCats: "Toutes les catégories",
+    recipesTitle: "Recettes & Desserts", addCustomRecipe: "＋ Recette perso",
+    plannerTitle: "Planificateur de repas", plannerDesc: "Organisez vos repas de la semaine.", clear: "Effacer", toShopping: "🛒 Liste de courses",
+    shoppingTitle: "Liste de courses", copy: "Copier", clearDone: "Effacer faits",
+    catVeg: "Fruits & Légumes", catDairy: "Produits laitiers", catPantry: "Garde-manger", catSpices: "Épices", catDessert: "Dessert", catOther: "Autre",
+    pantryTitle: "Garde-manger", addPantry: "＋ Ajouter", item: "Article", qty: "Qté", cat: "Catégorie", action: "Action",
+    communityTitle: "Communauté & Astuces", addPost: "＋ Créer un post",
+    navRecipes: "Recettes", navPlanner: "Plan", navShopping: "Courses", navPantry: "Stock", navCommunity: "Communauté"
+  },
+  it: {
+    subtitle: "IL TUO ASSISTENTE DI CUCINA INTELLIGENTE",
+    heroTitle: "Cosa vorresti cucinare oggi?",
+    quickSelect: "SELEZIONE RAPIDA INGREDIENTI:",
+    generateBtn: "Genera Ricette",
+    dietLabel: "Dieta", optAllDiet: "Tutte le diete", optVeg: "Vegetariano", optVegan: "Vegano", optGluten: "Senza glutine", optLowCarb: "Low-Carb",
+    timeLabel: "Tempo max", optAnyTime: "Qualsiasi",
+    catLabel: "Categoria", optAllCats: "Tutte le categorie",
+    recipesTitle: "Ricette & Dessert", addCustomRecipe: "＋ Ricetta personalizzata",
+    plannerTitle: "Pianificatore settimanale", plannerDesc: "Organizza i tuoi pasti.", clear: "Pulisci", toShopping: "🛒 Lista della spesa",
+    shoppingTitle: "Lista della spesa", copy: "Copia", clearDone: "Elimina fatti",
+    catVeg: "Frutta e Verdura", catDairy: "Latticini", catPantry: "Dispensa", catSpices: "Spezie", catDessert: "Dessert", catOther: "Altro",
+    pantryTitle: "Dispensa", addPantry: "＋ Aggiungi", item: "Articolo", qty: "Q.tà", cat: "Categoria", action: "Azione",
+    communityTitle: "Community & Consigli", addPost: "＋ Crea post",
+    navRecipes: "Ricette", navPlanner: "Piano", navShopping: "Spesa", navPantry: "Dispensa", navCommunity: "Community"
+  },
+  tr: {
+    subtitle: "AKILLI MUTFAK ASİSTANINIZ",
+    heroTitle: "Bugün ne pişirmek istersiniz?",
+    quickSelect: "HIZLI MALZEME SEÇİMİ:",
+    generateBtn: "Tarifleri Oluştur",
+    dietLabel: "Diyet", optAllDiets: "Tüm Diyetler", optVeg: "Vejetaryen", optVegan: "Vegan", optGluten: "Glutensiz", optLowCarb: "Düşük Karbonhidrat",
+    timeLabel: "Maks Süre", optAnyTime: "Farketmez",
+    catLabel: "Kategori", optAllCats: "Tüm Kategoriler",
+    recipesTitle: "Tarifler ve Tatlılar", addCustomRecipe: "＋ Özel Tarif",
+    plannerTitle: "Haftalık Yemek Planı", plannerDesc: "Haftalık öğünlerinizi düzenleyin.", clear: "Temizle", toShopping: "🛒 Alışveriş Listesi",
+    shoppingTitle: "Alışveriş Listesi", copy: "Kopyala", clearDone: "Tamamlananları Sil",
+    catVeg: "Sebze & Meyve", catDairy: "Süt Ürünleri", catPantry: "Kiler", catSpices: "Baharatlar", catDessert: "Tatlı", catOther: "Diğer",
+    pantryTitle: "Kiler Takibi", addPantry: "＋ Ürün Ekle", item: "Ürün", qty: "Miktar", cat: "Kategori", action: "İşlem",
+    communityTitle: "Topluluk & İpuçları", addPost: "＋ Gönderi Oluştur",
+    navRecipes: "Tarifler", navPlanner: "Plan", navShopping: "Alışveriş", navPantry: "Kiler", navCommunity: "Topluluk"
+  },
+  ar: {
+    subtitle: "مساعد المطبخ الذكي الخاص بك",
+    heroTitle: "ماذا تريد أن تطبخ اليوم؟",
+    quickSelect: "اختيار سريع للمكونات:",
+    generateBtn: "إنشاء الوصفات",
+    dietLabel: "النظام الغذائي", optAllDiets: "جميع الأنظمة", optVeg: "نباتي", optVegan: "صرف", optGluten: "خالي من الجلوتين", optLowCarb: "منخفض الكربوهيدرات",
+    timeLabel: "الوقت الأقصى", optAnyTime: "أي وقت",
+    catLabel: "الفئة", optAllCats: "جميع الفئات",
+    recipesTitle: "الوصفات والحلويات", addCustomRecipe: "＋ وصفة مخصصة",
+    plannerTitle: "مخطط الوجبات الأسبوعي", plannerDesc: "قم بتنظيم وجباتك الأسبوعية.", clear: "مسح", toShopping: "🛒 قائمة التسوق",
+    shoppingTitle: "قائمة التسوق", copy: "نسخ", clearDone: "حذف المكتمل",
+    catVeg: "خضار وفواكه", catDairy: "ألبان", catPantry: "مخزن", catSpices: "بهارات", catDessert: "حلويات", catOther: "أخرى",
+    pantryTitle: "متتبع المخزن", addPantry: "＋ إضافة عنصر", item: "العنصر", qty: "الكمية", cat: "الفئة", action: "إجراء",
+    communityTitle: "المجتمع والنصائح", addPost: "＋ إنشاء منشور",
+    navRecipes: "الوصفات", navPlanner: "الخطة", navShopping: "التسوق", navPantry: "المخزن", navCommunity: "المجتمع"
+  }
+};
 
-        function changeLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('mpm_lang', lang);
-            document.getElementById('langSelect').value = lang;
+const state = {
+  lang: localStorage.getItem("kp_lang") || "de",
+  dark: localStorage.getItem("kp_dark") === "true",
+  ingredients: ["Pasta", "Sahne", "Knoblauch", "Tomate"],
+  custom: read("kp_custom", []),
+  plan: read("kp_plan", Object.fromEntries(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => [d, {breakfast:null, lunch:null, dinner:null}]))),
+  shopping: read("kp_shop", [{id:"s1", name:"Tomaten", category:"Gemüse & Obst", checked:false}]),
+  pantry: read("kp_pantry", [{id:"p1", name:"Mehl", qty:"1 kg", cat:"Vorratskammer"}]),
+  posts: read("kp_posts", [{title:"Crispy Tofu Tip", body:"Dust with cornstarch before frying!", author:"ChefLena"}]),
+};
 
-            // Handle RTL for Arabic
-            if (lang === 'ar') {
-                document.documentElement.setAttribute('dir', 'rtl');
-                document.documentElement.setAttribute('lang', 'ar');
-            } else {
-                document.documentElement.setAttribute('dir', 'ltr');
-                document.documentElement.setAttribute('lang', lang);
-            }
+const baseRecipes = [
+  {id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520, diet:"Vegetarisch", cuisine:"Italienisch", ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter"], steps:["Pasta garen.","Knoblauch anbraten.","Sahne und Käse einrühren."], image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
+  {id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380, diet:"Vegan", cuisine:"Mediterran", ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl"], steps:["Gemüse schneiden.","In heißem Öl anbraten."], image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
+  {id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460, diet:"Vegan", cuisine:"Asiatisch", ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer"], steps:["Reis kochen.","Tofu anbraten."], image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"},
+  {id:"r4", title:"Beeren-Joghurt-Parfait", time:10, calories:220, diet:"Vegetarisch", cuisine:"Nachtisch", ingredients:["Joghurt","Beeren","Honig","Müsli"], steps:["Joghurt und Beeren in Gläser schichten."], image:"https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"}
+];
 
-            // Translate static elements
-            const langData = translations[lang] || translations.en;
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (langData[key]) {
-                    el.innerText = langData[key];
-                }
-            });
-        }
+const availableTags = ["Pasta", "Sahne", "Knoblauch", "Tomate", "Avocado", "Schokolade", "Spinat", "Feta", "Linsen", "Reis", "Paprika", "Hähnchen", "Tofu", "Beeren", "Eier"];
+const days = {Mon:"Mon", Tue:"Tue", Wed:"Wed", Thu:"Thu", Fri:"Fri", Sat:"Sat", Sun:"Sun"};
+const meals = {breakfast:"Breakfast", lunch:"Lunch", dinner:"Dinner"};
 
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+function save() {
+  localStorage.setItem("kp_custom", JSON.stringify(state.custom));
+  localStorage.setItem("kp_plan", JSON.stringify(state.plan));
+  localStorage.setItem("kp_shop", JSON.stringify(state.shopping));
+  localStorage.setItem("kp_pantry", JSON.stringify(state.pantry));
+  localStorage.setItem("kp_posts", JSON.stringify(state.posts));
+}
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = 'tab-btn px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all';
-            });
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            if (activeBtn) {
-                activeBtn.className = 'tab-btn px-4 py-2 text-sm font-semibold rounded-xl flex items-center gap-2 whitespace-nowrap transition-all bg-brand-500 text-white shadow-md shadow-brand-500/20';
-            }
-        }
+function toast(s) {
+  let t = $("toast");
+  t.textContent = s;
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2400);
+}
 
-        function showToast(message, iconClass = 'fa-circle-check text-brand-400') {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = message;
-            document.getElementById('toastIcon').className = `fa-solid ${iconClass} text-lg`;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+function init() {
+  document.documentElement.classList.toggle("dark", state.dark);
+  $("langSelect").value = state.lang;
+  updateLanguageUI();
+  
+  // Render Bottom Navigation
+  const navItems = [
+    ["recipes", "🍳", "navRecipes"],
+    ["weekly", "📅", "navPlanner"],
+    ["shopping", "🛒", "navShopping"],
+    ["pantry", "📦", "navPantry"],
+    ["community", "👥", "navCommunity"]
+  ];
+  $("bottomNav").innerHTML = navItems.map(([id, icon, key], i) => `
+    <button class="bottom-btn ${i===0?'active':''}" onclick="tab('${id}', this)">
+      <span class="icon">${icon}</span>
+      <span data-t="${key}">${translations[state.lang][key]}</span>
+    </button>
+  `).join("");
 
-        /* -------------------------------------------------------------------
-           4. RECIPE STUDIO & AI SYNTHESIS
-        ------------------------------------------------------------------- */
-        function renderIngredientsTags() {
-            const container = document.getElementById('activeIngredients');
-            container.innerHTML = currentIngredients.map((ing, idx) => `
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-700 dark:text-gray-200 shadow-sm">
-                    <i class="fa-solid fa-lemon text-amber-500"></i> ${ing}
-                    <button onclick="removeIngredient(${idx})" class="text-gray-400 hover:text-red-500 ml-1">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </span>
-            `).join('');
-        }
+  renderTags();
+  renderRecipes();
+  renderWeek();
+  renderShopping();
+  renderPantry();
+  renderPosts();
+}
 
-        function addIngredientFromInput() {
-            const input = document.getElementById('ingredientInput');
-            const val = input.value.trim();
-            if (val) {
-                const newItems = val.split(',').map(s => s.trim()).filter(Boolean);
-                newItems.forEach(item => {
-                    if (!currentIngredients.includes(item)) {
-                        currentIngredients.push(item);
-                    }
-                });
-                input.value = '';
-                renderIngredientsTags();
-                showToast('Ingredients added to synthesis cloud!');
-            }
-        }
+function changeLanguage(lang) {
+  state.lang = lang;
+  localStorage.setItem("kp_lang", lang);
+  updateLanguageUI();
+  init();
+}
 
-        function removeIngredient(idx) {
-            currentIngredients.splice(idx, 1);
-            renderIngredientsTags();
-        }
+function updateLanguageUI() {
+  const dict = translations[state.lang] || translations.en;
+  document.documentElement.setAttribute("dir", state.lang === "ar" ? "rtl" : "ltr");
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (dict[key]) el.textContent = dict[key];
+  });
+}
 
-        function startVoiceRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                showToast('Voice input not supported in this browser.', 'fa-circle-exclamation text-yellow-400');
-                return;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = currentLang === 'de' ? 'de-DE' : currentLang === 'ar' ? 'ar-SA' : 'en-US';
-            
-            showToast('Listening... Speak ingredients now.', 'fa-microphone text-accent-400');
-            recognition.start();
+function tab(id, btn) {
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+  $("tab-" + id).classList.add("active");
+  document.querySelectorAll(".bottom-btn").forEach(x => x.classList.remove("active"));
+  btn?.classList.add("active");
+}
 
-            recognition.onresult = (event) => {
-                const speechResult = event.results[0][0].transcript;
-                document.getElementById('ingredientInput').value = speechResult;
-                addIngredientFromInput();
-            };
-        }
+function toggleTheme() {
+  state.dark = !state.dark;
+  localStorage.setItem("kp_dark", state.dark);
+  document.documentElement.classList.toggle("dark", state.dark);
+}
 
-        function simulatePhotoScan() {
-            showToast('Scanning fridge photo...', 'fa-camera text-brand-400');
-            setTimeout(() => {
-                const simulated = ['Spinach', 'Mushrooms', 'Heavy Cream'];
-                simulated.forEach(item => {
-                    if (!currentIngredients.includes(item)) currentIngredients.push(item);
-                });
-                renderIngredientsTags();
-                showToast('Detected Spinach, Mushrooms & Cream!', 'fa-wand-magic-sparkles text-accent-400');
-            }, 1200);
-        }
+function renderTags() {
+  $("selectedCount").textContent = state.ingredients.length;
+  $("quickTags").innerHTML = availableTags.map(tag => {
+    let active = state.ingredients.some(x => x.toLowerCase() === tag.toLowerCase());
+    return `<button class="chip ${active ? 'selected' : ''}" onclick="toggleTag('${tag}')">${tag} ${active ? '✕' : '＋'}</button>`;
+  }).join("");
+}
 
-        function generateRecipes() {
-            const grid = document.getElementById('recipeGrid');
-            grid.innerHTML = recipeDatabase.map(recipe => {
-                const matched = recipe.ingredients.filter(i => currentIngredients.some(c => c.toLowerCase().includes(i.toLowerCase()))).length;
-                const matchPct = Math.min(100, Math.round((matched / recipe.ingredients.length) * 100) + 30);
+function toggleTag(tag) {
+  let idx = state.ingredients.findIndex(x => x.toLowerCase() === tag.toLowerCase());
+  if (idx > -1) state.ingredients.splice(idx, 1);
+  else state.ingredients.push(tag);
+  renderTags();
+  renderRecipes();
+}
 
-                return `
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col justify-between">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold ${recipe.type === 'Dessert' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300' : 'bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300'}">
-                                    ${recipe.type}
-                                </span>
-                                <span class="text-xs font-extrabold text-brand-600 dark:text-brand-400 flex items-center gap-1">
-                                    <i class="fa-solid fa-chart-line"></i> ${matchPct}% Match
-                                </span>
-                            </div>
-                            <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">${recipe.title}</h4>
-                            <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                <span><i class="fa-regular fa-clock"></i> ${recipe.prepTime}</span>
-                                <span><i class="fa-solid fa-fire"></i> ${recipe.calories}</span>
-                            </div>
-                            <div class="space-y-1 mb-4">
-                                <p class="text-xs font-bold text-gray-400 uppercase">Ingredients:</p>
-                                <p class="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">${recipe.ingredients.join(', ')}</p>
-                            </div>
-                        </div>
-                        <div class="p-6 pt-0">
-                            <button onclick="openCookingModal('${recipe.id}')" class="w-full bg-gray-100 dark:bg-slate-700 hover:bg-brand-500 hover:text-white dark:hover:bg-brand-500 text-gray-800 dark:text-white font-bold py-3 rounded-2xl text-xs transition-all flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-kitchen-set"></i> Start Preparation Steps
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+function addIngredientFromInput() {
+  let val = $("ingredientInput").value.trim();
+  if (val) {
+    val.split(",").forEach(x => {
+      let cleaned = x.trim();
+      if (cleaned && !state.ingredients.some(i => i.toLowerCase() === cleaned.toLowerCase())) {
+        state.ingredients.push(cleaned);
+      }
+    });
+    $("ingredientInput").value = "";
+    renderTags();
+    renderRecipes();
+  }
+}
 
-            document.getElementById('recipeCount').innerText = `${recipeDatabase.length} Recipes`;
-        }
+function generateRecipesAction() {
+  addIngredientFromInput();
+  renderRecipes();
+  toast("✨ Recipes generated successfully!");
+}
 
-        /* -------------------------------------------------------------------
-           5. INTERACTIVE STEP-BY-STEP COOKING MODAL
-        ------------------------------------------------------------------- */
-        function openCookingModal(recipeId) {
-            const recipe = recipeDatabase.find(r => r.id === recipeId);
-            if (!recipe) return;
+function renderRecipes() {
+  let diet = $("diet").value, time = $("time").value, cuisine = $("cuisine").value;
+  let allRecipes = [...baseRecipes, ...state.custom];
 
-            const modal = document.getElementById('cookingModal');
-            const content = document.getElementById('modalContent');
+  let matches = allRecipes.filter(r => {
+    let matchDiet = (diet === "all" || r.diet === diet);
+    let matchTime = (time === "all" || r.time <= +time);
+    let matchCuisine = (cuisine === "all" || r.cuisine === cuisine);
+    let matchIng = (!state.ingredients.length || state.ingredients.some(ing => 
+      r.ingredients.some(rIng => rIng.toLowerCase().includes(ing.toLowerCase()))
+    ));
+    return matchDiet && matchTime && matchCuisine && matchIng;
+  });
 
-            content.innerHTML = `
-                <div class="flex items-center gap-2 text-xs font-bold text-brand-500 uppercase mb-1">${recipe.type}</div>
-                <h3 class="text-2xl font-extrabold text-gray-900 dark:text-white mb-4">${recipe.title}</h3>
-                
-                <!-- Servings Calculator -->
-                <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-2xl mb-6 flex items-center justify-between">
-                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Servings Scale:</span>
-                    <div class="flex items-center gap-3">
-                        <button onclick="adjustServings(-1)" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 shadow flex items-center justify-center text-sm font-bold">-</button>
-                        <span id="servingCount" class="font-bold text-base dark:text-white">2</span>
-                        <button onclick="adjustServings(1)" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 shadow flex items-center justify-center text-sm font-bold">+</button>
-                    </div>
-                </div>
+  let dynamicDishes = generateDynamicMenuSet(state.ingredients, cuisine, diet);
+  let finalDisplayList = [...matches, ...dynamicDishes];
 
-                <!-- Steps Checklist -->
-                <div class="space-y-4 mb-6">
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">Preparation Steps</h4>
-                    ${recipe.steps.map((step, idx) => `
-                        <label class="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/50 cursor-pointer hover:bg-gray-100 transition-colors">
-                            <input type="checkbox" class="mt-1 rounded text-brand-500 focus:ring-brand-500">
-                            <span class="text-sm text-gray-700 dark:text-gray-300 font-medium"><strong>Step ${idx + 1}:</strong> ${step}</span>
-                        </label>
-                    `).join('')}
-                </div>
+  if (cuisine === "Nachtisch") {
+    finalDisplayList = finalDisplayList.filter(r => r.cuisine === "Nachtisch");
+  }
 
-                <div class="flex gap-3">
-                    <button onclick="exportRecipeToShopping('${recipe.title}')" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl text-sm transition-all shadow-md">
-                        Add Missing Ingredients to Shopping List
-                    </button>
-                </div>
-            `;
+  $("recipeCount").textContent = finalDisplayList.length;
 
-            modal.classList.remove('hidden');
-        }
+  $("recipes").innerHTML = finalDisplayList.length ? finalDisplayList.map(r => `
+    <div class="recipe-card">
+      <img src="${r.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"}" alt="">
+      <div class="recipe-body">
+        <h3>${esc(r.title)}</h3>
+        <div class="recipe-meta">⏱ ${r.time} Min · 🔥 ${r.calories || 420} kcal · ${esc(r.cuisine || "Kreativ")}</div>
+        <div class="recipe-ings"><b>Ingredients:</b> ${(r.ingredients || []).join(", ")}</div>
+        <button class="primary-btn" style="font-size:13px; padding:8px 12px;" onclick="recipeDetail('${esc(r.id)}')">Details & Cook</button>
+      </div>
+    </div>
+  `).join("") : `<div class="card" style="grid-column: 1/-1;">No recipes found matching your filters.</div>`;
+}
 
-        function closeCookingModal() {
-            document.getElementById('cookingModal').classList.add('hidden');
-        }
+function generateDynamicMenuSet(ings, currentCuisine, currentDiet) {
+  if (!ings.length && currentCuisine !== "Nachtisch") return [];
+  let main = ings[0] ? (ings[0].charAt(0).toUpperCase() + ings[0].slice(1)) : "Special";
+  let second = ings[1] ? (ings[1].charAt(0).toUpperCase() + ings[1].slice(1)) : "Herbs";
 
-        function adjustServings(delta) {
-            const countEl = document.getElementById('servingCount');
-            if (countEl) {
-                let count = parseInt(countEl.innerText) + delta;
-                if (count < 1) count = 1;
-                countEl.innerText = count;
-            }
-        }
+  return [
+    {
+      id: "gen_1",
+      title: `${main} & ${second} Skillet`,
+      time: 20,
+      calories: 410,
+      diet: currentDiet === "all" ? "Vegetarian" : currentDiet,
+      cuisine: "Quick & Easy",
+      ingredients: [...ings, "Olive Oil", "Salt & Pepper"],
+      steps: ["Chop ingredients.", "Sauté in olive oil.", "Season well and serve."]
+    },
+    {
+      id: "gen_2",
+      title: `Creamy ${main} Dish`,
+      time: 25,
+      calories: 450,
+      diet: "Vegetarian",
+      cuisine: "Mediterranean",
+      ingredients: [...ings, "Cream / Plant Cream", "Garlic"],
+      steps: ["Sauté ingredients.", "Deglaze with cream.", "Simmer for 5 minutes."]
+    }
+  ];
+}
 
-        function exportRecipeToShopping(recipeTitle) {
-            const recipe = recipeDatabase.find(r => r.title === recipeTitle);
-            if (recipe) {
-                recipe.ingredients.forEach(ing => {
-                    shoppingItems.push({ id: Date.now() + Math.random(), name: ing, category: 'Produce', checked: false });
-                });
-                localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-                renderShoppingList();
-                showToast(`Added ${recipe.title} ingredients to shopping list!`);
-                closeCookingModal();
-            }
-        }
+function getAllRecipesList() {
+  return [...baseRecipes, ...state.custom, ...generateDynamicMenuSet(state.ingredients, $("cuisine").value, $("diet").value)];
+}
 
-        /* -------------------------------------------------------------------
-           6. WEEKLY PLANNER ENGINE
-        ------------------------------------------------------------------- */
-        function renderWeeklyPlanner() {
-            const grid = document.getElementById('weeklyGrid');
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+function recipeDetail(id) {
+  let r = getAllRecipesList().find(x => x.id === id);
+  if (!r) return;
+  openModal(r.title, `
+    <p style="color:var(--muted); font-size:13px;">⏱ ${r.time} Min · 🔥 ${r.calories || 420} kcal</p>
+    <h4>Ingredients:</h4>
+    <ul>${r.ingredients.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <h4>Steps:</h4>
+    <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+    <button class="primary-btn" style="margin-top:14px;" onclick="recipeToShop('${esc(r.id)}')">Add ingredients to shopping list</button>
+  `);
+}
 
-            grid.innerHTML = days.map(day => `
-                <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3 border-b border-gray-100 dark:border-slate-700 pb-2">
-                            <span class="font-extrabold text-sm text-gray-900 dark:text-white">${day}</span>
-                            <i class="fa-solid fa-calendar-day text-brand-500 text-xs"></i>
-                        </div>
-                        <div class="space-y-3">
-                            <div>
-                                <span class="text-[10px] font-bold text-gray-400 uppercase">Main Dish</span>
-                                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">${weeklyPlan[day]?.main || 'Not Set'}</p>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-bold text-gray-400 uppercase">Dessert</span>
-                                <p class="text-xs font-semibold text-gray-800 dark:text-gray-200">${weeklyPlan[day]?.dessert || 'Not Set'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="editDayPlan('${day}')" class="mt-4 w-full bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 text-xs font-bold py-2 rounded-xl transition-all text-gray-600 dark:text-gray-300">
-                        Edit Day
-                    </button>
-                </div>
-            `).join('');
-        }
+function recipeToShop(id) {
+  let r = getAllRecipesList().find(x => x.id === id);
+  if (r) {
+    r.ingredients.forEach(name => state.shopping.push({id: String(Date.now() + Math.random()), name, category:"Pantry", checked:false}));
+    save(); renderShopping(); closeModal(); toast("Added ingredients to shopping list!");
+  }
+}
 
-        function editDayPlan(day) {
-            const newMain = prompt(`Enter Main Dish for ${day}:`, weeklyPlan[day]?.main || '');
-            if (newMain !== null) {
-                const newDessert = prompt(`Enter Dessert for ${day}:`, weeklyPlan[day]?.dessert || '');
-                weeklyPlan[day] = { main: newMain, dessert: newDessert };
-                localStorage.setItem('mpm_plan', JSON.stringify(weeklyPlan));
-                renderWeeklyPlanner();
-                showToast(`Updated plan for ${day}!`);
-            }
-        }
+function renderWeek() {
+  $("week").innerHTML = Object.entries(days).map(([key, label]) => `
+    <div class="card">
+      <h3 style="margin:0 0 10px; color:var(--orange);">${label}</h3>
+      ${Object.entries(meals).map(([m, ml]) => {
+        let item = state.plan[key]?.[m];
+        return `
+          <div class="slot">
+            <div style="font-size:11px; color:var(--muted); font-weight:700;">${ml}</div>
+            <div style="font-weight:600; margin:4px 0;">${item ? esc(item.title) : '—'}</div>
+            <button class="iconbtn" style="padding:2px 6px; font-size:11px;" onclick="openMealModal('${key}','${m}')">${item ? '✏️ Edit' : '＋ Add'}</button>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `).join("");
+}
 
-        function exportPlanToShoppingList() {
-            Object.values(weeklyPlan).forEach(p => {
-                if (p.main) shoppingItems.push({ id: Date.now() + Math.random(), name: `${p.main} Ingredients`, category: 'Pantry', checked: false });
-            });
-            localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-            renderShoppingList();
-            showToast('Exported weekly prep needs to shopping list!');
-        }
+function openMealModal(day, meal) {
+  let existing = state.plan[day]?.[meal]?.title || "";
+  openModal(`Meal (${day} - ${meal})`, `
+    <div class="field">
+      <label>Custom Meal<input id="customMealInput" value="${esc(existing)}" placeholder="e.g. Pasta, Pizza..."></label>
+      <button class="primary-btn" onclick="saveCustomMeal('${day}', '${meal}')">Save</button>
+    </div>
+  `);
+}
 
-        /* -------------------------------------------------------------------
-           7. PANTRY TRACKER
-        ------------------------------------------------------------------- */
-        function renderPantryTable() {
-            const body = document.getElementById('pantryTableBody');
-            body.innerHTML = pantryItems.map(item => `
-                <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td class="p-4 font-bold text-gray-900 dark:text-white">${item.name}</td>
-                    <td class="p-4 text-gray-600 dark:text-gray-300"><span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 text-xs font-semibold">${item.category}</span></td>
-                    <td class="p-4 font-semibold text-gray-700 dark:text-gray-300">${item.quantity}</td>
-                    <td class="p-4">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${item.status === 'Fresh' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300'}">
-                            ${item.status}
-                        </span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <button onclick="deletePantryItem(${item.id})" class="text-gray-400 hover:text-red-500 transition-colors">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+function saveCustomMeal(day, meal) {
+  let title = $("customMealInput").value.trim();
+  if (title) {
+    state.plan[day][meal] = { title, ingredients: [] };
+    save(); renderWeek(); closeModal(); toast("Meal saved!");
+  }
+}
 
-        function openAddPantryModal() {
-            document.getElementById('pantryModal').classList.remove('hidden');
-        }
+function clearPlan() {
+  Object.keys(state.plan).forEach(d => state.plan[d] = {breakfast:null, lunch:null, dinner:null});
+  save(); renderWeek(); toast("Plan cleared.");
+}
 
-        function closePantryModal() {
-            document.getElementById('pantryModal').classList.add('hidden');
-        }
+function planToShopping() { tab("shopping"); }
 
-        function savePantryItem(e) {
-            e.preventDefault();
-            const name = document.getElementById('pantryInputName').value;
-            const category = document.getElementById('pantryInputCat').value;
-            const quantity = document.getElementById('pantryInputQty').value;
-            const status = document.getElementById('pantryInputStatus').value;
+function addShop() {
+  let inp = $("shopInput"), cat = $("shopCat");
+  if (inp.value.trim()) {
+    state.shopping.push({id: String(Date.now() + Math.random()), name: inp.value.trim(), category: cat.value, checked: false});
+    inp.value = ""; save(); renderShopping();
+  }
+}
 
-            pantryItems.push({ id: Date.now(), name, category, quantity, status });
-            localStorage.setItem('mpm_pantry', JSON.stringify(pantryItems));
-            renderPantryTable();
-            closePantryModal();
-            showToast('Pantry item recorded!');
-        }
+function toggleShop(id) {
+  let item = state.shopping.find(x => x.id === id);
+  if (item) { item.checked = !item.checked; save(); renderShopping(); }
+}
 
-        function deletePantryItem(id) {
-            pantryItems = pantryItems.filter(i => i.id !== id);
-            localStorage.setItem('mpm_pantry', JSON.stringify(pantryItems));
-            renderPantryTable();
-        }
+function clearChecked() {
+  state.shopping = state.shopping.filter(x => !x.checked); save(); renderShopping();
+}
 
-        /* -------------------------------------------------------------------
-           8. SHOPPING LIST
-        ------------------------------------------------------------------- */
-        function renderShoppingList() {
-            const container = document.getElementById('shoppingListContainer');
-            const categories = ['Produce', 'Dairy', 'Meat', 'Pantry', 'Spices'];
+function copyList() {
+  navigator.clipboard.writeText(state.shopping.map(x => x.name).join("\n")).then(() => toast("Copied!"));
+}
 
-            container.innerHTML = categories.map(cat => {
-                const items = shoppingItems.filter(i => i.category === cat);
-                return `
-                    <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm">
-                        <h4 class="font-bold text-base text-gray-900 dark:text-white mb-4 flex items-center justify-between">
-                            <span>${cat}</span>
-                            <span class="text-xs bg-gray-100 dark:bg-slate-700 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 font-bold">${items.length}</span>
-                        </h4>
-                        <div class="space-y-3">
-                            ${items.length === 0 ? `<p class="text-xs text-gray-400 italic">No items in ${cat}</p>` : items.map(item => `
-                                <label class="flex items-center justify-between cursor-pointer group">
-                                    <div class="flex items-center gap-3">
-                                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem(${item.id})" class="rounded text-brand-500 focus:ring-brand-500 w-4 h-4">
-                                        <span class="text-sm font-medium ${item.checked ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-200'}">${item.name}</span>
-                                    </div>
-                                    <button onclick="deleteShoppingItem(${item.id})" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity">
-                                        <i class="fa-solid fa-xmark text-xs"></i>
-                                    </button>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+function renderShopping() {
+  $("shoppingList").innerHTML = state.shopping.length ? state.shopping.map(x => `
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);">
+      <input type="checkbox" ${x.checked ? "checked" : ""} onchange="toggleShop('${x.id}')">
+      <span style="flex:1; ${x.checked ? "text-decoration:line-through; color:var(--muted)" : ""}">${esc(x.name)}</span>
+    </div>
+  `).join("") : `<div style="color:var(--muted)">Shopping list is empty.</div>`;
+}
 
-        function toggleShoppingItem(id) {
-            const item = shoppingItems.find(i => i.id === id);
-            if (item) {
-                item.checked = !item.checked;
-                localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-                renderShoppingList();
-            }
-        }
+function openPantryForm() {
+  openModal("Add Pantry Item", `
+    <div class="field">
+      <label>Item Name<input id="pName"></label>
+      <label>Quantity<input id="pQty"></label>
+      <button class="primary-btn" onclick="savePantryItem()">Save</button>
+    </div>
+  `);
+}
 
-        function deleteShoppingItem(id) {
-            shoppingItems = shoppingItems.filter(i => i.id !== id);
-            localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-            renderShoppingList();
-        }
+function savePantryItem() {
+  let name = $("pName").value.trim(), qty = $("pQty").value.trim();
+  if (name) {
+    state.pantry.push({id: String(Date.now()), name, qty, cat: "Pantry"});
+    save(); renderPantry(); closeModal();
+  }
+}
 
-        function clearCompletedShopping() {
-            shoppingItems = shoppingItems.filter(i => !i.checked);
-            localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-            renderShoppingList();
-            showToast('Cleared completed shopping items!');
-        }
+function renderPantry() {
+  $("pantryList").innerHTML = state.pantry.map(x => `
+    <tr><td style="padding:8px">${esc(x.name)}</td><td style="padding:8px">${esc(x.qty)}</td><td style="padding:8px">${esc(x.cat)}</td><td style="padding:8px"><button class="iconbtn" onclick="deletePantry('${x.id}')">✕</button></td></tr>
+  `).join("");
+}
 
-        function addCustomShoppingItemPrompt() {
-            const name = prompt('Enter item name:');
-            if (name) {
-                shoppingItems.push({ id: Date.now(), name, category: 'Produce', checked: false });
-                localStorage.setItem('mpm_shopping', JSON.stringify(shoppingItems));
-                renderShoppingList();
-            }
-        }
+function deletePantry(id) {
+  state.pantry = state.pantry.filter(x => x.id !== id); save(); renderPantry();
+}
 
-        /* -------------------------------------------------------------------
-           9. COMMUNITY HUB
-        ------------------------------------------------------------------- */
-        function renderCommunityFeed() {
-            const feed = document.getElementById('communityFeed');
-            feed.innerHTML = communityPosts.map(post => `
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-accent-500 to-brand-500 flex items-center justify-center text-white font-bold text-sm">
-                                ${post.author.charAt(0)}
-                            </div>
-                            <div>
-                                <h5 class="text-sm font-bold text-gray-900 dark:text-white">${post.author}</h5>
-                                <span class="text-xs text-gray-400">Verified Meal Prepper</span>
-                            </div>
-                        </div>
-                        <h4 class="font-bold text-base text-gray-900 dark:text-white mb-2">${post.title}</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-4">${post.desc}</p>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-gray-100 dark:border-slate-700/50 pt-4">
-                        <button onclick="likePost(${post.id})" class="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors">
-                            <i class="fa-solid fa-heart text-red-500"></i> ${post.likes} Likes
-                        </button>
-                        <button onclick="showToast('Routine cloned to your Meal Planner!')" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline">
-                            Import Routine
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
+function openRecipeForm() {
+  openModal("Create Custom Recipe", `
+    <div class="field">
+      <label>Title<input id="rTitle"></label>
+      <label>Ingredients (comma separated)<input id="rIngs"></label>
+      <button class="primary-btn" onclick="saveCustomRecipe()">Save</button>
+    </div>
+  `);
+}
 
-        function likePost(id) {
-            const post = communityPosts.find(p => p.id === id);
-            if (post) {
-                post.likes++;
-                renderCommunityFeed();
-            }
-        }
+function saveCustomRecipe() {
+  let title = $("rTitle").value.trim(), ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
+  if (title) {
+    state.custom.push({id: "c_" + Date.now(), title, time: 20, calories: 400, diet: "Vegetarian", cuisine: "Custom", ingredients: ings, steps: ["Cook and enjoy."]});
+    save(); renderRecipes(); closeModal(); toast("Recipe saved!");
+  }
+}
 
-        function shareRecipeModal() {
-            const title = prompt('Enter routine title to share:');
-            if (title) {
-                communityPosts.unshift({ id: Date.now(), author: 'You', title, likes: 1, desc: 'User created meal preparation schedule shared with community.' });
-                renderCommunityFeed();
-                showToast('Routine shared with community!');
-            }
-        }
+function openPostForm() {
+  openModal("Create Post", `<div class="field"><label>Title<input id="pTitle"></label><label>Content<textarea id="pBody"></textarea></label><button class="primary-btn" onclick="savePost()">Publish</button></div>`);
+}
 
-        /* -------------------------------------------------------------------
-           10. COOKING TIMER CONTROLLER
-        ------------------------------------------------------------------- */
-        function toggleTimerModal() {
-            document.getElementById('timerModal').classList.toggle('hidden');
-        }
+function savePost() {
+  let title = $("pTitle").value.trim(), body = $("pBody").value.trim();
+  if (title && body) {
+    state.posts.unshift({author: "User", title, body});
+    save(); renderPosts(); closeModal(); toast("Post published!");
+  }
+}
 
-        function updateTimerDisplay() {
-            const mins = Math.floor(timerSeconds / 60);
-            const secs = timerSeconds % 60;
-            document.getElementById('timerDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
+function renderPosts() {
+  $("posts").innerHTML = state.posts.map(p => `<div class="card"><h3>${esc(p.title)}</h3><p>${esc(p.body)}</p></div>`).join("");
+}
 
-        function adjustTimer(delta) {
-            timerSeconds = Math.max(0, timerSeconds + delta);
-            updateTimerDisplay();
-        }
+function openTimer() {
+  let mins = prompt("Timer in minutes:", "10");
+  if (mins) { toast(`Timer set for ${mins} mins!`); setTimeout(() => toast("⏰ Timer finished!"), mins * 60000); }
+}
 
-        function toggleTimerRunning() {
-            const btn = document.getElementById('startTimerBtn');
-            if (timerRunning) {
-                clearInterval(timerInterval);
-                timerRunning = false;
-                btn.innerText = 'Start';
-                btn.className = 'flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-2xl transition-all';
-            } else {
-                timerRunning = true;
-                btn.innerText = 'Pause';
-                btn.className = 'flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-2xl transition-all';
-                timerInterval = setInterval(() => {
-                    if (timerSeconds > 0) {
-                        timerSeconds--;
-                        updateTimerDisplay();
-                    } else {
-                        clearInterval(timerInterval);
-                        timerRunning = false;
-                        btn.innerText = 'Start';
-                        document.getElementById('timerBadge').classList.remove('hidden');
-                        showToast('Timer Complete! Your meal is ready.', 'fa-bell text-red-500');
-                    }
-                }, 1000);
-            }
-        }
+function startVoiceInput() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return toast("Speech recognition not supported.");
+  const recognition = new SpeechRecognition();
+  recognition.lang = state.lang === "de" ? "de-DE" : "en-US";
+  toast("🎙️ Listening...");
+  recognition.onresult = (e) => {
+    let text = e.results[0][0].transcript;
+    toast(`Recognized: "${text}"`);
+    $("ingredientInput").value = text;
+    addIngredientFromInput();
+  };
+  recognition.start();
+}
 
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerRunning = false;
-            timerSeconds = 300;
-            updateTimerDisplay();
-            document.getElementById('startTimerBtn').innerText = 'Start';
-            document.getElementById('timerBadge').classList.add('hidden');
-        }
-    </script>
+function scanPhoto(e) {
+  if (e.target.files[0]) {
+    toast("Photo scanned successfully!");
+    ["Potatoes", "Carrots"].forEach(x => { if (!state.ingredients.includes(x)) state.ingredients.push(x); });
+    renderTags(); renderRecipes();
+  }
+}
+
+function openModal(title, html) {
+  $("modalTitle").textContent = title;
+  $("modalBody").innerHTML = html;
+  $("modal").classList.add("open");
+}
+
+function closeModal() { $("modal").classList.remove("open"); }
+function esc(s) { return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+init();
+</script>
 </body>
 </html>
