@@ -1,1803 +1,202 @@
-<!DOCTYPE html>
-<html lang="de" class="h-full">
+<!doctype html>
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Küchenplaner Deluxe - Dynamic Culinary Studio</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        emerald: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                            950: '#022c22',
-                        },
-                        terracotta: {
-                            100: '#ffedd5',
-                            500: '#f97316',
-                            600: '#ea580c',
-                            700: '#c2410c',
-                        },
-                        coral: {
-                            400: '#ff7060',
-                            500: '#ff523f',
-                            600: '#e63926',
-                        },
-                        butter: '#fdfbf7',
-                        darkbg: '#0f1715',
-                        darkcard: '#182421',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .dark .glass {
-            background: rgba(24, 36, 33, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(16, 185, 129, 0.3);
-            border-radius: 9999px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(16, 185, 129, 0.6);
-        }
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 0.4; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-        .pulse-active {
-            animation: pulse-ring 2s infinite ease-in-out;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Küchenplaner Deluxe</title>
+<style>
+:root{--bg:#f6f7f2;--card:#fff;--ink:#17231e;--muted:#68766f;--green:#087a55;--green2:#e4f4ec;--coral:#f26049;--line:#e3e9e4;--shadow:0 12px 32px #183a2910}
+.dark{--bg:#101815;--card:#19241f;--ink:#eef5f0;--muted:#a3b2a9;--green:#67d6a7;--green2:#20392e;--line:#304039;--shadow:0 12px 32px #0004}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,"Segoe UI",sans-serif;transition:.2s}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-size:20px;font-weight:850;color:var(--green)}.brand small{font-size:11px;color:var(--coral)}
+nav{display:flex;gap:5px;flex-wrap:wrap}.navbtn,.iconbtn{background:transparent;color:var(--muted);padding:9px 12px;border-radius:12px;font-weight:700}
+.navbtn.active,.navbtn:hover,.iconbtn:hover{background:var(--green2);color:var(--green)}
+main{max-width:1180px;margin:24px auto;padding:0 20px 90px}
+.tab{display:none}.tab.active{display:block}
+.hero{background:linear-gradient(125deg,#07583f,#10251e);color:white;border-radius:26px;padding:30px;margin-bottom:20px;box-shadow:var(--shadow)}
+.hero h1{font-size:clamp(28px,5vw,46px);margin:12px 0}.hero p{color:#d1e1d8;max-width:700px}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.inputrow{background:#ffffff18;border:1px solid #ffffff35;padding:8px;border-radius:16px}
+.inputrow input{flex:1;min-width:180px;color:white;background:transparent;border:0;outline:0;padding:10px}.inputrow input::placeholder{color:#c5d5cc}
+input,select,textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:10px}
+.primary,.accent,.soft,.danger{padding:10px 14px;border-radius:11px;font-weight:750}
+.primary{background:var(--green);color:white}.accent{background:var(--coral);color:white}.soft{background:var(--green2);color:var(--green)}.danger{background:#ffe8e6;color:#a52b24}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:var(--green2);color:var(--green);border-radius:999px;padding:6px 10px;font-size:13px}
+.hero .chip{background:#ffffff1c;color:white;border:1px solid #ffffff25}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.filters label,.field label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:750}
+h2{margin:0 0 6px}h3{margin:0 0 12px}.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.recipe{padding:0;overflow:hidden}.recipe img{width:100%;height:175px;object-fit:cover;background:var(--green2)}
+.recipebody{padding:16px}.recipebody h3{margin:0 0 8px}.muted{color:var(--muted);font-size:13px}
+.recipe .chips{margin:10px 0}.recipe .chip{font-size:11px}
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.day{padding:12px}.slot{border:1px dashed var(--line);padding:9px;border-radius:11px;margin:8px 0;font-size:12px}.slot button{display:block;margin-top:6px}
+.list{display:grid;gap:8px}.listitem{display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg);border-radius:12px}
+.listitem span{flex:1}.checked{text-decoration:line-through;color:var(--muted)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px}
+.post{margin:12px auto;max-width:720px}.modal{position:fixed;inset:0;background:#0009;z-index:10;display:none;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
+.modalbox{background:var(--card);border-radius:20px;padding:22px;width:min(650px,100%);max-height:90vh;overflow:auto}
+.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.field{display:grid;gap:12px}.field input,.field textarea,.field select{width:100%}
+.step{padding:10px;background:var(--bg);border-radius:10px;margin:7px 0}
+.timer{font:700 48px ui-monospace,monospace;text-align:center;background:#101815;color:#67d6a7;padding:20px;border-radius:16px}
+.toast{position:fixed;bottom:22px;right:20px;background:#17231e;color:#fff;padding:12px 16px;border-radius:12px;z-index:20;box-shadow:var(--shadow)}
+.mobile{display:none}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.daygrid{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.top{padding:10px 12px;flex-wrap:wrap}.top nav{order:3;width:100%;overflow:auto;flex-wrap:nowrap}.navbtn{white-space:nowrap;padding:8px}.grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}main{padding:0 12px 90px}.hero{padding:22px}.daygrid{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body class="bg-butter dark:bg-darkbg text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-300">
-
-    <!-- TOP NAVIGATION HEADER -->
-    <header class="sticky top-0 z-30 glass border-b border-emerald-100 dark:border-emerald-900/30 px-4 lg:px-8 py-3.5 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <!-- Brand Logo -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-coral-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 transform hover:scale-105 transition-transform">
-                    <i class="fa-solid font-bold fa-utensils text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-700 via-emerald-600 to-coral-500 dark:from-emerald-400 dark:to-coral-400 bg-clip-text text-transparent">
-                        Küchenplaner <span class="text-xs px-2 py-0.5 rounded-full bg-coral-500/10 text-coral-600 dark:text-coral-400 font-semibold border border-coral-500/20">Pro</span>
-                    </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block" id="headerSubtitle">Dein intelligenter Kulinarik-Assistent</p>
-                </div>
-            </div>
-
-            <!-- Central Nav Tabs (Desktop) -->
-            <nav class="hidden md:flex items-center gap-1 bg-emerald-50/80 dark:bg-emerald-950/40 p-1.5 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-                <button onclick="switchTab('generator')" id="nav-generator" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white dark:bg-emerald-800 text-emerald-700 dark:text-emerald-100 shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles text-coral-500"></i>
-                    <span data-i18n="navGenerator">Rezept-Generator</span>
-                </button>
-                <button onclick="switchTab('weekly')" id="nav-weekly" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center gap-2">
-                    <i class="fa-regular fa-calendar-days text-emerald-500"></i>
-                    <span data-i18n="navWeekly">Wochenplaner</span>
-                </button>
-                <button onclick="switchTab('shopping')" id="nav-shopping" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center gap-2 relative">
-                    <i class="fa-solid fa-basket-shopping text-terracotta-500"></i>
-                    <span data-i18n="navShopping">Einkaufsliste</span>
-                    <span id="shopping-badge" class="hidden absolute -top-1 -right-1 bg-coral-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
-                </button>
-                <button onclick="switchTab('pantry')" id="nav-pantry" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-boxes-packing text-emerald-600"></i>
-                    <span data-i18n="navPantry">Vorratskammer</span>
-                </button>
-                <button onclick="switchTab('community')" id="nav-community" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-users text-indigo-500"></i>
-                    <span data-i18n="navCommunity">Community</span>
-                </button>
-            </nav>
-
-            <!-- Quick Controls (Timer, Theme, Lang) -->
-            <div class="flex items-center gap-2">
-                <!-- Kitchen Timer Trigger -->
-                <button onclick="toggleTimerModal()" class="relative p-2.5 rounded-xl bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200/60 dark:hover:bg-emerald-800/60 transition-all">
-                    <i class="fa-solid fa-stopwatch text-lg text-emerald-600 dark:text-emerald-400"></i>
-                    <span id="active-timer-indicator" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-coral-500 rounded-full animate-ping"></span>
-                </button>
-
-                <!-- Language Toggle -->
-                <button onclick="toggleLanguage()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-xs font-bold uppercase tracking-wider flex items-center gap-1.5" title="Sprache wechseln / Switch Language">
-                    <i class="fa-solid fa-globe text-slate-500 dark:text-slate-400"></i>
-                    <span id="lang-indicator">DE</span>
-                </button>
-
-                <!-- Theme Toggle -->
-                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-slate-700 dark:text-amber-400">
-                    <i class="fa-solid fa-moon dark:hidden text-lg"></i>
-                    <i class="fa-solid fa-sun hidden dark:block text-lg"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- MOBILE NAVIGATION BOTTOM BAR -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 z-30 glass border-t border-emerald-100 dark:border-emerald-900/30 px-2 py-2">
-        <div class="grid grid-cols-5 text-center">
-            <button onclick="switchTab('generator')" id="mob-generator" class="flex flex-col items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium py-1">
-                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
-                <span class="text-[10px]" data-i18n="mobRezepte">Rezepte</span>
-            </button>
-            <button onclick="switchTab('weekly')" id="mob-weekly" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 font-medium py-1">
-                <i class="fa-regular fa-calendar-days text-lg"></i>
-                <span class="text-[10px]" data-i18n="mobPlaner">Planer</span>
-            </button>
-            <button onclick="switchTab('shopping')" id="mob-shopping" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 font-medium py-1 relative">
-                <i class="fa-solid fa-basket-shopping text-lg"></i>
-                <span class="text-[10px]" data-i18n="mobEinkauf">Einkauf</span>
-            </button>
-            <button onclick="switchTab('pantry')" id="mob-pantry" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 font-medium py-1">
-                <i class="fa-solid fa-boxes-packing text-lg"></i>
-                <span class="text-[10px]" data-i18n="mobVorrat">Vorrat</span>
-            </button>
-            <button onclick="switchTab('community')" id="mob-community" class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 font-medium py-1">
-                <i class="fa-solid fa-users text-lg"></i>
-                <span class="text-[10px]" data-i18n="mobSocial">Social</span>
-            </button>
-        </div>
+<body>
+<header><div class="top">
+  <div class="brand">🍴 Küchenplaner <small>DELUXE</small></div>
+  <nav id="nav"></nav>
+  <div class="row"><button class="iconbtn" onclick="openTimer()" title="Timer">⏱</button><button class="iconbtn" onclick="toggleTheme()" title="Theme">🌙</button><button class="iconbtn" onclick="toggleLang()" id="langBtn">DE</button></div>
+</div></header>
+<main>
+<section class="tab active" id="tab-recipes">
+  <div class="hero">
+    <div>✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
+    <h1 data-t="heroTitle">Was möchtest du heute kochen?</h1>
+    <p data-t="heroDesc">Gib Zutaten ein oder wähle sie aus. Lass dir passende Rezepte vorschlagen oder scanne ein Foto deiner Zutaten.</p>
+    <div class="row inputrow">
+      <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch" onkeydown="if(event.key==='Enter')addIngredients()">
+      <button class="accent" onclick="addIngredients()">＋ <span data-t="add">Hinzufügen</span></button>
+      <label class="soft" style="cursor:pointer">📷 <span data-t="scan">Foto scannen</span><input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)"></label>
     </div>
-
-    <!-- MAIN APP CONTENT CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 pb-24 md:pb-12">
-
-        <!-- 1. RECIPE GENERATOR TAB -->
-        <section id="tab-generator" class="tab-content space-y-8">
-            <!-- Hero Search & Ingredient Bar -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-900 text-white p-6 md:p-10 shadow-xl shadow-emerald-900/20">
-                <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-coral-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -left-12 -top-12 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="relative z-10 max-w-3xl space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold backdrop-blur-sm">
-                        <i class="fa-solid fa-fire text-coral-400"></i>
-                        <span data-i18n="generatorBadge">Intelligente Rezept-Synthese & KI Scan</span>
-                    </div>
-
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight" data-i18n="generatorTitle">
-                        Was möchtest du heute kochen?
-                    </h2>
-                    <p class="text-slate-300 text-sm sm:text-base" data-i18n="generatorSubtitle">
-                        Gib vorhandene Zutaten ein, wähle Tags aus oder nutze die Foto-Erkennung, um perfekt passende Rezepte zu kreieren.
-                    </p>
-
-                    <!-- Ingredient Input Box -->
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row gap-2 bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/20 shadow-2xl">
-                            <div class="flex-1 flex items-center px-3 gap-3">
-                                <i class="fa-solid fa-carrot text-coral-400 text-lg"></i>
-                                <input type="text" id="ingredientInput" onkeypress="handleIngredientKeyPress(event)" placeholder="Zutaten z.B. Tomaten, Nudeln, Knoblauch..." class="w-full bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm sm:text-base py-2">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="addCustomIngredient()" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm transition-all shadow-lg shadow-coral-500/30 flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span data-i18n="addBtn">Hinzufügen</span>
-                                </button>
-                                <button onclick="triggerPhotoScan()" class="px-4 py-3 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold text-sm transition-all border border-emerald-400/30 flex items-center gap-2" title="Zutaten mit Foto scannen">
-                                    <i class="fa-solid fa-camera"></i>
-                                    <span class="hidden sm:inline" data-i18n="scanBtn">Scan</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Interactive Quick-Add Ingredient Tags -->
-                        <div class="flex flex-wrap gap-2 items-center text-xs text-slate-300">
-                            <span class="font-semibold text-slate-400 flex items-center gap-1" data-i18n="quickAddLabel"><i class="fa-solid fa-bolt text-amber-400"></i> Schnellauswahl:</span>
-                            <div class="flex flex-wrap gap-1.5" id="quickTagContainer">
-                                <!-- Dynamic Tag Chips inserted via JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Selected Ingredients List -->
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
-                            <span data-i18n="selectedIngs">Gewählte Zutaten:</span>
-                            <button onclick="clearSelectedIngredients()" class="text-coral-400 hover:text-coral-300 underline underline-offset-2" data-i18n="clearAll">Alle löschen</button>
-                        </div>
-                        <div id="selectedTagChips" class="flex flex-wrap gap-2 min-h-[38px] p-2 bg-black/20 rounded-xl border border-white/10 items-center">
-                            <span class="text-xs text-slate-400 italic px-2" id="noIngsPlaceholder" data-i18n="noIngsPlaceholder">Noch keine Zutaten hinzugefügt. Klicke oben oder gib etwas ein!</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filter Controls Bar -->
-            <div class="bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200/80 dark:border-emerald-900/30 shadow-md space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div class="flex items-center gap-2 font-bold text-sm text-slate-700 dark:text-slate-200">
-                        <i class="fa-solid fa-sliders text-emerald-600 dark:text-emerald-400"></i>
-                        <span data-i18n="filterTitle">Rezept-Filter & Vorlieben</span>
-                    </div>
-                    <button onclick="generateRecipes()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span data-i18n="generateBtn">Rezepte Generieren</span>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Dietary Filter -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5" data-i18n="dietLabel">Ernährungstyp</label>
-                        <select id="dietFilter" onchange="generateRecipes()" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="all" data-i18n="dietAll">Alle Ernährungsformen</option>
-                            <option value="Vegetarisch" data-i18n="dietVeg">Vegetarisch</option>
-                            <option value="Vegan" data-i18n="dietVegan">Vegan</option>
-                            <option value="Glutenfrei" data-i18n="dietGF">Glutenfrei</option>
-                            <option value="Low-Carb" data-i18n="dietLC">Low Carb</option>
-                        </select>
-                    </div>
-
-                    <!-- Max Time Filter -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5" data-i18n="timeLabel">Max. Zubereitungszeit</label>
-                        <select id="timeFilter" onchange="generateRecipes()" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="all" data-i18n="timeAny">Egal (Jede Dauer)</option>
-                            <option value="15" data-i18n="time15">Unter 15 Minuten</option>
-                            <option value="30" data-i18n="time30">Unter 30 Minuten</option>
-                            <option value="45" data-i18n="time45">Unter 45 Minuten</option>
-                        </select>
-                    </div>
-
-                    <!-- Cuisine Style -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5" data-i18n="cuisineLabel">Küche / Stil</label>
-                        <select id="cuisineFilter" onchange="generateRecipes()" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="all" data-i18n="cuisineAll">Alle Küchen</option>
-                            <option value="Italienisch">Italienisch</option>
-                            <option value="Asiatisch">Asiatisch / Orientalisch</option>
-                            <option value="Mediterran">Mediterran</option>
-                            <option value="Klassisch">Klassisch / Hausmannskost</option>
-                        </select>
-                    </div>
-
-                    <!-- Search Input Filter -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5" data-i18n="searchRecipeLabel">Rezept-Name Suche</label>
-                        <div class="relative">
-                            <input type="text" id="recipeSearchKeyword" onkeyup="generateRecipes()" placeholder="z.B. Pasta, Suppe..." class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recipe Results Section -->
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-book-open text-coral-500"></i>
-                        <span data-i18n="recipesFoundTitle">Gefundene & Kreierte Rezepte</span>
-                        <span id="recipeCountBadge" class="ml-2 px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">0</span>
-                    </h3>
-                    <button onclick="openCustomRecipeModal()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-plus-circle"></i>
-                        <span data-i18n="createCustomRecipe">Eigenes Rezept eintragen</span>
-                    </button>
-                </div>
-
-                <!-- Grid of Cards -->
-                <div id="recipeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Dynamic Recipe Cards populate here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. WEEKLY MEAL PLANNER TAB -->
-        <section id="tab-weekly" class="tab-content hidden space-y-6">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white dark:bg-darkcard p-6 rounded-3xl border border-slate-200/80 dark:border-emerald-900/30 shadow-md">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-regular fa-calendar-check text-emerald-600 dark:text-emerald-400"></i>
-                        <span data-i18n="weeklyTitle">Wochen-Speiseplan</span>
-                    </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="weeklySubtitle">Plan deine Mahlzeiten für die ganze Woche und erstelle direkt die passende Einkaufsliste.</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="clearWeeklyPlan()" class="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span data-i18n="clearWeekly">Plan zurücksetzen</span>
-                    </button>
-                    <button onclick="syncWeeklyToShoppingList()" class="px-4 py-2.5 rounded-xl bg-coral-500 hover:bg-coral-600 text-white text-xs font-bold shadow-md shadow-coral-500/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span data-i18n="generateShoppingFromWeekly">In Einkaufsliste übertragen</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 7 Days Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4" id="weeklyGrid">
-                <!-- Days populated dynamically via JavaScript -->
-            </div>
-        </section>
-
-        <!-- 3. SHOPPING LIST TAB -->
-        <section id="tab-shopping" class="tab-content hidden space-y-6">
-            <div class="bg-white dark:bg-darkcard p-6 rounded-3xl border border-slate-200/80 dark:border-emerald-900/30 shadow-md space-y-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-basket-shopping text-terracotta-500"></i>
-                            <span data-i18n="shoppingTitle">Interaktive Einkaufsliste</span>
-                        </h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="shoppingSubtitle">Organisiert nach Kategorien für deinen entspannten Supermarkteinkauf.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyShoppingListToClipboard()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5">
-                            <i class="fa-regular fa-copy"></i>
-                            <span data-i18n="copyList">Kopieren</span>
-                        </button>
-                        <button onclick="clearCompletedShoppingItems()" class="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 text-xs font-bold transition-all flex items-center gap-1.5">
-                            <i class="fa-solid fa-check-double"></i>
-                            <span data-i18n="clearChecked">Erledigte löschen</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Add Custom Item Input -->
-                <div class="flex gap-2">
-                    <input type="text" id="customShoppingInput" onkeypress="handleShoppingKeyPress(event)" placeholder="Neuen Artikel hinzufügen (z.B. 500g Bananen, Milch...)" class="flex-1 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <select id="customShoppingCategory" class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="Gemüse & Obst" data-i18n="catProduce">Gemüse & Obst</option>
-                        <option value="Kühlregal & Milch" data-i18n="catDairy">Kühlregal & Milch</option>
-                        <option value="Vorratskammer & Pasta" data-i18n="catPantry">Vorratskammer</option>
-                        <option value="Gewürze & Öl" data-i18n="catSpices">Gewürze & Öl</option>
-                        <option value="Sonstiges" data-i18n="catOther">Sonstiges</option>
-                    </select>
-                    <button onclick="addCustomShoppingItem()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center gap-1">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                </div>
-
-                <!-- Categorized List Container -->
-                <div id="shoppingCategorizedList" class="space-y-6">
-                    <!-- Dynamic Categorized Items render here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. PANTRY MANAGER TAB -->
-        <section id="tab-pantry" class="tab-content hidden space-y-6">
-            <div class="bg-white dark:bg-darkcard p-6 rounded-3xl border border-slate-200/80 dark:border-emerald-900/30 shadow-md space-y-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-boxes-packing text-emerald-600 dark:text-emerald-400"></i>
-                            <span data-i18n="pantryTitle">Vorratskammer & Vorräte</span>
-                        </h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="pantrySubtitle">Behalte den Überblick über dein Lager und Ablaufdaten, um Lebensmittelverschwendung zu vermeiden.</p>
-                    </div>
-                    <button onclick="openAddPantryModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span data-i18n="addPantryItemBtn">Vorrat hinzufügen</span>
-                    </button>
-                </div>
-
-                <!-- Pantry Table/Grid -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-500 uppercase tracking-wider">
-                            <tr>
-                                <th class="p-3 rounded-l-xl" data-i18n="tblItem">Artikel</th>
-                                <th class="p-3" data-i18n="tblQty">Menge</th>
-                                <th class="p-3" data-i18n="tblExpiry">Mindesthaltbarkeit</th>
-                                <th class="p-3 rounded-r-xl text-right" data-i18n="tblAction">Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pantryTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <!-- Dynamic Pantry rows populate here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. COMMUNITY TAB -->
-        <section id="tab-community" class="tab-content hidden space-y-6">
-            <div class="flex items-center justify-between bg-white dark:bg-darkcard p-6 rounded-3xl border border-slate-200/80 dark:border-emerald-900/30 shadow-md">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-users text-indigo-500"></i>
-                        <span data-i18n="communityTitle">Kulinarische Community</span>
-                    </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="communitySubtitle">Teile Rezepte, Meal-Prep Inspirationen und Kochtipps mit der Community.</p>
-                </div>
-                <button onclick="openCreatePostModal()" class="px-4 py-2.5 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold text-xs shadow-md shadow-coral-500/20 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <span data-i18n="createPostBtn">Beitrag erstellen</span>
-                </button>
-            </div>
-
-            <!-- Feed Container -->
-            <div id="communityFeed" class="space-y-6 max-w-2xl mx-auto">
-                <!-- Dynamic Posts render here -->
-            </div>
-        </section>
-
-    </main>
-
-    <!-- RECIPE DETAIL / COOKING MODE MODAL -->
-    <div id="recipeDetailModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-darkcard w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-200 dark:border-emerald-900/40 overflow-hidden my-8 max-h-[90vh] flex flex-col">
-            <!-- Modal Header Image / Banner -->
-            <div class="relative h-48 sm:h-64 bg-slate-800 flex items-end p-6 bg-cover bg-center" id="recipeModalBanner">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                <button onclick="closeRecipeDetailModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-black/80 flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-                <div class="relative z-10 text-white space-y-1">
-                    <div class="flex items-center gap-2" id="recipeModalBadges">
-                        <!-- Badges -->
-                    </div>
-                    <h3 class="text-2xl sm:text-3xl font-black" id="recipeModalTitle">Rezept Titel</h3>
-                </div>
-            </div>
-
-            <!-- Modal Body Scrollable -->
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
-                <!-- Meta Info Grid -->
-                <div class="grid grid-cols-3 gap-3 bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 text-center">
-                    <div>
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="prepTime">Dauer</span>
-                        <span class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center justify-center gap-1 mt-0.5">
-                            <i class="fa-regular fa-clock"></i> <span id="recipeModalTime">30 Min</span>
-                        </span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="calories">Kalorien</span>
-                        <span class="text-sm font-extrabold text-coral-600 dark:text-coral-400 flex items-center justify-center gap-1 mt-0.5">
-                            <i class="fa-solid fa-fire"></i> <span id="recipeModalCalories">450 kcal</span>
-                        </span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="servings">Portionen</span>
-                        <div class="flex items-center justify-center gap-2 mt-0.5">
-                            <button onclick="adjustRecipeServings(-1)" class="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-700 font-bold text-xs flex items-center justify-center">-</button>
-                            <span class="text-sm font-extrabold text-slate-800 dark:text-white" id="recipeModalServings">2</span>
-                            <button onclick="adjustRecipeServings(1)" class="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-700 font-bold text-xs flex items-center justify-center">+</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="addCurrentRecipeToShopping()" class="flex-1 py-2.5 px-4 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span data-i18n="addModalToShopping">Zutaten zur Einkaufsliste</span>
-                    </button>
-                    <button onclick="openAddToWeeklyModal()" class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-calendar-plus"></i>
-                        <span data-i18n="addModalToWeekly">Zum Wochenplaner</span>
-                    </button>
-                </div>
-
-                <!-- Ingredients List -->
-                <div class="space-y-3">
-                    <h4 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-emerald-600"></i>
-                        <span data-i18n="ingredientsNeeded">Benötigte Zutaten</span>
-                    </h4>
-                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium" id="recipeModalIngredients">
-                        <!-- Dynamic list -->
-                    </ul>
-                </div>
-
-                <!-- Step by Step Instructions -->
-                <div class="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
-                    <h4 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-shoe-prints text-coral-500"></i>
-                        <span data-i18n="stepByStep">Zubereitungsschritte</span>
-                    </h4>
-                    <div class="space-y-3" id="recipeModalSteps">
-                        <!-- Interactive check steps -->
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="chips" id="quickTags"></div>
+    <div class="row" style="justify-content:space-between"><b data-t="selected">Gewählte Zutaten</b><button class="iconbtn" onclick="clearIngredients()" data-t="clear">Alle löschen</button></div>
+    <div class="chips" id="selectedTags"></div>
+  </div>
+  <div class="card">
+    <div class="sectionhead"><h3 data-t="filters">Filter & Vorlieben</h3><button class="primary" onclick="renderRecipes()">✨ <span data-t="generate">Rezepte generieren</span></button></div>
+    <div class="filters">
+      <label><span data-t="diet">Ernährung</span><select id="diet" onchange="renderRecipes()"><option value="all">Alle</option><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label>
+      <label><span data-t="time">Max. Zeit</span><select id="time" onchange="renderRecipes()"><option value="all">Egal</option><option value="15">15 Min</option><option value="30">30 Min</option><option value="45">45 Min</option></select></label>
+      <label><span data-t="cuisine">Küche</span><select id="cuisine" onchange="renderRecipes()"><option value="all">Alle</option><option>Italienisch</option><option>Mediterran</option><option>Asiatisch</option><option>Klassisch</option></select></label>
+      <label><span data-t="search">Suche</span><input id="search" placeholder="Rezeptname…" oninput="renderRecipes()"></label>
     </div>
-
-    <!-- KITCHEN TIMER MODAL -->
-    <div id="timerModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkcard w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-emerald-900/40 space-y-6">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-extrabold flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-                    <i class="fa-solid fa-stopwatch"></i>
-                    <span data-i18n="timerTitle">Küchen-Timer</span>
-                </h3>
-                <button onclick="toggleTimerModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            <!-- Big Digital Display -->
-            <div class="bg-slate-900 text-emerald-400 font-mono text-5xl py-6 rounded-2xl text-center shadow-inner tracking-widest border border-emerald-900" id="timerDisplay">
-                00:00
-            </div>
-
-            <!-- Timer Quick Presets -->
-            <div class="grid grid-cols-3 gap-2 text-xs font-bold">
-                <button onclick="setPresetTimer(360)" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 text-slate-700 dark:text-slate-200">Eier (6m)</button>
-                <button onclick="setPresetTimer(480)" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 text-slate-700 dark:text-slate-200">Pasta (8m)</button>
-                <button onclick="setPresetTimer(1500)" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 text-slate-700 dark:text-slate-200">Backen (25m)</button>
-            </div>
-
-            <!-- Custom Input & Controls -->
-            <div class="space-y-4">
-                <div class="flex items-center gap-2">
-                    <input type="number" id="customTimerMinutes" placeholder="Minuten" min="1" max="180" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-center font-bold">
-                    <button onclick="setCustomTimer()" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold" data-i18n="setBtn">Setzen</button>
-                </div>
-                <div class="flex gap-2">
-                    <button id="startTimerBtn" onclick="toggleTimerStart()" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all" data-i18n="startBtn">Start</button>
-                    <button onclick="resetTimer()" class="px-5 py-3 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-600 font-bold text-sm" data-i18n="resetBtn">Reset</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD PANTRY ITEM MODAL -->
-    <div id="addPantryModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkcard w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-emerald-900/40 space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="addPantryTitle">Neuen Vorrat eintragen</h3>
-                <button onclick="closeAddPantryModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblItemName">Bezeichnung</label>
-                    <input type="text" id="pantryItemName" placeholder="z.B. Olivenöl, Pasta, Haferflocken" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblItemQty">Menge / Einheit</label>
-                    <input type="text" id="pantryItemQty" placeholder="z.B. 1 Flasche, 500g" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblItemExpiry">Mindesthaltbarkeitsdatum</label>
-                    <input type="date" id="pantryItemExpiry" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <button onclick="savePantryItem()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all" data-i18n="saveBtn">Speichern</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CREATE COMMUNITY POST MODAL -->
-    <div id="createPostModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkcard w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-emerald-900/40 space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="createPostTitle">Beitrag veröffentlichen</h3>
-                <button onclick="closeCreatePostModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblAuthor">Dein Name / Name</label>
-                    <input type="text" id="postAuthorInput" placeholder="z.B. Chef Maria" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblPostTitle">Titel / Thema</label>
-                    <input type="text" id="postTitleInput" placeholder="z.B. Mein Sonntags Meal Prep Trick" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1" data-i18n="lblPostText">Inhalt / Rezepttipp</label>
-                    <textarea id="postTextInput" rows="4" placeholder="Schreibe deinen Rezept-Tipp oder deine Story..." class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs"></textarea>
-                </div>
-                <button onclick="submitCommunityPost()" class="w-full py-3 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm transition-all" data-i18n="publishBtn">Veröffentlichen</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD CUSTOM RECIPE MODAL -->
-    <div id="customRecipeModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkcard w-full max-w-xl rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-emerald-900/40 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="createCustomTitle">Eigenes Rezept eintragen</h3>
-                <button onclick="closeCustomRecipeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1">Rezept Name</label>
-                    <input type="text" id="crTitle" placeholder="z.B. Omas Linseneintopf" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Dauer (Minuten)</label>
-                        <input type="number" id="crTime" value="25" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-500 mb-1">Ernährung</label>
-                        <select id="crDiet" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs font-bold">
-                            <option value="Vegetarisch">Vegetarisch</option>
-                            <option value="Vegan">Vegan</option>
-                            <option value="Glutenfrei">Glutenfrei</option>
-                            <option value="Low-Carb">Low-Carb</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1">Zutaten (Kommagetrennt)</label>
-                    <input type="text" id="crIngredients" placeholder="Linsen, Karotten, Brühe, Zwiebeln" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs">
-                </div>
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1">Zubereitungsschritte (Eine pro Zeile)</label>
-                    <textarea id="crSteps" rows="3" placeholder="1. Gemüse schneiden&#10;2. Alles anbraten und köcheln lassen" class="w-full bg-slate-50 dark:bg-slate-800 border rounded-xl p-2.5 text-xs"></textarea>
-                </div>
-                <button onclick="saveCustomRecipe()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all">Rezept Speichern</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toastContainer" class="fixed bottom-16 md:bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- JAVASCRIPT APPLICATION LOGIC -->
-    <script>
-        /* ==========================================================================
-           1. INITIAL STATE & LOCAL STORAGE DATABASE
-           ========================================================================== */
-        const PRESET_QUICK_TAGS = ['Tomaten', 'Pasta', 'Knoblauch', 'Hähnchen', 'Paprika', 'Zucchini', 'Käse', 'Reis', 'Eier', 'Tofu', 'Pilze'];
-
-        const PRESET_RECIPES = [
-            {
-                id: 'rec-1',
-                title: 'Cremige Knoblauch Pasta',
-                time: 20,
-                calories: 520,
-                diet: 'Vegetarisch',
-                cuisine: 'Italienisch',
-                ingredients: ['Pasta', 'Knoblauch', 'Sahne', 'Parmesan', 'Butter', 'Petersilie'],
-                steps: [
-                    'Pasta in reichlich Salzwasser al dente kochen.',
-                    'Knoblauch fein hacken und in Butter goldbraun dünsten.',
-                    'Sahne und etwas Nudelwasser dazugeben und leicht einkochen lassen.',
-                    'Geriebenen Parmesan einrühren, mit Salz und Pfeffer abschmecken.',
-                    'Nudeln unter die Soße heben und mit frischer Petersilie servieren.'
-                ],
-                image: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=600&q=80'
-            },
-            {
-                id: 'rec-2',
-                title: 'Mediterrane Gemüse-Pfanne',
-                time: 25,
-                calories: 380,
-                diet: 'Vegan',
-                cuisine: 'Mediterran',
-                ingredients: ['Paprika', 'Zucchini', 'Tomaten', 'Knoblauch', 'Olivenöl', 'Kräuter'],
-                steps: [
-                    'Zucchini und Paprika in mundgerechte Stücke schneiden.',
-                    'Olivenöl in einer Pfanne erhitzen und Knoblauch kurz anbraten.',
-                    'Gemüse hinzugeben und bei mittlerer Hitze 10-12 Minuten knusprig dünsten.',
-                    'Halbierte Tomaten und mediterrane Kräuter hinzufügen.',
-                    'Mit Meersalz und schwarzem Pfeffer abschmecken.'
-                ],
-                image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80'
-            },
-            {
-                id: 'rec-3',
-                title: 'Asiatische Tofu-Reis-Bowl',
-                time: 30,
-                calories: 460,
-                diet: 'Vegan',
-                cuisine: 'Asiatisch',
-                ingredients: ['Tofu', 'Reis', 'Paprika', 'Sojasauce', 'Ingwer', 'Sesam'],
-                steps: [
-                    'Reis nach Packungsanleitung gar kochen.',
-                    'Tofu würfeln und in Sesamöl knusprig anbraten.',
-                    'Paprika und Ingwer hinzugeben und mit Sojasauce ablöschen.',
-                    'Reis in Schüsseln anrichten, Tofu-Gemüse-Mix darauf verteilen.',
-                    'Mit geröstetem Sesam bestreuen.'
-                ],
-                image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80'
-            },
-            {
-                id: 'rec-4',
-                title: 'Würziges Hähnchen-Curry',
-                time: 35,
-                calories: 580,
-                diet: 'Low-Carb',
-                cuisine: 'Asiatisch',
-                ingredients: ['Hähnchen', 'Kokosmilch', 'Paprika', 'Currypaste', 'Knoblauch'],
-                steps: [
-                    'Hähnchenbrust in Streifen schneiden und goldbraun anbraten.',
-                    'Currypaste und Knoblauch dazugeben und kurz anrösten.',
-                    'Mit Kokosmilch gießen und auf kleiner Stufe simmern lassen.',
-                    'Paprikastreifen hinzugeben und 10 Minuten köcheln lassen.'
-                ],
-                image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=600&q=80'
-            }
-        ];
-
-        // Global State initialized from LocalStorage
-        let appState = {
-            lang: localStorage.getItem('kp_lang') || 'de',
-            darkMode: localStorage.getItem('kp_dark') === 'true',
-            selectedIngredients: [],
-            customRecipes: JSON.parse(localStorage.getItem('kp_custom_recipes')) || [],
-            weeklyPlan: JSON.parse(localStorage.getItem('kp_weekly')) || {
-                Mon: { breakfast: null, lunch: null, dinner: null },
-                Tue: { breakfast: null, lunch: null, dinner: null },
-                Wed: { breakfast: null, lunch: null, dinner: null },
-                Thu: { breakfast: null, lunch: null, dinner: null },
-                Fri: { breakfast: null, lunch: null, dinner: null },
-                Sat: { breakfast: null, lunch: null, dinner: null },
-                Sun: { breakfast: null, lunch: null, dinner: null }
-            },
-            shoppingList: JSON.parse(localStorage.getItem('kp_shopping')) || [
-                { id: 's1', name: 'Tomaten', category: 'Gemüse & Obst', checked: false },
-                { id: 's2', name: 'Hafermilch', category: 'Kühlregal & Milch', checked: true }
-            ],
-            pantry: JSON.parse(localStorage.getItem('kp_pantry')) || [
-                { id: 'p1', name: 'Pasta / Spaghetti', qty: '1 kg', expiry: '2026-12-01' },
-                { id: 'p2', name: 'Olivenöl Native', qty: '750 ml', expiry: '2027-05-15' }
-            ],
-            posts: JSON.parse(localStorage.getItem('kp_posts')) || [
-                {
-                    id: 'post-1',
-                    author: 'Laura K.',
-                    title: 'Bester Trick für knusprigen Tofu!',
-                    text: 'Presst den Tofu vorher gründlich aus und wendet ihn in etwas Speisestärke vor dem Anbraten. Passt perfekt zu jeder Stir-Fry Bowl!',
-                    likes: 14,
-                    comments: ['Super Tipp, danke!', 'Funktioniert auch hervorragend in der Heißluftfritteuse!']
-                }
-            ]
-        };
-
-        // Active Recipe Modal State
-        let activeModalRecipe = null;
-        let activeServings = 2;
-
-        // Kitchen Timer State
-        let timerInterval = null;
-        let timerTotalSeconds = 0;
-        let timerRemainingSeconds = 0;
-        let timerIsRunning = false;
-
-        /* ==========================================================================
-           2. TRANSLATION DICTIONARY
-           ========================================================================== */
-        const i18n = {
-            de: {
-                navGenerator: 'Rezept-Generator',
-                navWeekly: 'Wochenplaner',
-                navShopping: 'Einkaufsliste',
-                navPantry: 'Vorratskammer',
-                navCommunity: 'Community',
-                mobRezepte: 'Rezepte',
-                mobPlaner: 'Planer',
-                mobEinkauf: 'Einkauf',
-                mobVorrat: 'Vorrat',
-                mobSocial: 'Social',
-                generatorBadge: 'Intelligente Rezept-Synthese & KI Scan',
-                generatorTitle: 'Was möchtest du heute kochen?',
-                generatorSubtitle: 'Gib vorhandene Zutaten ein, wähle Tags aus oder nutze die Foto-Erkennung, um perfekt passende Rezepte zu kreieren.',
-                addBtn: 'Hinzufügen',
-                scanBtn: 'Foto-Scan',
-                quickAddLabel: 'Schnellauswahl:',
-                selectedIngs: 'Gewählte Zutaten:',
-                clearAll: 'Alle löschen',
-                noIngsPlaceholder: 'Noch keine Zutaten hinzugefügt. Klicke oben oder gib etwas ein!',
-                filterTitle: 'Rezept-Filter & Vorlieben',
-                generateBtn: 'Rezepte Generieren',
-                dietLabel: 'Ernährungstyp',
-                dietAll: 'Alle Ernährungsformen',
-                dietVeg: 'Vegetarisch',
-                dietVegan: 'Vegan',
-                dietGF: 'Glutenfrei',
-                dietLC: 'Low Carb',
-                timeLabel: 'Max. Zubereitungszeit',
-                timeAny: 'Egal (Jede Dauer)',
-                time15: 'Unter 15 Minuten',
-                time30: 'Unter 30 Minuten',
-                time45: 'Unter 45 Minuten',
-                cuisineLabel: 'Küche / Stil',
-                cuisineAll: 'Alle Küchen',
-                searchRecipeLabel: 'Rezept Suche',
-                recipesFoundTitle: 'Gefundene & Kreierte Rezepte',
-                createCustomRecipe: 'Eigenes Rezept eintragen',
-                weeklyTitle: 'Wochen-Speiseplan',
-                weeklySubtitle: 'Plan deine Mahlzeiten für die ganze Woche und erstelle direkt die passende Einkaufsliste.',
-                clearWeekly: 'Plan zurücksetzen',
-                generateShoppingFromWeekly: 'In Einkaufsliste übertragen',
-                shoppingTitle: 'Interaktive Einkaufsliste',
-                shoppingSubtitle: 'Organisiert nach Kategorien für deinen entspannten Supermarkteinkauf.',
-                copyList: 'Kopieren',
-                clearChecked: 'Erledigte löschen',
-                catProduce: 'Gemüse & Obst',
-                catDairy: 'Kühlregal & Milch',
-                catPantry: 'Vorratskammer',
-                catSpices: 'Gewürze & Öl',
-                catOther: 'Sonstiges',
-                pantryTitle: 'Vorratskammer & Vorräte',
-                pantrySubtitle: 'Behalte den Überblick über dein Lager und Ablaufdaten, um Lebensmittelverschwendung zu vermeiden.',
-                addPantryItemBtn: 'Vorrat hinzufügen',
-                tblItem: 'Artikel',
-                tblQty: 'Menge',
-                tblExpiry: 'Mindesthaltbarkeit',
-                tblAction: 'Aktion',
-                communityTitle: 'Kulinarische Community',
-                communitySubtitle: 'Teile Rezepte, Meal-Prep Inspirationen und Kochtipps mit der Community.',
-                createPostBtn: 'Beitrag erstellen',
-                prepTime: 'Dauer',
-                calories: 'Kalorien',
-                servings: 'Portionen',
-                addModalToShopping: 'Zutaten zur Einkaufsliste',
-                addModalToWeekly: 'Zum Wochenplaner',
-                ingredientsNeeded: 'Benötigte Zutaten',
-                stepByStep: 'Zubereitungsschritte',
-                timerTitle: 'Küchen-Timer',
-                startBtn: 'Start',
-                resetBtn: 'Reset',
-                setBtn: 'Setzen',
-                addPantryTitle: 'Neuen Vorrat eintragen',
-                lblItemName: 'Bezeichnung',
-                lblItemQty: 'Menge / Einheit',
-                lblItemExpiry: 'Mindesthaltbarkeitsdatum',
-                saveBtn: 'Speichern',
-                createPostTitle: 'Beitrag veröffentlichen',
-                lblAuthor: 'Dein Name',
-                lblPostTitle: 'Titel / Thema',
-                lblPostText: 'Inhalt / Rezepttipp',
-                publishBtn: 'Veröffentlichen'
-            },
-            en: {
-                navGenerator: 'Recipe Generator',
-                navWeekly: 'Weekly Planner',
-                navShopping: 'Shopping List',
-                navPantry: 'Pantry Manager',
-                navCommunity: 'Community',
-                mobRezepte: 'Recipes',
-                mobPlaner: 'Planner',
-                mobEinkauf: 'Shopping',
-                mobVorrat: 'Pantry',
-                mobSocial: 'Social',
-                generatorBadge: 'Smart Recipe Synthesis & AI Scan',
-                generatorTitle: 'What would you like to cook today?',
-                generatorSubtitle: 'Type available ingredients, click tags, or use photo scan to generate matching recipes.',
-                addBtn: 'Add',
-                scanBtn: 'Photo Scan',
-                quickAddLabel: 'Quick Add:',
-                selectedIngs: 'Selected Ingredients:',
-                clearAll: 'Clear All',
-                noIngsPlaceholder: 'No ingredients added yet. Click above or type to add!',
-                filterTitle: 'Recipe Filters & Preferences',
-                generateBtn: 'Generate Recipes',
-                dietLabel: 'Dietary Preference',
-                dietAll: 'All Diets',
-                dietVeg: 'Vegetarian',
-                dietVegan: 'Vegan',
-                dietGF: 'Gluten-Free',
-                dietLC: 'Low Carb',
-                timeLabel: 'Max Cook Time',
-                timeAny: 'Any Duration',
-                time15: 'Under 15 Mins',
-                time30: 'Under 30 Mins',
-                time45: 'Under 45 Mins',
-                cuisineLabel: 'Cuisine Style',
-                cuisineAll: 'All Cuisines',
-                searchRecipeLabel: 'Search Recipe Name',
-                recipesFoundTitle: 'Found & Created Recipes',
-                createCustomRecipe: 'Add Custom Recipe',
-                weeklyTitle: 'Weekly Meal Plan',
-                weeklySubtitle: 'Plan your meals for the week and auto-generate your grocery shopping list.',
-                clearWeekly: 'Reset Plan',
-                generateShoppingFromWeekly: 'Transfer to Shopping List',
-                shoppingTitle: 'Interactive Shopping List',
-                shoppingSubtitle: 'Organized by categories for stress-free grocery trips.',
-                copyList: 'Copy List',
-                clearChecked: 'Clear Checked',
-                catProduce: 'Produce & Fruits',
-                catDairy: 'Dairy & Chilled',
-                catPantry: 'Pantry & Pasta',
-                catSpices: 'Spices & Oils',
-                catOther: 'Miscellaneous',
-                pantryTitle: 'Pantry & Storage',
-                pantrySubtitle: 'Track your home inventory and expiration dates to prevent food waste.',
-                addPantryItemBtn: 'Add Pantry Item',
-                tblItem: 'Item Name',
-                tblQty: 'Quantity',
-                tblExpiry: 'Expiration Date',
-                tblAction: 'Action',
-                communityTitle: 'Culinary Community',
-                communitySubtitle: 'Share recipes, meal prep ideas, and cooking hacks with everyone.',
-                createPostBtn: 'Create Post',
-                prepTime: 'Time',
-                calories: 'Calories',
-                servings: 'Servings',
-                addModalToShopping: 'Add Ingredients to Grocery List',
-                addModalToWeekly: 'Add to Weekly Plan',
-                ingredientsNeeded: 'Required Ingredients',
-                stepByStep: 'Step-by-Step Cooking Mode',
-                timerTitle: 'Kitchen Timer',
-                startBtn: 'Start',
-                resetBtn: 'Reset',
-                setBtn: 'Set',
-                addPantryTitle: 'Add Pantry Inventory',
-                lblItemName: 'Item Name',
-                lblItemQty: 'Quantity / Unit',
-                lblItemExpiry: 'Expiration Date',
-                saveBtn: 'Save Item',
-                createPostTitle: 'Publish Community Post',
-                lblAuthor: 'Your Name',
-                lblPostTitle: 'Title / Subject',
-                lblPostText: 'Content / Recipe Tip',
-                publishBtn: 'Publish'
-            }
-        };
-
-        /* ==========================================================================
-           3. APPLICATION INITIALIZATION & DOM RENDERING
-           ========================================================================== */
-        window.onload = function() {
-            applyTheme();
-            renderQuickTags();
-            generateRecipes();
-            renderWeeklyPlan();
-            renderShoppingList();
-            renderPantry();
-            renderCommunityFeed();
-            updateShoppingBadge();
-            applyLanguageTexts();
-        };
-
-        function applyTheme() {
-            if (appState.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        function toggleDarkMode() {
-            appState.darkMode = !appState.darkMode;
-            localStorage.setItem('kp_dark', appState.darkMode);
-            applyTheme();
-        }
-
-        function toggleLanguage() {
-            appState.lang = appState.lang === 'de' ? 'en' : 'de';
-            localStorage.setItem('kp_lang', appState.lang);
-            document.getElementById('lang-indicator').innerText = appState.lang.toUpperCase();
-            applyLanguageTexts();
-            generateRecipes();
-            renderWeeklyPlan();
-            renderShoppingList();
-            renderPantry();
-        }
-
-        function applyLanguageTexts() {
-            const dict = i18n[appState.lang];
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (dict[key]) el.innerText = dict[key];
-            });
-            document.getElementById('headerSubtitle').innerText = appState.lang === 'de' ? 'Dein intelligenter Kulinarik-Assistent' : 'Your Smart Culinary Assistant';
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-            // Update Nav Styles
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center gap-2";
-            });
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.className = "nav-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-white dark:bg-emerald-800 text-emerald-700 dark:text-emerald-100 shadow-sm";
-            }
-        }
-
-        function showToast(msg, icon = 'fa-circle-check') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'pointer-events-auto flex items-center gap-3 bg-slate-900/90 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md text-xs font-bold transform transition-all duration-300 translate-y-4 opacity-0';
-            toast.innerHTML = `<i class="fa-solid ${icon} text-emerald-400 dark:text-emerald-600 text-base"></i> <span>${msg}</span>`;
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('translate-y-4', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        /* ==========================================================================
-           4. INGREDIENT TAGS & PHOTO SCAN SIMULATION
-           ========================================================================== */
-        function renderQuickTags() {
-            const container = document.getElementById('quickTagContainer');
-            container.innerHTML = PRESET_QUICK_TAGS.map(tag => `
-                <button onclick="toggleIngredientTag('${tag}')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-all text-xs border border-white/10 flex items-center gap-1">
-                    + ${tag}
-                </button>
-            `).join('');
-        }
-
-        function handleIngredientKeyPress(e) {
-            if (e.key === 'Enter') addCustomIngredient();
-        }
-
-        function addCustomIngredient() {
-            const input = document.getElementById('ingredientInput');
-            const val = input.value.trim();
-            if (val) {
-                const items = val.split(',').map(s => s.trim()).filter(Boolean);
-                items.forEach(item => {
-                    if (!appState.selectedIngredients.includes(item)) {
-                        appState.selectedIngredients.push(item);
-                    }
-                });
-                input.value = '';
-                renderSelectedIngredientChips();
-                generateRecipes();
-            }
-        }
-
-        function toggleIngredientTag(tag) {
-            if (!appState.selectedIngredients.includes(tag)) {
-                appState.selectedIngredients.push(tag);
-            } else {
-                appState.selectedIngredients = appState.selectedIngredients.filter(t => t !== tag);
-            }
-            renderSelectedIngredientChips();
-            generateRecipes();
-        }
-
-        function removeIngredientChip(tag) {
-            appState.selectedIngredients = appState.selectedIngredients.filter(t => t !== tag);
-            renderSelectedIngredientChips();
-            generateRecipes();
-        }
-
-        function clearSelectedIngredients() {
-            appState.selectedIngredients = [];
-            renderSelectedIngredientChips();
-            generateRecipes();
-        }
-
-        function renderSelectedIngredientChips() {
-            const container = document.getElementById('selectedTagChips');
-            const placeholder = document.getElementById('noIngsPlaceholder');
-
-            if (appState.selectedIngredients.length === 0) {
-                container.innerHTML = `<span class="text-xs text-slate-400 italic px-2" id="noIngsPlaceholder">${i18n[appState.lang].noIngsPlaceholder}</span>`;
-                return;
-            }
-
-            container.innerHTML = appState.selectedIngredients.map(tag => `
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-coral-500 to-terracotta-500 text-white text-xs font-bold shadow-sm">
-                    ${tag}
-                    <button onclick="removeIngredientChip('${tag}')" class="hover:text-slate-200">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </span>
-            `).join('');
-        }
-
-        function triggerPhotoScan() {
-            showToast(appState.lang === 'de' ? 'Kamera-Erkennung gestartet...' : 'Camera scanning ingredients...', 'fa-camera');
-            setTimeout(() => {
-                const detected = ['Paprika', 'Zucchini', 'Tomaten', 'Kichererbsen'];
-                detected.forEach(item => {
-                    if (!appState.selectedIngredients.includes(item)) {
-                        appState.selectedIngredients.push(item);
-                    }
-                });
-                renderSelectedIngredientChips();
-                generateRecipes();
-                showToast(appState.lang === 'de' ? 'Zutaten per KI-Kamera erkannt!' : 'Ingredients detected via camera scan!', 'fa-wand-magic-sparkles');
-            }, 1200);
-        }
-
-        /* ==========================================================================
-           5. RECIPE GENERATION ENGINE & SYNTHESIS
-           ========================================================================== */
-        function generateRecipes() {
-            const diet = document.getElementById('dietFilter').value;
-            const maxTime = document.getElementById('timeFilter').value;
-            const cuisine = document.getElementById('cuisineFilter').value;
-            const keyword = document.getElementById('recipeSearchKeyword').value.toLowerCase().trim();
-
-            let allRecipes = [...PRESET_RECIPES, ...appState.customRecipes];
-
-            // Filter logic
-            let filtered = allRecipes.filter(recipe => {
-                // Diet filter
-                if (diet !== 'all' && recipe.diet !== diet) return false;
-                // Max time filter
-                if (maxTime !== 'all' && recipe.time > parseInt(maxTime)) return false;
-                // Cuisine filter
-                if (cuisine !== 'all' && recipe.cuisine !== cuisine) return false;
-                // Keyword filter
-                if (keyword && !recipe.title.toLowerCase().includes(keyword)) return false;
-
-                // Selected Ingredients match check (if ingredients selected)
-                if (appState.selectedIngredients.length > 0) {
-                    const match = appState.selectedIngredients.some(ing => 
-                        recipe.ingredients.some(ri => ri.toLowerCase().includes(ing.toLowerCase()))
-                    );
-                    if (!match) return false;
-                }
-
-                return true;
-            });
-
-            // INTELLIGENT DYNAMIC SYNTHESIS: If user entered ingredients and no preset matches, create synthetic custom recipe!
-            if (filtered.length === 0 && appState.selectedIngredients.length > 0) {
-                const synthesizedRecipe = synthesizeCustomRecipe(appState.selectedIngredients, diet, cuisine);
-                filtered.unshift(synthesizedRecipe);
-            }
-
-            renderRecipeGrid(filtered);
-        }
-
-        function synthesizeCustomRecipe(userIngs, diet, cuisine) {
-            const ingListStr = userIngs.join(', ');
-            const mainIng = userIngs[0] || 'Gemüse';
-            
-            return {
-                id: 'syn-' + Date.now(),
-                title: `${cuisine !== 'all' ? cuisine : 'Frische'} ${mainIng}-Pfanne Deluxe`,
-                time: 25,
-                calories: 420,
-                diet: diet !== 'all' ? diet : 'Vegetarisch',
-                cuisine: cuisine !== 'all' ? cuisine : 'Kreativ',
-                isSynthesized: true,
-                ingredients: [...userIngs, 'Olivenöl', 'Meersalz', 'Frische Kräuter'],
-                steps: [
-                    `Vorbereitung: Frische Zutaten (${ingListStr}) gründlich waschen und in mundgerechte Stücke schneiden.`,
-                    'In einer großen Pfanne Olivenöl erhitzen.',
-                    `Die Zutaten (${mainIng} zuerst) in die Pfanne geben und bei mittlerer Hitze für 10-15 Minuten anbraten.`,
-                    'Mit Pfeffer, Meersalz und Gewürzen nach Geschmack abschmecken.',
-                    'Heiß servieren und genießen!'
-                ],
-                image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80'
-            };
-        }
-
-        function renderRecipeGrid(recipes) {
-            const grid = document.getElementById('recipeGrid');
-            document.getElementById('recipeCountBadge').innerText = recipes.length;
-
-            if (recipes.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center space-y-3 bg-white dark:bg-darkcard rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                        <i class="fa-solid fa-utensils text-4xl text-slate-300 dark:text-slate-600"></i>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 font-semibold">Keine Rezepte für diese Filterkombination gefunden.</p>
-                        <button onclick="clearSelectedIngredients()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 underline">Filter & Zutaten zurücksetzen</button>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = recipes.map(recipe => `
-                <div class="group bg-white dark:bg-darkcard rounded-3xl overflow-hidden border border-slate-200/80 dark:border-emerald-900/30 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col">
-                    <div class="relative h-48 overflow-hidden bg-slate-800">
-                        <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                        
-                        <!-- Badges -->
-                        <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                            <span class="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold">
-                                ${recipe.diet}
-                            </span>
-                            ${recipe.isSynthesized ? `<span class="px-2.5 py-1 rounded-full bg-coral-500 text-white text-[10px] font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> KI Synthese</span>` : ''}
-                        </div>
-
-                        <div class="absolute bottom-3 left-3 right-3 text-white">
-                            <h4 class="text-lg font-bold leading-snug drop-shadow-md">${recipe.title}</h4>
-                        </div>
-                    </div>
-
-                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-emerald-600"></i> ${recipe.time} Min</span>
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-fire text-coral-500"></i> ${recipe.calories} kcal</span>
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-globe text-indigo-500"></i> ${recipe.cuisine || 'International'}</span>
-                        </div>
-
-                        <div>
-                            <span class="block text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-1.5">Zutaten Snapshot</span>
-                            <div class="flex flex-wrap gap-1">
-                                ${recipe.ingredients.slice(0, 4).map(ing => `<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium">${ing}</span>`).join('')}
-                                ${recipe.ingredients.length > 4 ? `<span class="px-1.5 py-0.5 text-[11px] font-bold text-slate-400">+${recipe.ingredients.length - 4}</span>` : ''}
-                            </div>
-                        </div>
-
-                        <button onclick="openRecipeDetailModal('${recipe.id}')" class="w-full py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white font-bold text-xs transition-all flex items-center justify-center gap-2 border border-emerald-200 dark:border-emerald-800/40">
-                            <i class="fa-solid fa-book-open"></i>
-                            <span>Kochmodus & Details</span>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        /* ==========================================================================
-           6. RECIPE DETAIL & STEP-BY-STEP COOKING MODAL
-           ========================================================================== */
-        function openRecipeDetailModal(recipeId) {
-            const all = [...PRESET_RECIPES, ...appState.customRecipes];
-            let found = all.find(r => r.id === recipeId);
-            if (!found) {
-                // If synthesized
-                found = synthesizeCustomRecipe(appState.selectedIngredients, 'all', 'all');
-            }
-
-            activeModalRecipe = found;
-            activeServings = 2;
-
-            document.getElementById('recipeModalTitle').innerText = found.title;
-            document.getElementById('recipeModalTime').innerText = found.time + ' Min';
-            document.getElementById('recipeModalCalories').innerText = found.calories + ' kcal';
-            document.getElementById('recipeModalServings').innerText = activeServings;
-            document.getElementById('recipeModalBanner').style.backgroundImage = `url('${found.image}')`;
-
-            renderRecipeModalIngredients();
-            renderRecipeModalSteps();
-
-            document.getElementById('recipeDetailModal').classList.remove('hidden');
-        }
-
-        function closeRecipeDetailModal() {
-            document.getElementById('recipeDetailModal').classList.add('hidden');
-        }
-
-        function adjustRecipeServings(delta) {
-            activeServings = Math.max(1, Math.min(8, activeServings + delta));
-            document.getElementById('recipeModalServings').innerText = activeServings;
-            renderRecipeModalIngredients();
-        }
-
-        function renderRecipeModalIngredients() {
-            const container = document.getElementById('recipeModalIngredients');
-            const multiplier = activeServings / 2; // base servings = 2
-
-            container.innerHTML = activeModalRecipe.ingredients.map((ing, idx) => `
-                <li class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-                    <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">${ing}</span>
-                </li>
-            `).join('');
-        }
-
-        function renderRecipeModalSteps() {
-            const container = document.getElementById('recipeModalSteps');
-            container.innerHTML = activeModalRecipe.steps.map((step, idx) => `
-                <label class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-100/80 transition-all">
-                    <input type="checkbox" class="mt-1 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4">
-                    <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                        <strong class="text-emerald-600 dark:text-emerald-400 block mb-0.5">Schritt ${idx + 1}</strong>
-                        ${step}
-                    </span>
-                </label>
-            `).join('');
-        }
-
-        function addCurrentRecipeToShopping() {
-            if (!activeModalRecipe) return;
-            activeModalRecipe.ingredients.forEach(ing => {
-                appState.shoppingList.push({
-                    id: 's-' + Date.now() + Math.random(),
-                    name: ing,
-                    category: 'Vorratskammer & Pasta',
-                    checked: false
-                });
-            });
-            saveShoppingList();
-            showToast(appState.lang === 'de' ? 'Zutaten zur Einkaufsliste hinzugefügt!' : 'Ingredients added to shopping list!');
-        }
-
-        /* ==========================================================================
-           7. WEEKLY MEAL PLANNER ENGINE
-           ========================================================================== */
-        const DAYS_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        const DAYS_LABELS = {
-            de: { Mon: 'Montag', Tue: 'Dienstag', Wed: 'Mittwoch', Thu: 'Donnerstag', Fri: 'Freitag', Sat: 'Samstag', Sun: 'Sonntag' },
-            en: { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' }
-        };
-
-        function renderWeeklyPlan() {
-            const grid = document.getElementById('weeklyGrid');
-            const labels = DAYS_LABELS[appState.lang];
-
-            grid.innerHTML = DAYS_KEYS.map(dayKey => {
-                const dayData = appState.weeklyPlan[dayKey];
-
-                return `
-                    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200/80 dark:border-emerald-900/30 p-3 flex flex-col space-y-3">
-                        <div class="text-center border-b border-slate-100 dark:border-slate-800 pb-2">
-                            <span class="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">${labels[dayKey]}</span>
-                        </div>
-
-                        <!-- Meals Slots -->
-                        <div class="space-y-2 flex-1">
-                            ${renderMealSlot(dayKey, 'breakfast', 'Frühstück', dayData.breakfast)}
-                            ${renderMealSlot(dayKey, 'lunch', 'Mittagessen', dayData.lunch)}
-                            ${renderMealSlot(dayKey, 'dinner', 'Abendessen', dayData.dinner)}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderMealSlot(dayKey, mealKey, label, item) {
-            if (item) {
-                return `
-                    <div class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 text-xs relative group">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">${label}</span>
-                        <span class="font-bold text-slate-800 dark:text-slate-100 leading-tight block mt-0.5 truncate">${item.title}</span>
-                        <button onclick="removeWeeklyMeal('${dayKey}', '${mealKey}')" class="absolute top-1 right-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="fa-solid fa-xmark text-xs"></i>
-                        </button>
-                    </div>
-                `;
-            }
-
-            return `
-                <button onclick="assignMealToSlotPrompt('${dayKey}', '${mealKey}')" class="w-full p-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-slate-400 text-[11px] font-semibold text-center transition-all flex flex-col items-center gap-0.5">
-                    <span class="text-[9px] font-bold uppercase tracking-wider">${label}</span>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400">+ Hinzufügen</span>
-                </button>
-            `;
-        }
-
-        function assignMealToSlotPrompt(dayKey, mealKey) {
-            const allRecipes = [...PRESET_RECIPES, ...appState.customRecipes];
-            if (allRecipes.length === 0) return;
-
-            const selected = allRecipes[Math.floor(Math.random() * allRecipes.length)];
-            appState.weeklyPlan[dayKey][mealKey] = {
-                title: selected.title,
-                ingredients: selected.ingredients
-            };
-            saveWeeklyPlan();
-            renderWeeklyPlan();
-            showToast(`${selected.title} eingetragen!`);
-        }
-
-        function removeWeeklyMeal(dayKey, mealKey) {
-            appState.weeklyPlan[dayKey][mealKey] = null;
-            saveWeeklyPlan();
-            renderWeeklyPlan();
-        }
-
-        function clearWeeklyPlan() {
-            DAYS_KEYS.forEach(d => {
-                appState.weeklyPlan[d] = { breakfast: null, lunch: null, dinner: null };
-            });
-            saveWeeklyPlan();
-            renderWeeklyPlan();
-            showToast('Wochenplan zurückgesetzt.');
-        }
-
-        function syncWeeklyToShoppingList() {
-            let addedCount = 0;
-            DAYS_KEYS.forEach(d => {
-                ['breakfast', 'lunch', 'dinner'].forEach(m => {
-                    const meal = appState.weeklyPlan[d][m];
-                    if (meal && meal.ingredients) {
-                        meal.ingredients.forEach(ing => {
-                            appState.shoppingList.push({
-                                id: 's-' + Date.now() + Math.random(),
-                                name: ing,
-                                category: 'Gemüse & Obst',
-                                checked: false
-                            });
-                            addedCount++;
-                        });
-                    }
-                });
-            });
-
-            saveShoppingList();
-            renderShoppingList();
-            showToast(appState.lang === 'de' ? `${addedCount} Zutaten in Einkaufsliste übertragen!` : `${addedCount} ingredients added to grocery list!`);
-        }
-
-        function openAddToWeeklyModal() {
-            if (!activeModalRecipe) return;
-            appState.weeklyPlan.Mon.dinner = {
-                title: activeModalRecipe.title,
-                ingredients: activeModalRecipe.ingredients
-            };
-            saveWeeklyPlan();
-            renderWeeklyPlan();
-            closeRecipeDetailModal();
-            switchTab('weekly');
-            showToast(appState.lang === 'de' ? 'Für Montag Abendessen eingetragen!' : 'Added for Monday Dinner!');
-        }
-
-        function saveWeeklyPlan() {
-            localStorage.setItem('kp_weekly', JSON.stringify(appState.weeklyPlan));
-        }
-
-        /* ==========================================================================
-           8. INTERACTIVE SHOPPING LIST
-           ========================================================================== */
-        function renderShoppingList() {
-            const container = document.getElementById('shoppingCategorizedList');
-            const categories = ['Gemüse & Obst', 'Kühlregal & Milch', 'Vorratskammer & Pasta', 'Gewürze & Öl', 'Sonstiges'];
-
-            container.innerHTML = categories.map(cat => {
-                const items = appState.shoppingList.filter(item => (item.category || 'Sonstiges') === cat);
-
-                if (items.length === 0) return '';
-
-                return `
-                    <div class="space-y-2">
-                        <h4 class="text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-                            <i class="fa-solid fa-layer-group text-coral-500"></i> ${cat}
-                        </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            ${items.map(item => `
-                                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 ${item.checked ? 'opacity-50' : ''}">
-                                    <label class="flex items-center gap-3 cursor-pointer flex-1">
-                                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4">
-                                        <span class="text-xs font-bold ${item.checked ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'}">${item.name}</span>
-                                    </label>
-                                    <button onclick="deleteShoppingItem('${item.id}')" class="text-slate-400 hover:text-rose-500 ml-2">
-                                        <i class="fa-solid fa-xmark text-xs"></i>
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            updateShoppingBadge();
-        }
-
-        function handleShoppingKeyPress(e) {
-            if (e.key === 'Enter') addCustomShoppingItem();
-        }
-
-        function addCustomShoppingItem() {
-            const input = document.getElementById('customShoppingInput');
-            const catSelect = document.getElementById('customShoppingCategory');
-            const val = input.value.trim();
-
-            if (val) {
-                appState.shoppingList.push({
-                    id: 's-' + Date.now(),
-                    name: val,
-                    category: catSelect.value,
-                    checked: false
-                });
-                input.value = '';
-                saveShoppingList();
-                renderShoppingList();
-            }
-        }
-
-        function toggleShoppingItem(id) {
-            const item = appState.shoppingList.find(i => i.id === id);
-            if (item) item.checked = !item.checked;
-            saveShoppingList();
-            renderShoppingList();
-        }
-
-        function deleteShoppingItem(id) {
-            appState.shoppingList = appState.shoppingList.filter(i => i.id !== id);
-            saveShoppingList();
-            renderShoppingList();
-        }
-
-        function clearCompletedShoppingItems() {
-            appState.shoppingList = appState.shoppingList.filter(i => !i.checked);
-            saveShoppingList();
-            renderShoppingList();
-            showToast('Erledigte Artikel entfernt.');
-        }
-
-        function copyShoppingListToClipboard() {
-            const text = appState.shoppingList.map(i => `${i.checked ? '[x]' : '[ ]'} ${i.name}`).join('\n');
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast(appState.lang === 'de' ? 'Einkaufsliste in Zwischenablage kopiert!' : 'Shopping list copied to clipboard!');
-        }
-
-        function updateShoppingBadge() {
-            const badge = document.getElementById('shopping-badge');
-            const count = appState.shoppingList.filter(i => !i.checked).length;
-            if (count > 0) {
-                badge.innerText = count;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-        }
-
-        function saveShoppingList() {
-            localStorage.setItem('kp_shopping', JSON.stringify(appState.shoppingList));
-        }
-
-        /* ==========================================================================
-           9. KITCHEN PANTRY MANAGER
-           ========================================================================== */
-        function renderPantry() {
-            const tbody = document.getElementById('pantryTableBody');
-            tbody.innerHTML = appState.pantry.map(item => `
-                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td class="p-3 font-bold text-slate-800 dark:text-slate-200">${item.name}</td>
-                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">${item.qty}</td>
-                    <td class="p-3 text-slate-600 dark:text-slate-400 font-semibold">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400">
-                            <i class="fa-solid fa-hourglass-half text-[10px]"></i> ${item.expiry}
-                        </span>
-                    </td>
-                    <td class="p-3 text-right">
-                        <button onclick="deletePantryItem('${item.id}')" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function openAddPantryModal() {
-            document.getElementById('addPantryModal').classList.remove('hidden');
-        }
-
-        function closeAddPantryModal() {
-            document.getElementById('addPantryModal').classList.add('hidden');
-        }
-
-        function savePantryItem() {
-            const name = document.getElementById('pantryItemName').value.trim();
-            const qty = document.getElementById('pantryItemQty').value.trim();
-            const expiry = document.getElementById('pantryItemExpiry').value;
-
-            if (name) {
-                appState.pantry.push({
-                    id: 'p-' + Date.now(),
-                    name,
-                    qty: qty || '1 Stk.',
-                    expiry: expiry || '2026-12-31'
-                });
-                localStorage.setItem('kp_pantry', JSON.stringify(appState.pantry));
-                renderPantry();
-                closeAddPantryModal();
-                showToast('Vorrat gespeichert.');
-            }
-        }
-
-        function deletePantryItem(id) {
-            appState.pantry = appState.pantry.filter(p => p.id !== id);
-            localStorage.setItem('kp_pantry', JSON.stringify(appState.pantry));
-            renderPantry();
-        }
-
-        /* ==========================================================================
-           10. LIVE COOKING TIMER
-           ========================================================================== */
-        function toggleTimerModal() {
-            const modal = document.getElementById('timerModal');
-            modal.classList.toggle('hidden');
-        }
-
-        function setPresetTimer(seconds) {
-            timerTotalSeconds = seconds;
-            timerRemainingSeconds = seconds;
-            updateTimerDisplay();
-        }
-
-        function setCustomTimer() {
-            const mins = parseInt(document.getElementById('customTimerMinutes').value);
-            if (mins > 0) {
-                setPresetTimer(mins * 60);
-            }
-        }
-
-        function toggleTimerStart() {
-            const btn = document.getElementById('startTimerBtn');
-            const indicator = document.getElementById('active-timer-indicator');
-
-            if (timerIsRunning) {
-                clearInterval(timerInterval);
-                timerIsRunning = false;
-                btn.innerText = i18n[appState.lang].startBtn;
-                indicator.classList.add('hidden');
-            } else {
-                if (timerRemainingSeconds <= 0) return;
-                timerIsRunning = true;
-                btn.innerText = 'Pause';
-                indicator.classList.remove('hidden');
-
-                timerInterval = setInterval(() => {
-                    timerRemainingSeconds--;
-                    updateTimerDisplay();
-
-                    if (timerRemainingSeconds <= 0) {
-                        clearInterval(timerInterval);
-                        timerIsRunning = false;
-                        btn.innerText = i18n[appState.lang].startBtn;
-                        indicator.classList.add('hidden');
-                        showToast('Timer abgelaufen! Essen ist fertig!', 'fa-bell');
-                    }
-                }, 1000);
-            }
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerIsRunning = false;
-            timerRemainingSeconds = 0;
-            updateTimerDisplay();
-            document.getElementById('startTimerBtn').innerText = i18n[appState.lang].startBtn;
-            document.getElementById('active-timer-indicator').classList.add('hidden');
-        }
-
-        function updateTimerDisplay() {
-            const m = Math.floor(timerRemainingSeconds / 60).toString().padStart(2, '0');
-            const s = (timerRemainingSeconds % 60).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
-        }
-
-        /* ==========================================================================
-           11. COMMUNITY FEED & CUSTOM POST CREATION
-           ========================================================================== */
-        function renderCommunityFeed() {
-            const container = document.getElementById('communityFeed');
-            container.innerHTML = appState.posts.map(post => `
-                <div class="bg-white dark:bg-darkcard rounded-3xl p-6 border border-slate-200/80 dark:border-emerald-900/30 shadow-md space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-coral-500 to-terracotta-500 text-white font-bold flex items-center justify-center text-sm shadow-md">
-                                ${post.author.charAt(0)}
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">${post.author}</h4>
-                                <span class="text-[10px] text-slate-400 font-semibold">Community Mitglied</span>
-                            </div>
-                        </div>
-                        <button onclick="likePost('${post.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-coral-50 dark:bg-coral-950/40 text-coral-600 dark:text-coral-400 text-xs font-bold hover:bg-coral-100 transition-colors">
-                            <i class="fa-solid fa-heart"></i>
-                            <span>${post.likes}</span>
-                        </button>
-                    </div>
-
-                    <div class="space-y-1">
-                        <h3 class="font-black text-base text-slate-900 dark:text-white">${post.title}</h3>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${post.text}</p>
-                    </div>
-
-                    <div class="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kommentare (${post.comments.length})</span>
-                        ${post.comments.map(c => `
-                            <div class="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl text-xs text-slate-700 dark:text-slate-300 font-medium">
-                                "${c}"
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function likePost(id) {
-            const p = appState.posts.find(item => item.id === id);
-            if (p) {
-                p.likes++;
-                localStorage.setItem('kp_posts', JSON.stringify(appState.posts));
-                renderCommunityFeed();
-            }
-        }
-
-        function openCreatePostModal() {
-            document.getElementById('createPostModal').classList.remove('hidden');
-        }
-
-        function closeCreatePostModal() {
-            document.getElementById('createPostModal').classList.add('hidden');
-        }
-
-        function submitCommunityPost() {
-            const author = document.getElementById('postAuthorInput').value.trim();
-            const title = document.getElementById('postTitleInput').value.trim();
-            const text = document.getElementById('postTextInput').value.trim();
-
-            if (author && title && text) {
-                appState.posts.unshift({
-                    id: 'post-' + Date.now(),
-                    author,
-                    title,
-                    text,
-                    likes: 1,
-                    comments: []
-                });
-                localStorage.setItem('kp_posts', JSON.stringify(appState.posts));
-                renderCommunityFeed();
-                closeCreatePostModal();
-                showToast('Beitrag veröffentlicht!');
-            }
-        }
-
-        /* ==========================================================================
-           12. CUSTOM RECIPE CREATION
-           ========================================================================== */
-        function openCustomRecipeModal() {
-            document.getElementById('customRecipeModal').classList.remove('hidden');
-        }
-
-        function closeCustomRecipeModal() {
-            document.getElementById('customRecipeModal').classList.add('hidden');
-        }
-
-        function saveCustomRecipe() {
-            const title = document.getElementById('crTitle').value.trim();
-            const time = parseInt(document.getElementById('crTime').value) || 25;
-            const diet = document.getElementById('crDiet').value;
-            const ingsRaw = document.getElementById('crIngredients').value.trim();
-            const stepsRaw = document.getElementById('crSteps').value.trim();
-
-            if (title && ingsRaw) {
-                const newRec = {
-                    id: 'custom-' + Date.now(),
-                    title,
-                    time,
-                    calories: 450,
-                    diet,
-                    cuisine: 'Eigenes Rezept',
-                    ingredients: ingsRaw.split(',').map(s => s.trim()).filter(Boolean),
-                    steps: stepsRaw.split('\n').filter(Boolean),
-                    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=600&q=80'
-                };
-
-                appState.customRecipes.push(newRec);
-                localStorage.setItem('kp_custom_recipes', JSON.stringify(appState.customRecipes));
-                generateRecipes();
-                closeCustomRecipeModal();
-                showToast('Eigenes Rezept gespeichert!');
-            }
-        }
-    </script>
+  </div>
+  <div class="sectionhead"><h2 data-t="results">Rezepte</h2><button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button></div>
+  <div class="grid" id="recipes"></div>
+</section>
+
+<section class="tab" id="tab-weekly">
+  <div class="card sectionhead"><div><h2 data-t="weekly">Wochenplaner</h2><div class="muted">Plane Mahlzeiten und übertrage Zutaten in deine Einkaufsliste.</div></div><div class="row"><button class="soft" onclick="clearPlan()">Plan leeren</button><button class="accent" onclick="planToShopping()">🛒 Einkaufsliste erstellen</button></div></div>
+  <div class="daygrid" id="week"></div>
+</section>
+
+<section class="tab" id="tab-shopping">
+  <div class="card">
+    <div class="sectionhead"><div><h2 data-t="shopping">Einkaufsliste</h2><div class="muted">Artikel abhaken, ergänzen oder kopieren.</div></div><div class="row"><button class="soft" onclick="copyList()">Kopieren</button><button class="danger" onclick="clearChecked()">Erledigte löschen</button></div></div>
+    <div class="row"><input id="shopInput" placeholder="Artikel hinzufügen…" style="flex:1" onkeydown="if(event.key==='Enter')addShop()"><select id="shopCat"><option>Gemüse & Obst</option><option>Kühlregal & Milch</option><option>Vorratskammer</option><option>Gewürze & Öl</option><option>Sonstiges</option></select><button class="primary" onclick="addShop()">＋</button></div>
+    <div id="shoppingList" style="margin-top:16px"></div>
+  </div>
+</section>
+
+<section class="tab" id="tab-pantry">
+  <div class="card"><div class="sectionhead"><div><h2 data-t="pantry">Vorratskammer</h2><div class="muted">Behalte Menge und Mindesthaltbarkeit im Blick.</div></div><button class="primary" onclick="openPantryForm()">＋ Vorrat hinzufügen</button></div>
+  <div style="overflow:auto"><table><thead><tr><th>Artikel</th><th>Menge</th><th>MHD</th><th></th></tr></thead><tbody id="pantryList"></tbody></table></div></div>
+</section>
+
+<section class="tab" id="tab-community">
+  <div class="card sectionhead"><div><h2 data-t="community">Community</h2><div class="muted">Teile Kochtipps und Rezeptideen.</div></div><button class="accent" onclick="openPostForm()">＋ Beitrag erstellen</button></div>
+  <div id="posts"></div>
+</section>
+</main>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle"></h2><button class="iconbtn" onclick="closeModal()">✕</button></div><div id="modalBody"></div></div></div>
+<div id="toast" style="display:none" class="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+const state={
+ lang:localStorage.getItem("kp_lang")||"de",dark:localStorage.getItem("kp_dark")==="true",
+ ingredients:[],custom:read("kp_custom",[]),
+ plan:read("kp_plan",Object.fromEntries(["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>[d,{breakfast:null,lunch:null,dinner:null}]))),
+ shopping:read("kp_shop",[{id:"s1",name:"Tomaten",category:"Gemüse & Obst",checked:false}]),
+ pantry:read("kp_pantry",[]),posts:read("kp_posts",[]),
+};
+const recipes=[
+{id:"r1",title:"Cremige Knoblauch-Pasta",time:20,calories:520,diet:"Vegetarisch",cuisine:"Italienisch",ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter","Petersilie"],steps:["Pasta in Salzwasser al dente kochen.","Knoblauch in Butter sanft anbraten.","Sahne und etwas Nudelwasser zugeben.","Parmesan einrühren und abschmecken.","Pasta mit der Sauce vermengen und servieren."],image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
+{id:"r2",title:"Mediterrane Gemüsepfanne",time:25,calories:380,diet:"Vegan",cuisine:"Mediterran",ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl","Kräuter"],steps:["Gemüse in Stücke schneiden.","Öl erhitzen und Knoblauch kurz anbraten.","Gemüse 10–12 Minuten braten.","Kräuter zugeben und abschmecken."],image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
+{id:"r3",title:"Tofu-Reis-Bowl",time:30,calories:460,diet:"Vegan",cuisine:"Asiatisch",ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer","Sesam"],steps:["Reis garen.","Tofu würfeln und knusprig braten.","Paprika und Ingwer zugeben.","Mit Sojasauce würzen und mit Reis servieren."],image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"},
+{id:"r4",title:"Würziges Hähnchen-Curry",time:35,calories:580,diet:"Low-Carb",cuisine:"Asiatisch",ingredients:["Hähnchen","Kokosmilch","Paprika","Currypaste","Knoblauch"],steps:["Hähnchen in Streifen schneiden und anbraten.","Currypaste und Knoblauch kurz mitbraten.","Kokosmilch zugießen und köcheln lassen.","Paprika zugeben und garen."],image:"https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80"},
+{id:"r5",title:"Tomaten-Eier-Pfanne",time:15,calories:310,diet:"Vegetarisch",cuisine:"Klassisch",ingredients:["Tomaten","Eier","Zwiebel","Paprika","Kräuter"],steps:["Zwiebel und Paprika anbraten.","Tomaten zugeben und weich köcheln.","Eier hineinschlagen und stocken lassen.","Mit Kräutern servieren."],image:"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"}
+];
+const quick=["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu","Pilze"];
+const days={Mon:"Montag",Tue:"Dienstag",Wed:"Mittwoch",Thu:"Donnerstag",Fri:"Freitag",Sat:"Samstag",Sun:"Sonntag"};
+const meals={breakfast:"Frühstück",lunch:"Mittagessen",dinner:"Abendessen"};
+function save(){localStorage.setItem("kp_custom",JSON.stringify(state.custom));localStorage.setItem("kp_plan",JSON.stringify(state.plan));localStorage.setItem("kp_shop",JSON.stringify(state.shopping));localStorage.setItem("kp_pantry",JSON.stringify(state.pantry));localStorage.setItem("kp_posts",JSON.stringify(state.posts))}
+function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2400)}
+function init(){
+ document.documentElement.classList.toggle("dark",state.dark);
+ $("nav").innerHTML=[["recipes","🍳 Rezepte"],["weekly","📅 Planer"],["shopping","🛒 Einkauf"],["pantry","📦 Vorrat"],["community","👥 Community"]].map(([id,label],i)=>`<button class="navbtn ${i===0?"active":""}" onclick="tab('${id}',this)">${label}</button>`).join("");
+ $("quickTags").innerHTML=quick.map(x=>`<button class="chip" onclick="toggleIng('${x}')">＋ ${x}</button>`).join("");
+ renderSelected();renderRecipes();renderWeek();renderShopping();renderPantry();renderPosts();
+}
+function tab(id,btn){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));$("tab-"+id).classList.add("active");document.querySelectorAll(".navbtn").forEach(x=>x.classList.remove("active"));btn?.classList.add("active")}
+function toggleTheme(){state.dark=!state.dark;localStorage.setItem("kp_dark",state.dark);document.documentElement.classList.toggle("dark",state.dark)}
+function toggleLang(){state.lang=state.lang==="de"?"en":"de";localStorage.setItem("kp_lang",state.lang);$("langBtn").textContent=state.lang.toUpperCase();toast(state.lang==="en"?"Language toggle is a visual preference in this demo.":"Sprache geändert.")}
+function addIngredients(){const val=$("ingredientInput").value.trim();if(val)val.split(",").map(x=>x.trim()).filter(Boolean).forEach(x=>{if(!state.ingredients.includes(x))state.ingredients.push(x)});$("ingredientInput").value="";renderSelected();renderRecipes()}
+function toggleIng(x){state.ingredients=state.ingredients.includes(x)?state.ingredients.filter(y=>y!==x):[...state.ingredients,x];renderSelected();renderRecipes()}
+function renderSelected(){$("selectedTags").innerHTML=state.ingredients.length?state.ingredients.map(x=>`<button class="chip" onclick="toggleIng('${esc(x)}')">${esc(x)} ✕</button>`).join(""):'<span class="muted">Noch keine Zutaten gewählt.</span>'}
+function clearIngredients(){state.ingredients=[];renderSelected();renderRecipes()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderRecipes(){
+ let list=[...recipes,...state.custom],diet=$("diet").value,time=$("time").value,cuisine=$("cuisine").value,search=$("search").value.toLowerCase();
+ list=list.filter(r=>(diet==="all"||r.diet===diet)&&(time==="all"||r.time<=+time)&&(cuisine==="all"||r.cuisine===cuisine)&&(!search||r.title.toLowerCase().includes(search))&&(!state.ingredients.length||state.ingredients.some(i=>r.ingredients.some(x=>x.toLowerCase().includes(i.toLowerCase())))));
+ if(!list.length&&state.ingredients.length)list=[synthesize()];
+ $("recipes").innerHTML=list.length?list.map(r=>`<article class="card recipe"><img src="${esc(r.image||"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt=""><div class="recipebody"><h3>${esc(r.title)}</h3><div class="muted">⏱ ${r.time} min · 🔥 ${r.calories||400} kcal · ${esc(r.cuisine||"Kreativ")}</div><div class="chips">${r.ingredients.slice(0,5).map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div><button class="primary" onclick="recipeDetail('${esc(r.id)}')">Kochmodus & Details</button></div></article>`).join(""):'<div class="card">Keine Rezepte gefunden. Ändere deine Filter oder Zutaten.</div>';
+}
+function synthesize(){let ing=state.ingredients;return{id:"synth",title:`Kreative ${ing[0]||"Gemüse"}-Pfanne`,time:25,calories:420,diet:$("diet").value==="all"?"Vegetarisch":$("diet").value,cuisine:$("cuisine").value==="all"?"Kreativ":$("cuisine").value,ingredients:[...ing,"Olivenöl","Salz","Kräuter"],steps:["Zutaten waschen und mundgerecht schneiden.","Öl in einer Pfanne erhitzen.","Feste Zutaten zuerst anbraten, dann restliche Zutaten zugeben und garen.","Mit Salz, Pfeffer und Kräutern abschmecken und servieren."],image:""}}
+function getRecipe(id){return [...recipes,...state.custom].find(r=>r.id===id)||(id==="synth"?synthesize():null)}
+function recipeDetail(id){let r=getRecipe(id);if(!r)return;openModal(r.title,`<p class="muted">⏱ ${r.time} Minuten · ${r.calories||420} kcal · ${esc(r.diet)}</p><h3>Zutaten</h3><ul>${r.ingredients.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="row"><button class="accent" onclick="recipeToShop('${esc(r.id)}')">Zutaten zur Einkaufsliste</button><button class="primary" onclick="recipeToPlan('${esc(r.id)}')">Zum Wochenplan</button></div><h3 style="margin-top:18px">Zubereitung</h3>${r.steps.map((s,i)=>`<label class="step"><input type="checkbox"> Schritt ${i+1}: ${esc(s)}</label>`).join("")}`)}
+function recipeToShop(id){let r=getRecipe(id);r.ingredients.forEach(name=>state.shopping.push({id:crypto.randomUUID?.()||String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false}));save();renderShopping();closeModal();toast("Zutaten zur Einkaufsliste hinzugefügt")}
+function recipeToPlan(id){let r=getRecipe(id);state.plan.Mon.dinner={title:r.title,ingredients:r.ingredients};save();renderWeek();closeModal();tab("weekly",document.querySelectorAll(".navbtn")[1]);toast("Für Montagabend eingeplant")}
+function renderWeek(){$("week").innerHTML=Object.entries(days).map(([key,label])=>`<div class="card day"><b>${label}</b>${Object.entries(meals).map(([m,ml])=>{let item=state.plan[key]?.[m];return `<div class="slot"><b>${ml}</b><br>${item?esc(item.title):"—"}<button class="soft" onclick="chooseMeal('${key}','${m}')">${item?"Ändern":"＋ Hinzufügen"}</button>${item?`<button class="iconbtn" onclick="removeMeal('${key}','${m}')">Entfernen</button>`:""}</div>`}).join("")}</div>`).join("")}
+function chooseMeal(day,meal){let all=[...recipes,...state.custom];let options=all.map((r,i)=>`${i+1}. ${r.title}`).join("\n");let n=prompt("Rezeptnummer wählen:\n"+options);let r=all[+n-1];if(r){state.plan[day][meal]={title:r.title,ingredients:r.ingredients};save();renderWeek()}}
+function removeMeal(d,m){state.plan[d][m]=null;save();renderWeek()}
+function clearPlan(){Object.keys(state.plan).forEach(d=>state.plan[d]={breakfast:null,lunch:null,dinner:null});save();renderWeek()}
+function planToShopping(){let n=0;Object.values(state.plan).forEach(d=>Object.values(d).forEach(m=>m?.ingredients?.forEach(name=>{state.shopping.push({id:String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false});n++})));save();renderShopping();toast(`${n} Zutaten übertragen`)}
+function renderShopping(){let cats=["Gemüse & Obst","Kühlregal & Milch","Vorratskammer","Gewürze & Öl","Sonstiges"];$("shoppingList").innerHTML=cats.map(cat=>{let items=state.shopping.filter(x=>x.category===cat);return items.length?`<h3 style="margin-top:18px">${cat}</h3><div class="list">${items.map(x=>`<div class="listitem"><input type="checkbox" ${x.checked?"checked":""} onchange="checkShop('${esc(x.id)}')"><span class="${x.checked?"checked":""}">${esc(x.name)}</span><button class="iconbtn" onclick="deleteShop('${esc(x.id)}')">✕</button></div>`).join("")}</div>`:""}).join("")||'<p class="muted">Deine Einkaufsliste ist leer.</p>'}
+function addShop(){let name=$("shopInput").value.trim();if(!name)return;state.shopping.push({id:String(Date.now()),name,category:$("shopCat").value,checked:false});$("shopInput").value="";save();renderShopping()}
+function checkShop(id){let x=state.shopping.find(i=>i.id===id);if(x)x.checked=!x.checked;save();renderShopping()}
+function deleteShop(id){state.shopping=state.shopping.filter(x=>x.id!==id);save();renderShopping()}
+function clearChecked(){state.shopping=state.shopping.filter(x=>!x.checked);save();renderShopping()}
+async function copyList(){let text=state.shopping.map(x=>`${x.checked?"[x]":"[ ]"} ${x.name}`).join("\n");try{await navigator.clipboard.writeText(text);toast("Liste kopiert")}catch{prompt("Liste kopieren:",text)}}
+function renderPantry(){$("pantryList").innerHTML=state.pantry.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.qty)}</td><td>${esc(x.expiry||"—")}</td><td><button class="danger" onclick="deletePantry('${esc(x.id)}')">Löschen</button></td></tr>`).join("")||'<tr><td colspan="4" class="muted">Noch keine Vorräte eingetragen.</td></tr>'}
+function openPantryForm(){openModal("Vorrat hinzufügen",`<div class="field"><label>Artikel<input id="pname"></label><label>Menge<input id="pqty" placeholder="z. B. 500 g"></label><label>Mindesthaltbarkeit<input id="pexp" type="date"></label><button class="primary" onclick="savePantry()">Speichern</button></div>`)}
+function savePantry(){let name=$("pname").value.trim();if(!name)return;state.pantry.push({id:String(Date.now()),name,qty:$("pqty").value||"1 Stück",expiry:$("pexp").value});save();renderPantry();closeModal()}
+function deletePantry(id){state.pantry=state.pantry.filter(x=>x.id!==id);save();renderPantry()}
+function renderPosts(){$("posts").innerHTML=state.posts.map((p,i)=>`<article class="card post"><div class="muted">👩‍🍳 ${esc(p.author)}</div><h3>${esc(p.title)}</h3><p>${esc(p.text)}</p><button class="soft" onclick="like(${i})">♥ ${p.likes||0}</button></article>`).join("")||'<div class="card muted">Noch keine Beiträge. Teile den ersten Kochtipp!</div>'}
+function openPostForm(){openModal("Beitrag erstellen",`<div class="field"><label>Name<input id="pauthor" value="Küchenfreund"></label><label>Titel<input id="ptitle"></label><label>Beitrag<textarea id="ptext" rows="4"></textarea></label><button class="accent" onclick="savePost()">Veröffentlichen</button></div>`)}
+function savePost(){let title=$("ptitle").value.trim(),text=$("ptext").value.trim();if(!title||!text)return;state.posts.unshift({author:$("pauthor").value||"Küchenfreund",title,text,likes:0});save();renderPosts();closeModal()}
+function like(i){state.posts[i].likes=(state.posts[i].likes||0)+1;save();renderPosts()}
+function openRecipeForm(){openModal("Eigenes Rezept",`<div class="field"><label>Name<input id="rtitle"></label><label>Zeit in Minuten<input id="rtime" type="number" value="25"></label><label>Ernährung<select id="rdiet"><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label><label>Küche<input id="rcuisine" value="Klassisch"></label><label>Zutaten, durch Kommas getrennt<input id="rings"></label><label>Zubereitung, ein Schritt pro Zeile<textarea id="rsteps" rows="4"></textarea></label><button class="primary" onclick="saveRecipe()">Rezept speichern</button></div>`)}
+function saveRecipe(){let title=$("rtitle").value.trim();if(!title)return;state.custom.push({id:"c"+Date.now(),title,time:+$("rtime").value||25,calories:400,diet:$("rdiet").value,cuisine:$("rcuisine").value||"Klassisch",ingredients:$("rings").value.split(",").map(x=>x.trim()).filter(Boolean),steps:$("rsteps").value.split("\n").filter(Boolean),image:""});save();renderRecipes();closeModal()}
+function openModal(title,html){$("modalTitle").textContent=title;$("modalBody").innerHTML=html;$("modal").classList.add("open")}
+function closeModal(){$("modal").classList.remove("open")}
+function openTimer(){openModal("Küchentimer",`<div class="timer" id="timerDisplay">00:00</div><div class="row" style="margin:12px 0"><button class="soft" onclick="setTimer(6)">Eier 6m</button><button class="soft" onclick="setTimer(8)">Pasta 8m</button><button class="soft" onclick="setTimer(25)">Backen 25m</button></div><div class="row"><input id="timerMins" type="number" min="1" placeholder="Minuten" style="flex:1"><button class="soft" onclick="setTimer(+$('timerMins').value)">Setzen</button><button class="primary" id="timerStart" onclick="startTimer()">Start</button><button class="danger" onclick="resetTimer()">Reset</button></div>`)}
+let timerLeft=0,timerId=null;
+function setTimer(m){clearInterval(timerId);timerLeft=Math.max(0,m*60);updateTimer()}
+function updateTimer(){let el=$("timerDisplay");if(el)el.textContent=`${String(Math.floor(timerLeft/60)).padStart(2,"0")}:${String(timerLeft%60).padStart(2,"0")}`}
+function startTimer(){if(timerId){clearInterval(timerId);timerId=null;$("timerStart").textContent="Weiter";return}if(!timerLeft)return;timerId=setInterval(()=>{timerLeft--;updateTimer();if(timerLeft<=0){clearInterval(timerId);timerId=null;toast("Timer abgelaufen! 🔔");alert("Timer abgelaufen!")}},1000);$("timerStart").textContent="Pause"}
+function resetTimer(){clearInterval(timerId);timerId=null;timerLeft=0;updateTimer();if($("timerStart"))$("timerStart").textContent="Start"}
+async function scanPhoto(event){
+ const file=event.target.files[0];if(!file)return;
+ // Browser-native text/image recognition is not consistently available. This demo
+ // never uploads your photo; use the manual ingredient input if recognition is unavailable.
+ if("BarcodeDetector" in window){toast("Foto ausgewählt. Bitte erkannte Zutaten bei Bedarf manuell ergänzen.")}
+ else{toast("Foto ausgewählt. Automatische Erkennung braucht einen KI-Dienst; bitte Zutaten manuell eingeben.")}
+ const url=URL.createObjectURL(file);openModal("Foto deiner Zutaten",`<img src="${url}" alt="Ausgewähltes Zutatenfoto" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px"><p class="muted">Das Foto bleibt in deinem Browser. Diese Offline-Version kann Zutaten nicht zuverlässig automatisch erkennen. Tippe erkannte Zutaten unten ein.</p><div class="row"><input id="photoIngredients" placeholder="z. B. Tomaten, Paprika" style="flex:1"><button class="primary" onclick="usePhotoIngredients()">Zutaten übernehmen</button></div>`);event.target.value="";
+}
+function usePhotoIngredients(){let v=$("photoIngredients").value; if(v){$("ingredientInput").value=v;addIngredients()}closeModal()}
+init();
+</script>
 </body>
 </html>
