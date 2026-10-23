@@ -14,7 +14,6 @@
   --green-hover: #059669;
   --green-light: #ecfdf5;
   --coral: #f97316;
-  --coral-light: #fff7ed;
   --line: #e2e8f0;
   --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
 }
@@ -28,7 +27,6 @@
   --green-hover: #10b981;
   --green-light: rgba(52, 211, 153, 0.12);
   --coral: #fb923c;
-  --coral-light: rgba(251, 146, 60, 0.12);
   --line: #334155;
   --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
 }
@@ -40,7 +38,7 @@ body {
   color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   transition: background 0.2s, color 0.2s;
-  padding-bottom: 80px;
+  padding-bottom: 85px;
 }
 
 button, input, select, textarea { font: inherit; }
@@ -82,10 +80,7 @@ header {
 }
 
 /* Desktop Navigation */
-nav.desktop-nav {
-  display: flex;
-  gap: 6px;
-}
+nav.desktop-nav { display: flex; gap: 6px; }
 .navbtn, .iconbtn {
   background: transparent;
   color: var(--muted);
@@ -128,7 +123,6 @@ nav.desktop-nav {
   font-weight: 700;
   padding: 6px 12px;
   border-radius: 12px;
-  transition: all 0.2s;
 }
 .bottom-btn .icon { font-size: 18px; }
 .bottom-btn.active {
@@ -182,15 +176,13 @@ input, select, textarea {
   border-radius: 12px;
   padding: 10px 14px;
 }
-input:focus, select:focus, textarea:focus {
-  outline: 2px solid var(--green);
-}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--green); }
 
 .primary, .accent, .soft, .danger {
   padding: 10px 16px;
   border-radius: 12px;
   font-weight: 750;
-  transition: transform 0.1s, opacity 0.2s;
+  transition: transform 0.1s;
 }
 .primary:active, .accent:active, .soft:active { transform: scale(0.98); }
 .primary { background: var(--green); color: white; }
@@ -207,9 +199,8 @@ input:focus, select:focus, textarea:focus {
   padding: 6px 12px;
   font-size: 13px;
   font-weight: 600;
-  border: 0;
 }
-.hero .chip { background: rgba(255, 255, 255, 0.15); color: white; }
+.hero .chip { background: rgba(255, 255, 255, 0.18); color: white; }
 
 .card {
   background: var(--card);
@@ -359,7 +350,6 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
       🍴 Küchenplaner <small>DELUXE</small>
     </div>
     
-    <!-- Desktop Navigation -->
     <nav class="desktop-nav" id="desktopNav"></nav>
 
     <div class="row">
@@ -376,7 +366,7 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
     <div class="hero">
       <div style="font-size: 12px; font-weight: 800; letter-spacing: 1px;">✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
       <h1>Was möchtest du heute kochen?</h1>
-      <p>Gib Zutaten ein oder wähle sie aus. Lass dir passende Rezepte vorschlagen oder scanne ein Foto deiner Zutaten.</p>
+      <p>Gib Zutaten ein oder wähle sie aus. Klicke auf "Rezepte generieren", um passende Rezeptideen zu erstellen!</p>
       
       <div class="row inputrow">
         <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch" onkeydown="if(event.key==='Enter')addIngredients()">
@@ -396,7 +386,7 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
     <div class="card">
       <div class="sectionhead" style="margin-top: 0;">
         <h3>Filter & Vorlieben</h3>
-        <button class="primary" onclick="renderRecipes()">✨ Rezepte generieren</button>
+        <button class="primary" onclick="generateRecipesAction()">✨ Rezepte generieren</button>
       </div>
       <div class="filters">
         <label>Ernährung
@@ -547,9 +537,10 @@ const state = {
 };
 
 const recipes = [
-  {id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520, diet:"Vegetarisch", cuisine:"Italienisch", ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter"], steps:["Pasta kochen.","Knoblauch anbraten.","Sahne und Parmesan untermischen."], image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
-  {id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380, diet:"Vegan", cuisine:"Mediterran", ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl"], steps:["Gemüse würfeln.","In Öl anbraten und würzen."], image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
-  {id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460, diet:"Vegan", cuisine:"Asiatisch", ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer"], steps:["Reis kochen.","Tofu knusprig braten und mit Sojasauce ablöschen."], image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"}
+  {id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520, diet:"Vegetarisch", cuisine:"Italienisch", ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter"], steps:["Pasta in Salzwasser garen.","Knoblauch in Butter anbraten.","Sahne und Käse einrühren."], image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
+  {id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380, diet:"Vegan", cuisine:"Mediterran", ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl"], steps:["Gemüse in Scheiben schneiden.","In heißem Öl knackig anbraten."], image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
+  {id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460, diet:"Vegan", cuisine:"Asiatisch", ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer"], steps:["Reis kochen.","Tofu kross braten und marinieren."], image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"},
+  {id:"r4", title:"Schnelles Tomaten-Omelett", time:15, calories:320, diet:"Vegetarisch", cuisine:"Klassisch", ingredients:["Eier","Tomaten","Knoblauch","Butter","Kräuter"], steps:["Eier verquirlen.","Tomaten mit Butter in der Pfanne garen."], image:"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"}
 ];
 
 const quick = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu"];
@@ -581,12 +572,10 @@ function toast(s) {
 function init() {
   document.documentElement.classList.toggle("dark", state.dark);
   
-  // Render Desktop Navigation
   $("desktopNav").innerHTML = navItems.map(([id, icon, label], i) => 
     `<button class="navbtn ${i===0?'active':''}" onclick="tab('${id}', this)"><span>${icon}</span> ${label}</button>`
   ).join("");
 
-  // Render Mobile Bottom Navigation
   $("bottomNav").innerHTML = navItems.map(([id, icon, label], i) => 
     `<button class="bottom-btn ${i===0?'active':''}" onclick="tab('${id}', this)"><span class="icon">${icon}</span><span>${label}</span></button>`
   ).join("");
@@ -600,7 +589,6 @@ function tab(id, btn) {
   $("tab-" + id).classList.add("active");
   document.querySelectorAll(".navbtn, .bottom-btn").forEach(x => x.classList.remove("active"));
   
-  // Highlight both desktop and bottom navigation buttons for selected tab
   const index = navItems.findIndex(item => item[0] === id);
   if (index !== -1) {
     document.querySelectorAll(".desktop-nav .navbtn")[index]?.classList.add("active");
@@ -621,12 +609,14 @@ function toggleLang() {
   toast(state.lang === "en" ? "Language set to English." : "Sprache auf Deutsch gestellt.");
 }
 
-/* Ingredients & Recipe Engine */
+/* Fixed Generator Engine */
 function addIngredients() {
   let val = $("ingredientInput").value.trim();
   if (val) {
     val.split(",").map(x => x.trim()).filter(Boolean).forEach(x => {
-      if (!state.ingredients.includes(x)) state.ingredients.push(x);
+      if (!state.ingredients.some(existing => existing.toLowerCase() === x.toLowerCase())) {
+        state.ingredients.push(x);
+      }
     });
     $("ingredientInput").value = "";
     renderSelected(); renderRecipes();
@@ -634,7 +624,12 @@ function addIngredients() {
 }
 
 function toggleIng(x) {
-  state.ingredients = state.ingredients.includes(x) ? state.ingredients.filter(y => y !== x) : [...state.ingredients, x];
+  let idx = state.ingredients.findIndex(y => y.toLowerCase() === x.toLowerCase());
+  if (idx > -1) {
+    state.ingredients.splice(idx, 1);
+  } else {
+    state.ingredients.push(x);
+  }
   renderSelected(); renderRecipes();
 }
 
@@ -648,46 +643,65 @@ function clearIngredients() {
   state.ingredients = []; renderSelected(); renderRecipes();
 }
 
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function esc(s) { return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function generateRecipesAction() {
+  addIngredients();
+  renderRecipes();
+  toast("✨ Rezepte wurden neu berechnet!");
+}
 
 function renderRecipes() {
   let list = [...recipes, ...state.custom];
-  let diet = $("diet").value, time = $("time").value, cuisine = $("cuisine").value, search = $("search").value.toLowerCase();
+  let diet = $("diet").value, time = $("time").value, cuisine = $("cuisine").value, search = $("search").value.toLowerCase().trim();
   
-  list = list.filter(r => 
-    (diet === "all" || r.diet === diet) &&
-    (time === "all" || r.time <= +time) &&
-    (cuisine === "all" || r.cuisine === cuisine) &&
-    (!search || r.title.toLowerCase().includes(search)) &&
-    (!state.ingredients.length || state.ingredients.some(i => r.ingredients.some(x => x.toLowerCase().includes(i.toLowerCase()))))
-  );
+  // Filter matching recipes
+  list = list.filter(r => {
+    let matchDiet = (diet === "all" || r.diet === diet);
+    let matchTime = (time === "all" || r.time <= +time);
+    let matchCuisine = (cuisine === "all" || r.cuisine === cuisine);
+    let matchSearch = (!search || r.title.toLowerCase().includes(search));
+    let matchIng = (!state.ingredients.length || state.ingredients.some(ing => 
+      r.ingredients.some(rIng => rIng.toLowerCase().includes(ing.toLowerCase()))
+    ));
+    return matchDiet && matchTime && matchCuisine && matchSearch && matchIng;
+  });
 
-  if (!list.length && state.ingredients.length) list = [synthesize()];
+  // Dynamic Generator Fallback if user specified ingredients that don't match default list
+  if (!list.length && state.ingredients.length > 0) {
+    list = [synthesize()];
+  }
 
   $("recipes").innerHTML = list.length ? list.map(r => `
     <article class="card recipe">
       <img src="${esc(r.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt="">
       <div class="recipebody">
         <h3>${esc(r.title)}</h3>
-        <div class="muted">⏱ ${r.time} min · 🔥 ${r.calories || 400} kcal · ${esc(r.cuisine || "Kreativ")}</div>
-        <div class="chips">${r.ingredients.slice(0, 4).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
+        <div class="muted">⏱ ${r.time} Min · 🔥 ${r.calories || 420} kcal · ${esc(r.cuisine || "Kreativ")}</div>
+        <div class="chips">${(r.ingredients || []).slice(0, 4).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
         <button class="primary" style="width: 100%; margin-top: 8px;" onclick="recipeDetail('${esc(r.id)}')">Details & Kochen</button>
       </div>
     </article>
-  `).join("") : `<div class="card">Keine Rezepte gefunden. Pass deine Filter an.</div>`;
+  `).join("") : `<div class="card" style="grid-column: 1 / -1;">Keine passenden Rezepte gefunden. Wähle andere Zutaten oder passe die Filter an.</div>`;
 }
 
 function synthesize() {
   let ing = state.ingredients;
+  let mainName = ing[0] ? (ing[0].charAt(0).toUpperCase() + ing[0].slice(1)) : "Gemüse";
   return {
     id: "synth",
-    title: `Kreative ${ing[0] || "Gemüse"}-Pfanne`,
-    time: 25,
-    calories: 420,
+    title: `Spezial ${mainName}-Pfanne`,
+    time: 20,
+    calories: 410,
     diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
     cuisine: $("cuisine").value === "all" ? "Kreativ" : $("cuisine").value,
-    ingredients: [...ing, "Olivenöl", "Salz", "Kräuter"],
-    steps: ["Zutaten waschen und schneiden.", "In Pfanne garen und gut würzen."],
+    ingredients: [...ing, "Olivenöl", "Salz & Pfeffer", "Kräuter der Saison"],
+    steps: [
+      `Zutaten (${ing.join(", ")}) vorbereiten und in kleine Stücke schneiden.`,
+      "Etwas Olivenöl in einer Pfanne erhitzen.",
+      "Zutaten ca. 10–12 Minuten anbraten, bis sie goldbraun sind.",
+      "Mit Salz, Pfeffer und Kräutern abschmecken und servieren."
+    ],
     image: ""
   };
 }
@@ -699,7 +713,9 @@ function recipeDetail(id) {
     <p class="muted">⏱ ${r.time} Min · ${r.calories || 420} kcal · ${esc(r.diet)}</p>
     <h3>Zutaten</h3>
     <ul>${r.ingredients.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-    <div class="row">
+    <h3>Zubereitung</h3>
+    <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+    <div class="row" style="margin-top: 16px;">
       <button class="accent" onclick="recipeToShop('${esc(r.id)}')">Zutaten zur Einkaufsliste</button>
     </div>
   `);
@@ -713,7 +729,7 @@ function recipeToShop(id) {
   }
 }
 
-/* Weekly Planner Custom Input Engine */
+/* Weekly Planner Custom Input Modal */
 function renderWeek() {
   $("week").innerHTML = Object.entries(days).map(([key, label]) => `
     <div class="card day">
@@ -895,7 +911,7 @@ function openRecipeForm() {
 function saveCustomRecipe() {
   let title = $("rTitle").value.trim(), time = +$("rTime").value || 20, ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
   if (title) {
-    state.custom.push({id: "c_" + Date.now(), title, time, calories: 350, diet: "Vegetarisch", cuisine: "Kreativ", ingredients: ings, steps: [], image: ""});
+    state.custom.push({id: "c_" + Date.now(), title, time, calories: 350, diet: "Vegetarisch", cuisine: "Kreativ", ingredients: ings, steps: ["Zutaten zubereiten und gemeinsam kochen."], image: ""});
     save(); renderRecipes(); closeModal(); toast("Rezept gespeichert!");
   }
 }
@@ -940,7 +956,11 @@ function openTimer() {
 function scanPhoto(e) {
   if (e.target.files[0]) {
     toast("Foto-Scan: Zutaten wurden hinzugefügt!");
-    ["Kartoffeln", "Möhren", "Zwiebeln"].forEach(x => { if (!state.ingredients.includes(x)) state.ingredients.push(x); });
+    ["Kartoffeln", "Möhren", "Zwiebeln"].forEach(x => { 
+      if (!state.ingredients.some(existing => existing.toLowerCase() === x.toLowerCase())) {
+        state.ingredients.push(x); 
+      }
+    });
     renderSelected(); renderRecipes();
   }
 }
