@@ -366,10 +366,10 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
     <div class="hero">
       <div style="font-size: 12px; font-weight: 800; letter-spacing: 1px;">✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
       <h1>Was möchtest du heute kochen?</h1>
-      <p>Gib Zutaten ein oder wähle sie aus. Klicke auf "Rezepte generieren", um passende Rezeptideen zu erstellen!</p>
+      <p>Gib Zutaten ein oder wähle sie aus. Klicke auf "Rezepte generieren", um vielfältige Gerichte & Desserts zu erstellen!</p>
       
       <div class="row inputrow">
-        <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch" onkeydown="if(event.key==='Enter')addIngredients()">
+        <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Erdbeeren, Schokolade" onkeydown="if(event.key==='Enter')addIngredients()">
         <button class="accent" onclick="addIngredients()">＋ Hinzufügen</button>
         <label class="soft" style="cursor:pointer; background: rgba(255,255,255,0.2); color: white;">📷 Foto scannen<input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)"></label>
       </div>
@@ -406,13 +406,14 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
             <option value="45">45 Min</option>
           </select>
         </label>
-        <label>Küche
+        <label>Kategorie / Küche
           <select id="cuisine" onchange="renderRecipes()">
-            <option value="all">Alle</option>
+            <option value="all">Alle Kategorien</option>
             <option value="Italienisch">Italienisch</option>
             <option value="Mediterran">Mediterran</option>
             <option value="Asiatisch">Asiatisch</option>
             <option value="Klassisch">Klassisch</option>
+            <option value="Nachtisch">🍨 Nachtisch & Desserts</option>
           </select>
         </label>
         <label>Suche
@@ -422,7 +423,7 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
     </div>
 
     <div class="sectionhead">
-      <h2>Erkannte Rezepte</h2>
+      <h2>Erkannte Rezepte & Menüvorschläge</h2>
       <button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button>
     </div>
     <div class="grid" id="recipes"></div>
@@ -463,6 +464,7 @@ th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
           <option>Kühlregal & Milch</option>
           <option>Vorratskammer</option>
           <option>Gewürze & Öl</option>
+          <option>Süßes & Dessert</option>
           <option>Sonstiges</option>
         </select>
         <button class="primary" onclick="addShop()">＋</button>
@@ -540,10 +542,14 @@ const recipes = [
   {id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520, diet:"Vegetarisch", cuisine:"Italienisch", ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter"], steps:["Pasta in Salzwasser garen.","Knoblauch in Butter anbraten.","Sahne und Käse einrühren."], image:"https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"},
   {id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380, diet:"Vegan", cuisine:"Mediterran", ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl"], steps:["Gemüse in Scheiben schneiden.","In heißem Öl knackig anbraten."], image:"https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"},
   {id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460, diet:"Vegan", cuisine:"Asiatisch", ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer"], steps:["Reis kochen.","Tofu kross braten und marinieren."], image:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"},
-  {id:"r4", title:"Schnelles Tomaten-Omelett", time:15, calories:320, diet:"Vegetarisch", cuisine:"Klassisch", ingredients:["Eier","Tomaten","Knoblauch","Butter","Kräuter"], steps:["Eier verquirlen.","Tomaten mit Butter in der Pfanne garen."], image:"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"}
+  {id:"r4", title:"Schnelles Tomaten-Omelett", time:15, calories:320, diet:"Vegetarisch", cuisine:"Klassisch", ingredients:["Eier","Tomaten","Knoblauch","Butter","Kräuter"], steps:["Eier verquirlen.","Tomaten mit Butter in der Pfanne garen."], image:"https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80"},
+  /* Desserts */
+  {id:"r5", title:"Beeren-Joghurt-Parfait", time:10, calories:220, diet:"Vegetarisch", cuisine:"Nachtisch", ingredients:["Joghurt","Beeren","Honig","Müsli"], steps:["Joghurt und Beeren abwechselnd in Gläser schichten.","Mit Honig beträufeln und Müsli garnieren."], image:"https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"},
+  {id:"r6", title:"Schoko-Tassenkuchen", time:10, calories:350, diet:"Vegetarisch", cuisine:"Nachtisch", ingredients:["Schokolade","Mehl","Zucker","Milch","Butter"], steps:["Zutaten in einer Tasse verrühren.","Für 90 Sekunden in die Mikrowelle stellen."], image:"https://images.unsplash.com/photo-1579372786545-d24232daf58c?auto=format&fit=crop&w=800&q=80"},
+  {id:"r7", title:"Apfel-Zimt-Pfannkuchen", time:20, calories:380, diet:"Vegetarisch", cuisine:"Nachtisch", ingredients:["Äpfel","Mehl","Eier","Milch","Zimt"], steps:["Teig aus Mehl, Eiern und Milch anrühren.","Apfelscheiben in der Pfanne ausbacken und mit Zimt bestreuen."], image:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80"}
 ];
 
-const quick = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu"];
+const quick = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Beeren","Äpfel","Schokolade","Joghurt"];
 const days = {Mon:"Montag", Tue:"Dienstag", Wed:"Mittwoch", Thu:"Donnerstag", Fri:"Freitag", Sat:"Samstag", Sun:"Sonntag"};
 const meals = {breakfast:"Frühstück", lunch:"Mittagessen", dinner:"Abendessen"};
 const navItems = [
@@ -609,7 +615,7 @@ function toggleLang() {
   toast(state.lang === "en" ? "Language set to English." : "Sprache auf Deutsch gestellt.");
 }
 
-/* Fixed Generator Engine */
+/* Generator Engine */
 function addIngredients() {
   let val = $("ingredientInput").value.trim();
   if (val) {
@@ -648,7 +654,7 @@ function esc(s) { return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;",
 function generateRecipesAction() {
   addIngredients();
   renderRecipes();
-  toast("✨ Rezepte wurden neu berechnet!");
+  toast("✨ Vielfältige Menüoptionen generiert!");
 }
 
 function renderRecipes() {
@@ -667,16 +673,25 @@ function renderRecipes() {
     return matchDiet && matchTime && matchCuisine && matchSearch && matchIng;
   });
 
-  // Dynamic Generator Fallback if user specified ingredients that don't match default list
-  if (!list.length && state.ingredients.length > 0) {
-    list = [synthesize()];
+  // Dynamic Multi-Dish Synthesizer if custom ingredient combination is entered
+  let synthesizedDishes = [];
+  if (state.ingredients.length > 0) {
+    synthesizedDishes = synthesizeMultipleDishes();
+    if (cuisine === "Nachtisch") {
+      synthesizedDishes = synthesizedDishes.filter(d => d.cuisine === "Nachtisch");
+    }
   }
 
-  $("recipes").innerHTML = list.length ? list.map(r => `
+  let finalRecipes = [...list, ...synthesizedDishes];
+
+  $("recipes").innerHTML = finalRecipes.length ? finalRecipes.map(r => `
     <article class="card recipe">
       <img src="${esc(r.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80")}" alt="">
       <div class="recipebody">
-        <h3>${esc(r.title)}</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>${esc(r.title)}</h3>
+          ${r.cuisine === "Nachtisch" ? '<span class="chip" style="background:#fce7f3; color:#be185d;">🍨 Dessert</span>' : ''}
+        </div>
         <div class="muted">⏱ ${r.time} Min · 🔥 ${r.calories || 420} kcal · ${esc(r.cuisine || "Kreativ")}</div>
         <div class="chips">${(r.ingredients || []).slice(0, 4).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
         <button class="primary" style="width: 100%; margin-top: 8px;" onclick="recipeDetail('${esc(r.id)}')">Details & Kochen</button>
@@ -685,29 +700,102 @@ function renderRecipes() {
   `).join("") : `<div class="card" style="grid-column: 1 / -1;">Keine passenden Rezepte gefunden. Wähle andere Zutaten oder passe die Filter an.</div>`;
 }
 
-function synthesize() {
+function synthesizeMultipleDishes() {
   let ing = state.ingredients;
   let mainName = ing[0] ? (ing[0].charAt(0).toUpperCase() + ing[0].slice(1)) : "Gemüse";
-  return {
-    id: "synth",
-    title: `Spezial ${mainName}-Pfanne`,
-    time: 20,
-    calories: 410,
-    diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
-    cuisine: $("cuisine").value === "all" ? "Kreativ" : $("cuisine").value,
-    ingredients: [...ing, "Olivenöl", "Salz & Pfeffer", "Kräuter der Saison"],
-    steps: [
-      `Zutaten (${ing.join(", ")}) vorbereiten und in kleine Stücke schneiden.`,
-      "Etwas Olivenöl in einer Pfanne erhitzen.",
-      "Zutaten ca. 10–12 Minuten anbraten, bis sie goldbraun sind.",
-      "Mit Salz, Pfeffer und Kräutern abschmecken und servieren."
-    ],
-    image: ""
-  };
+  let secondName = ing[1] ? (ing[1].charAt(0).toUpperCase() + ing[1].slice(1)) : "Kräuter";
+  
+  let sweetIngs = ["beeren", "erdbeeren", "schokolade", "äpfel", "apfel", "zucker", "honig", "quark", "joghurt", "sahne", "banane"];
+  let isSweet = ing.some(x => sweetIngs.includes(x.toLowerCase())) || $("cuisine").value === "Nachtisch";
+
+  if (isSweet) {
+    return [
+      {
+        id: "synth_sweet_1",
+        title: `Fruchtiges ${mainName}-Dessert-Parfait`,
+        time: 15,
+        calories: 280,
+        diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+        cuisine: "Nachtisch",
+        ingredients: [...ing, "Joghurt oder Quark", "Honig", "Nüsse"],
+        steps: [
+          `Zutaten (${ing.join(", ")}) waschen und klein schneiden.`,
+          "Joghurt/Quark in Wüstengläser füllen.",
+          "Fruchtmischung darauf verteilen und mit Honig beträufeln."
+        ],
+        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "synth_sweet_2",
+        title: `Warmer ${mainName}-Crumble`,
+        time: 25,
+        calories: 360,
+        diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+        cuisine: "Nachtisch",
+        ingredients: [...ing, "Mehl", "Butter", "Zucker", "Zimt"],
+        steps: [
+          "Ofen auf 180°C vorgeheizt.",
+          `Früchte (${ing.join(", ")}) in eine Auflaufform geben.`,
+          "Streusel aus Mehl, Butter und Zucker kneten und drüberstreuen.",
+          "20 Minuten goldbraun backen."
+        ],
+        image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80"
+      }
+    ];
+  }
+
+  return [
+    {
+      id: "synth_1",
+      title: `Deftige ${mainName}-${secondName}-Pfanne`,
+      time: 20,
+      calories: 410,
+      diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+      cuisine: "Mediterran",
+      ingredients: [...ing, "Olivenöl", "Salz & Pfeffer", "Kräuter der Saison"],
+      steps: [
+        `Zutaten (${ing.join(", ")}) vorbereiten und schneiden.`,
+        "Olivenöl in einer Pfanne erhitzen und Zutaten anbraten.",
+        "Mit Salz, Pfeffer und Kräutern abschmecken."
+      ],
+      image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "synth_2",
+      title: `Cremige ${mainName}-Suppe`,
+      time: 25,
+      calories: 320,
+      diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+      cuisine: "Klassisch",
+      ingredients: [...ing, "Gemüsebrühe", "Sahne oder Kokosmilch", "Knoblauch"],
+      steps: [
+        `Zutaten in etwas Brühe weich kochen.`,
+        "Pürieren und mit Sahne verfeinern.",
+        "Abschmecken und heiß servieren."
+      ],
+      image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "synth_3",
+      title: `Überbackener ${mainName}-Auflauf`,
+      time: 35,
+      calories: 480,
+      diet: $("diet").value === "all" ? "Vegetarisch" : $("diet").value,
+      cuisine: "Italienisch",
+      ingredients: [...ing, "Käse zum Überbacken", "Tomatensauce", "Knoblauch"],
+      steps: [
+        "Zutaten in Auflaufform schichten.",
+        "Mit Tomatensauce und Käse bedecken.",
+        "Bei 200°C ca. 20 Minuten goldbraun überbacken."
+      ],
+      image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
 }
 
 function recipeDetail(id) {
-  let r = [...recipes, ...state.custom].find(x => x.id === id) || (id === "synth" ? synthesize() : null);
+  let allStored = [...recipes, ...state.custom, ...synthesizeMultipleDishes()];
+  let r = allStored.find(x => x.id === id);
   if (!r) return;
   openModal(r.title, `
     <p class="muted">⏱ ${r.time} Min · ${r.calories || 420} kcal · ${esc(r.diet)}</p>
@@ -722,7 +810,8 @@ function recipeDetail(id) {
 }
 
 function recipeToShop(id) {
-  let r = [...recipes, ...state.custom].find(x => x.id === id) || (id === "synth" ? synthesize() : null);
+  let allStored = [...recipes, ...state.custom, ...synthesizeMultipleDishes()];
+  let r = allStored.find(x => x.id === id);
   if (r) {
     r.ingredients.forEach(name => state.shopping.push({id: String(Date.now() + Math.random()), name, category:"Vorratskammer", checked:false}));
     save(); renderShopping(); closeModal(); toast("Zutaten zur Einkaufsliste hinzugefügt!");
@@ -902,6 +991,7 @@ function openRecipeForm() {
     <div class="field">
       <label>Titel<input id="rTitle" placeholder="z. B. Kürbissuppe"></label>
       <label>Zeit (Min)<input id="rTime" type="number" value="20"></label>
+      <label>Kategorie<select id="rCuisine"><option value="Kreativ">Kreativ</option><option value="Nachtisch">🍨 Nachtisch</option></select></label>
       <label>Zutaten (kommagetrennt)<input id="rIngs" placeholder="Kürbis, Sahne, Zwiebel"></label>
       <button class="primary" onclick="saveCustomRecipe()">Speichern</button>
     </div>
@@ -909,9 +999,9 @@ function openRecipeForm() {
 }
 
 function saveCustomRecipe() {
-  let title = $("rTitle").value.trim(), time = +$("rTime").value || 20, ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
+  let title = $("rTitle").value.trim(), time = +$("rTime").value || 20, cuisine = $("rCuisine").value, ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
   if (title) {
-    state.custom.push({id: "c_" + Date.now(), title, time, calories: 350, diet: "Vegetarisch", cuisine: "Kreativ", ingredients: ings, steps: ["Zutaten zubereiten und gemeinsam kochen."], image: ""});
+    state.custom.push({id: "c_" + Date.now(), title, time, calories: 350, diet: "Vegetarisch", cuisine, ingredients: ings, steps: ["Zutaten zubereiten und gemeinsam kochen."], image: ""});
     save(); renderRecipes(); closeModal(); toast("Rezept gespeichert!");
   }
 }
