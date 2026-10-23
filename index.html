@@ -2,129 +2,465 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Küchenplaner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Küchenplaner - Intelligent Meal Planner & Kitchen Assistant</title>
   <style>
     :root {
       color-scheme: light;
       --bg: #f7f7f2;
-      --surface: #fff;
+      --surface: #ffffff;
+      --surface-hover: #f1f3ed;
       --text: #252820;
       --muted: #73786e;
-      --accent: #537b52;
+      --accent: #4a7249;
+      --accent-hover: #3b5c3a;
       --accent-light: #e8f0e5;
-      --border: #e8e9e2;
-      --shadow: 0 8px 28px #25321a0b;
+      --border: #e2e4dc;
+      --shadow: 0 8px 24px rgba(37, 50, 26, 0.06);
+      --shadow-lg: 0 12px 32px rgba(37, 50, 26, 0.12);
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 20px;
     }
 
     body.dark {
       color-scheme: dark;
-      --bg: #171a16;
-      --surface: #222720;
+      --bg: #141713;
+      --surface: #1f241d;
+      --surface-hover: #293027;
       --text: #f1f3ec;
-      --muted: #b0b7aa;
-      --accent: #a2c795;
-      --accent-light: #303d2d;
-      --border: #373d34;
-      --shadow: 0 8px 28px #0003;
+      --muted: #9fa699;
+      --accent: #8eb781;
+      --accent-hover: #a3c897;
+      --accent-light: #2a3528;
+      --border: #323a30;
+      --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
     }
 
     * { box-sizing: border-box; }
+    
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font: 15px/1.5 system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
-    button, input, select { font: inherit; }
-    button { cursor: pointer; }
-    .app { display: flex; min-height: 100vh; }
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
     aside {
-      width: 240px;
-      padding: 28px 18px;
+      width: 260px;
+      padding: 24px 16px;
       background: var(--surface);
       border-right: 1px solid var(--border);
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 20;
     }
-    .brand { font-size: 20px; font-weight: 750; margin: 0 10px 32px; }
-    .brand span { color: var(--accent); }
-    nav { display: grid; gap: 6px; }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0 12px 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
     .nav-button {
       border: 0;
       background: transparent;
       color: var(--muted);
       text-align: left;
-      padding: 11px 12px;
-      border-radius: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 550;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14.5px;
     }
-    .nav-button:hover, .nav-button.active {
+
+    .nav-button:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+
+    .nav-button.active {
       background: var(--accent-light);
       color: var(--accent);
+      font-weight: 700;
     }
-    main { width: min(1100px, 100%); padding: 36px 42px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 28px; }
-    h1 { font-size: clamp(25px, 4vw, 34px); margin: 0; letter-spacing: -.7px; }
-    h2 { font-size: 19px; margin: 0 0 14px; }
-    p { color: var(--muted); }
-    .header-actions, .row { display: flex; align-items: center; gap: 10px; }
+
+    /* Main Area */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      padding: 36px 40px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 4vw, 32px);
+      margin: 0;
+      letter-spacing: -0.7px;
+      font-weight: 800;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 0 0 14px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    .header-actions, .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Cards & Container Units */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: var(--radius);
+      padding: 22px;
       box-shadow: var(--shadow);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
     .hero {
-      padding: 28px;
-      background: linear-gradient(120deg, var(--accent-light), var(--surface));
-      margin-bottom: 22px;
+      padding: 32px;
+      background: linear-gradient(135deg, var(--accent-light), var(--surface));
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
     }
-    .hero p { margin: 7px 0 18px; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Custom Form Control & Buttons */
     .button {
       border: 0;
-      border-radius: 10px;
-      padding: 10px 15px;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
       background: var(--accent);
-      color: white;
+      color: #ffffff;
       font-weight: 650;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .button.secondary { color: var(--accent); background: var(--accent-light); }
-    .button.ghost { color: var(--muted); background: transparent; border: 1px solid var(--border); }
-    input, select {
-      width: 100%;
-      padding: 11px 12px;
+
+    body.dark .button {
+      color: #141713;
+    }
+
+    .button:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .button.secondary {
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .button.secondary:hover {
+      filter: brightness(0.95);
+    }
+
+    .button.ghost {
+      color: var(--text);
+      background: transparent;
       border: 1px solid var(--border);
-      border-radius: 10px;
+    }
+
+    .button.ghost:hover {
+      background: var(--surface-hover);
+    }
+
+    .button.danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .button.danger:hover {
+      background: #b91c1c;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       background: var(--surface);
       color: var(--text);
+      transition: border-color 0.15s ease;
     }
-    .search-row { display: flex; gap: 9px; margin: 14px 0; }
-    .search-row input { flex: 1; }
-    .tag { display: inline-block; color: var(--accent); background: var(--accent-light); border-radius: 99px; padding: 4px 9px; font-size: 12px; }
-    .meal { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .meal:last-child { border: 0; }
-    .muted { color: var(--muted); }
-    .check { accent-color: var(--accent); }
-    .task { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
-    .setting { display: grid; grid-template-columns: 1fr 220px; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .setting:last-child { border: 0; }
-    .hidden { display: none !important; }
-    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 11px 16px; border-radius: 10px; background: var(--text); color: var(--surface); display: none; }
-    @media (max-width: 760px) {
-      .app { display: block; }
-      aside { width: 100%; padding: 14px; border-right: 0; border-bottom: 1px solid var(--border); }
-      .brand { margin: 0 4px 10px; }
-      nav { display: flex; overflow-x: auto; }
-      .nav-button { white-space: nowrap; }
-      main { padding: 24px 16px; }
-      .grid, .three { grid-template-columns: 1fr; }
-      .setting { grid-template-columns: 1fr; gap: 7px; }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .search-row input {
+      flex: 1;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      color: var(--accent);
+      background: var(--accent-light);
+      border-radius: 99px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .meal {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .meal:last-child {
+      border: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .check {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task:last-child {
+      border-bottom: none;
+    }
+
+    .task.done span {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+
+    .setting {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting:last-child {
+      border: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 12px 20px;
+      border-radius: 99px;
+      background: var(--text);
+      color: var(--surface);
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Drop Zone styling for scan photo demo */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      background: var(--surface-hover);
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .drop-zone:hover {
+      border-color: var(--accent);
+    }
+
+    /* Active timer badge */
+    .timer-display {
+      font-size: 32px;
+      font-weight: 800;
+      font-mono: monospace;
+      color: var(--accent);
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 820px) {
+      .app {
+        flex-direction: column;
+      }
+      aside {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 16px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .brand {
+        margin: 0 4px 14px;
+      }
+      nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .nav-button {
+        white-space: nowrap;
+        padding: 8px 12px;
+      }
+      main {
+        padding: 20px 16px;
+      }
+      .grid, .three {
+        grid-template-columns: 1fr;
+      }
+      .setting {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
     }
   </style>
 </head>
 <body>
+
 <div class="app">
   <aside>
     <div class="brand">🍃 <span>Küchenplaner</span></div>
@@ -138,177 +474,815 @@
         <h1 id="page-title"></h1>
       </div>
       <div class="header-actions">
-        <button class="button ghost" onclick="showPage('settings')">⚙️</button>
+        <button class="button ghost" title="Einstellungen" onclick="showPage('settings')">⚙️</button>
       </div>
     </header>
     <div id="content"></div>
   </main>
 </div>
+
+<!-- Modal Container -->
+<div id="modal-root" class="hidden"></div>
+
+<!-- Toast Container -->
 <div id="toast"></div>
 
 <script>
+  // Translations Object
   const translations = {
     de: {
-      home:"Start", create:"Erstellen", plan:"Wochenplan", shopping:"Einkauf",
-      todo:"Aufgaben", community:"Community", kitchen:"Meine Küche", settings:"Einstellungen",
-      today:"HEUTE", welcome:"Was kommt heute auf den Tisch?", welcomeText:"Plane entspannt, koche lecker und behalte alles im Blick.",
-      createRecipe:"Rezeptideen finden", prep:"Vorbereitung", quick:"Schnellzugriff",
-      todayMeals:"Heutige Mahlzeiten", reminders:"Erinnerungen", scan:"Zutaten fotografieren",
-      type:"Zutaten eingeben", ingredients:"Welche Zutaten hast du?", generate:"Rezepte finden",
-      filters:"Filter", diet:"Ernährungsweise", time:"Max. Kochzeit", cuisine:"Küche",
-      avoid:"Zutaten vermeiden", planTitle:"Dein Wochenplan", shoppingTitle:"Einkaufsliste",
-      todoTitle:"Deine Aufgaben", communityTitle:"Aus der Community", kitchenTitle:"Deine Küche",
-      settingsTitle:"Einstellungen", add:"Hinzufügen", empty:"Noch nichts eingetragen.",
-      servings:"Portionen", save:"Speichern", addShopping:"Zum Einkauf hinzufügen",
-      addPlan:"Zum Wochenplan", dark:"Dunkelmodus", follow:"Geräteeinstellung verwenden",
-      language:"Sprache", remindersTitle:"Erinnerungen & Timer", customTimer:"Timer (Minuten)",
-      startTimer:"Timer starten", pantry:"Vorrat", saved:"Gespeicherte Rezepte",
-      preferences:"Ernährung & Vorlieben", tasks:"Aufgabe hinzufügen", taskPlaceholder:"z. B. Gemüse schneiden",
-      scanNote:"Foto-Scan-Demo: Zutaten werden hier beispielhaft erkannt.",
-      scanButton:"Foto auswählen", breakfast:"Frühstück", lunch:"Mittagessen", dinner:"Abendessen",
-      monday:"Montag", tuesday:"Dienstag", wednesday:"Mittwoch", thursday:"Donnerstag",
-      friday:"Freitag", saturday:"Samstag", sunday:"Sonntag", searchHint:"z. B. Tomaten, Kichererbsen",
-      recipeIdeas:"Rezeptideen", communityText:"Teile Rezepte, Wochenpläne, Tipps und Fotos mit anderen.",
-      timerDone:"Timer abgelaufen!", added:"Hinzugefügt!"
+      home: "Start", create: "Erstellen", plan: "Wochenplan", shopping: "Einkauf",
+      todo: "Aufgaben", community: "Community", kitchen: "Meine Küche", settings: "Einstellungen",
+      today: "HEUTE", welcome: "Was kommt heute auf den Tisch?", welcomeText: "Plane entspannt, koche lecker und behalte alle Zutaten im Blick.",
+      createRecipe: "Rezeptideen finden", prep: "Vorbereitung", quick: "Schnellzugriff",
+      todayMeals: "Heutige Mahlzeiten", reminders: "Erinnerungen & Aufgaben", scan: "Zutaten fotografieren",
+      type: "Zutaten eingeben", ingredients: "Welche Zutaten hast du?", generate: "Rezepte finden",
+      filters: "Filter & Vorlieben", diet: "Ernährungsweise", time: "Max. Kochzeit", cuisine: "Küche",
+      avoid: "Zutaten vermeiden", planTitle: "Dein Wochenplan", shoppingTitle: "Einkaufsliste",
+      todoTitle: "Deine Aufgaben & Timer", communityTitle: "Community & Inspiration", kitchenTitle: "Deine Küche & Vorrat",
+      settingsTitle: "Einstellungen", add: "Hinzufügen", empty: "Noch keine Einträge vorhanden.",
+      servings: "Portionen", save: "Speichern", addShopping: "Zum Einkauf",
+      addPlan: "Zum Wochenplan", dark: "Dunkelmodus", follow: "Geräteeinstellung folgen",
+      language: "Sprache", remindersTitle: "Timer & Eieruhr", customTimer: "Küchentimer",
+      startTimer: "Starten", pantry: "Vorratskammer", saved: "Gespeicherte Rezepte",
+      preferences: "Ernährung & Vorlieben", tasks: "Neue Aufgabe", taskPlaceholder: "z. B. Brotteig gehen lassen",
+      scanNote: "KI-Scanner Demo: Foto wählen, um automatisch verfügbare Zutaten zu erkennen.",
+      scanButton: "Foto hochladen / Kamera", breakfast: "Frühstück", lunch: "Mittagessen", dinner: "Abendessen",
+      monday: "Montag", tuesday: "Dienstag", wednesday: "Mittwoch", thursday: "Donnerstag",
+      friday: "Freitag", saturday: "Samstag", sunday: "Sonntag", searchHint: "z. B. Tomaten, Kichererbsen, Reis",
+      recipeIdeas: "Rezeptideen", communityText: "Teile deine liebsten Rezepte, Wochenpläne und Tipps mit der Community.",
+      timerDone: "⏰ Der Küchentimer ist abgelaufen!", added: "Erfolgreich hinzugefügt!",
+      clearDone: "Erledigte löschen", addCustomRecipe: "Rezept einreichen",
+      autoAddShopping: "Alle Zutaten in den Einkaufskorb übertragen"
     },
     en: {
-      home:"Home", create:"Create", plan:"Weekly Plan", shopping:"Shopping",
-      todo:"To-Do", community:"Community", kitchen:"My Kitchen", settings:"Settings",
-      today:"TODAY", welcome:"What’s on the menu today?", welcomeText:"Plan with ease, cook something lovely, and keep everything in view.",
-      createRecipe:"Find recipe ideas", prep:"Prep reminders", quick:"Quick actions",
-      todayMeals:"Today’s meals", reminders:"Reminders", scan:"Take a photo of ingredients",
-      type:"Enter ingredients", ingredients:"What ingredients do you have?", generate:"Find recipes",
-      filters:"Filters", diet:"Dietary needs", time:"Max cooking time", cuisine:"Cuisine",
-      avoid:"Ingredients to avoid", planTitle:"Your weekly plan", shoppingTitle:"Shopping list",
-      todoTitle:"Your tasks", communityTitle:"From the community", kitchenTitle:"Your kitchen",
-      settingsTitle:"Settings", add:"Add", empty:"Nothing here yet.",
-      servings:"Servings", save:"Save", addShopping:"Add to shopping",
-      addPlan:"Add to weekly plan", dark:"Dark mode", follow:"Follow device appearance",
-      language:"Language", remindersTitle:"Reminders & timers", customTimer:"Timer (minutes)",
-      startTimer:"Start timer", pantry:"Pantry", saved:"Saved recipes",
-      preferences:"Dietary preferences", tasks:"Add a task", taskPlaceholder:"e.g. Chop vegetables",
-      scanNote:"Photo scan demo: ingredients are shown as a sample.",
-      scanButton:"Choose a photo", breakfast:"Breakfast", lunch:"Lunch", dinner:"Dinner",
-      monday:"Monday", tuesday:"Tuesday", wednesday:"Wednesday", thursday:"Thursday",
-      friday:"Friday", saturday:"Saturday", sunday:"Sunday", searchHint:"e.g. tomatoes, chickpeas",
-      recipeIdeas:"Recipe ideas", communityText:"Share recipes, meal plans, tips, and photos with others.",
-      timerDone:"Timer finished!", added:"Added!"
+      home: "Home", create: "Recipes", plan: "Weekly Plan", shopping: "Shopping",
+      todo: "Tasks", community: "Community", kitchen: "My Kitchen", settings: "Settings",
+      today: "TODAY", welcome: "What's on the menu today?", welcomeText: "Plan with ease, cook delicious meals, and keep all ingredients in view.",
+      createRecipe: "Find Recipe Ideas", prep: "Prep Reminders", quick: "Quick Actions",
+      todayMeals: "Today's Meals", reminders: "Reminders & Tasks", scan: "Scan Ingredients",
+      type: "Enter Ingredients", ingredients: "What ingredients do you have?", generate: "Find Recipes",
+      filters: "Filters & Preferences", diet: "Dietary Needs", time: "Max Time", cuisine: "Cuisine",
+      avoid: "Ingredients to avoid", planTitle: "Your Weekly Plan", shoppingTitle: "Shopping List",
+      todoTitle: "Tasks & Kitchen Timers", communityTitle: "Community & Inspiration", kitchenTitle: "My Kitchen & Pantry",
+      settingsTitle: "Settings", add: "Add", empty: "No entries here yet.",
+      servings: "Servings", save: "Save", addShopping: "Add to Cart",
+      addPlan: "Add to Plan", dark: "Dark Mode", follow: "Follow System Preference",
+      language: "Language", remindersTitle: "Kitchen Timers", customTimer: "Timer",
+      startTimer: "Start", pantry: "Pantry", saved: "Saved Recipes",
+      preferences: "Dietary Preferences", tasks: "New Task", taskPlaceholder: "e.g. Knead bread dough",
+      scanNote: "AI Scanner Demo: Upload a photo to recognize ingredients automatically.",
+      scanButton: "Upload Photo / Camera", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner",
+      monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday",
+      friday: "Friday", saturday: "Saturday", sunday: "Sunday", searchHint: "e.g. tomatoes, chickpeas, rice",
+      recipeIdeas: "Recipe Ideas", communityText: "Share your favorite recipes, meal plans, and cooking tips.",
+      timerDone: "⏰ Kitchen timer is up!", added: "Successfully added!",
+      clearDone: "Clear Completed", addCustomRecipe: "Submit Recipe",
+      autoAddShopping: "Transfer all ingredients to shopping list"
     }
   };
 
-  const navItems = ["home","create","plan","shopping","todo","community","kitchen","settings"];
-  const recipes = [
-    {name:"Cremige Tomaten-Kichererbsen", time:"25 Min.", tag:"Vegetarisch", ingredients:["Tomaten","Kichererbsen","Kokosmilch"], steps:"Zwiebel anbraten. Tomaten und Kichererbsen zugeben, würzen und köcheln lassen. Kokosmilch einrühren und mit Reis servieren."},
-    {name:"Ofengemüse mit Kräuterjoghurt", time:"35 Min.", tag:"Einfach", ingredients:["Kartoffeln","Paprika","Zucchini","Joghurt"], steps:"Gemüse würfeln, würzen und bei 200 °C rösten. Joghurt mit Kräutern verrühren und dazu servieren."},
-    {name:"Schnelle Gemüse-Pasta", time:"20 Min.", tag:"Schnell", ingredients:["Pasta","Tomaten","Spinat","Parmesan"], steps:"Pasta kochen. Gemüse in der Pfanne garen, Pasta untermischen und mit Parmesan servieren."}
-  ];
-  let lang = localStorage.getItem("lang") || "de";
-  let page = "home";
-  let shoppingList = JSON.parse(localStorage.getItem("shopping") || '["Hafermilch","Äpfel","Vollkornbrot"]');
-  let tasks = JSON.parse(localStorage.getItem("tasks") || '["Kichererbsen einweichen","Gemüse vorbereiten"]');
-  const t = key => translations[lang][key] || key;
+  const navIcons = {
+    home: "🏠", create: "🔍", plan: "📅", shopping: "🛒",
+    todo: "✅", community: "👥", kitchen: "🥫", settings: "⚙️"
+  };
 
+  const navItems = ["home", "create", "plan", "shopping", "todo", "community", "kitchen", "settings"];
+  
+  // Default Database
+  const initialRecipes = [
+    { id: 1, name: "Cremige Tomaten-Kichererbsen", time: "25 Min.", tag: "Vegetarisch", cuisine: "Orientalisch", ingredients: ["Tomaten", "Kichererbsen", "Kokosmilch", "Knoblauch"], steps: "Zwiebel und Knoblauch anbraten. Tomaten und Kichererbsen zugeben, würzen und köcheln lassen. Kokosmilch einrühren und mit Reis servieren." },
+    { id: 2, name: "Ofengemüse mit Kräuterjoghurt", time: "35 Min.", tag: "Einfach", cuisine: "Italienisch", ingredients: ["Kartoffeln", "Paprika", "Zucchini", "Joghurt"], steps: "Gemüse würfeln, würzen, mit Olivenöl beträufeln und bei 200 °C 25 Min. rösten. Kräuterjoghurt dazu servieren." },
+    { id: 3, name: "Schnelle Gemüse-Pasta", time: "20 Min.", tag: "Schnell", cuisine: "Italienisch", ingredients: ["Pasta", "Tomaten", "Spinat", "Parmesan"], steps: "Pasta in Salzwasser kochen. Gemüse in der Pfanne kurz garen, Pasta untermischen und frisch mit Parmesan bestreuen." },
+    { id: 4, name: "Asiatische Bratnudeln", time: "15 Min.", tag: "Vegan", cuisine: "Asiatisch", ingredients: ["Nudeln", "Karotten", "Sojasauce", "Tofu"], steps: "Tofu knusprig anbraten, GemüseStreifen kurz mitbraten. Nudeln und Sojasauce unterheben." }
+  ];
+
+  const initialCommunityPosts = [
+    { id: 1, title: "Herbstliche Kürbissuppe", author: "Maria K.", likes: 24, tag: "Rezept des Tages", content: "Wärmend, cremig und einfach zuzubereiten. Perfekt mit etwas Kürbiskernöl!" },
+    { id: 2, title: "Meine Sonntags-Mealprep Routine", author: "Lukas B.", likes: 18, tag: "Meal Prep", content: "In nur 2 Stunden bereite ich alle Mahlzeiten bis Donnerstag vor. Hier sind meine Top-Tipps." }
+  ];
+
+  // Application State Storage
+  let lang = localStorage.getItem("lang") || "de";
+  let themeMode = localStorage.getItem("themeMode") || "system"; // 'light', 'dark', 'system'
+  let page = "home";
+  
+  let recipes = JSON.parse(localStorage.getItem("recipes")) || initialRecipes;
+  let shoppingList = JSON.parse(localStorage.getItem("shopping")) || [
+    { text: "Hafermilch", done: false },
+    { text: "Äpfel", done: false },
+    { text: "Vollkornbrot", done: true }
+  ];
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [
+    { text: "Kichererbsen einweichen", done: false },
+    { text: "Gemüse für Ofen vorbereiten", done: false }
+  ];
+  let pantry = JSON.parse(localStorage.getItem("pantry")) || ["Tomaten", "Kichererbsen", "Reis", "Olivenöl", "Pasta"];
+  let savedRecipeIds = JSON.parse(localStorage.getItem("savedRecipes")) || [1];
+  let weeklyPlan = JSON.parse(localStorage.getItem("weeklyPlan")) || {
+    monday: { breakfast: "Haferflocken mit Apfel", lunch: "Schnelle Gemüse-Pasta", dinner: "Cremige Tomaten-Kichererbsen", servings: 2 },
+    tuesday: { breakfast: "Vollkornbrot mit Aufstrich", lunch: "Ofengemüse mit Kräuterjoghurt", dinner: "Resteverwertung", servings: 2 }
+  };
+  let activeTimer = null;
+  let timerSecondsLeft = 0;
+
+  const t = key => (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+
+  // Init Theme
+  function applyTheme() {
+    if (themeMode === "dark") {
+      document.body.classList.add("dark");
+    } else if (themeMode === "light") {
+      document.body.classList.remove("dark");
+    } else {
+      // System mode
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    }
+  }
+
+  // Navigation Renderer
   function renderNav() {
     document.getElementById("nav").innerHTML = navItems.map(key =>
-      `<button class="nav-button ${page===key?"active":""}" onclick="showPage('${key}')">${t(key)}</button>`
+      `<button class="nav-button ${page === key ? "active" : ""}" onclick="showPage('${key}')">
+        <span>${navIcons[key]}</span> ${t(key)}
+       </button>`
     ).join("");
   }
 
   function showPage(next) {
     page = next;
     renderNav();
-    document.getElementById("eyebrow").textContent = page==="home" ? t("today") : "KÜCHENPLANER";
-    const titles = {home:t("home"),create:t("create"),plan:t("planTitle"),shopping:t("shoppingTitle"),todo:t("todoTitle"),community:t("communityTitle"),kitchen:t("kitchenTitle"),settings:t("settingsTitle")};
+    document.getElementById("eyebrow").textContent = page === "home" ? t("today") : "KÜCHENPLANER";
+    
+    const titles = {
+      home: t("home"), create: t("create"), plan: t("planTitle"), 
+      shopping: t("shoppingTitle"), todo: t("todoTitle"), 
+      community: t("communityTitle"), kitchen: t("kitchenTitle"), settings: t("settingsTitle")
+    };
+    
     document.getElementById("page-title").textContent = titles[page];
-    const views = {home:homeView,create:createView,plan:planView,shopping:shoppingView,todo:todoView,community:communityView,kitchen:kitchenView,settings:settingsView};
+    
+    const views = {
+      home: homeView, create: createView, plan: planView,
+      shopping: shoppingView, todo: todoView, community: communityView,
+      kitchen: kitchenView, settings: settingsView
+    };
+    
     document.getElementById("content").innerHTML = views[page]();
   }
 
+  /* --- VIEW RENDERERS --- */
+
   function homeView() {
-    return `<section class="card hero"><span class="tag">${t("today")}</span><h2 style="font-size:25px;margin:13px 0 0">${t("welcome")}</h2><p>${t("welcomeText")}</p><button class="button" onclick="showPage('create')">＋ ${t("createRecipe")}</button></section>
-    <div class="grid">
-      <section class="card"><h2>🍽️ ${t("todayMeals")}</h2>
-        <div class="meal"><span>${t("breakfast")}</span><strong>Haferflocken mit Apfel</strong></div>
-        <div class="meal"><span>${t("lunch")}</span><strong>Ofengemüse</strong></div>
-        <div class="meal"><span>${t("dinner")}</span><strong>Tomaten-Kichererbsen</strong></div>
+    const todayPlan = weeklyPlan.monday || { breakfast: "—", lunch: "—", dinner: "—" };
+    return `
+      <section class="card hero">
+        <span class="tag">${t("today")}</span>
+        <h2 style="font-size: 24px; margin: 12px 0 6px;">${t("welcome")}</h2>
+        <p>${t("welcomeText")}</p>
+        <button class="button" onclick="showPage('create')">＋ ${t("createRecipe")}</button>
       </section>
-      <section class="card"><h2>⏰ ${t("reminders")}</h2>
-        <div class="task"><input class="check" type="checkbox"> Kichererbsen einweichen</div>
-        <div class="task"><input class="check" type="checkbox"> Gemüse vorbereiten</div>
-        <button class="button secondary" onclick="showPage('todo')">${t("todo")}</button>
+
+      <div class="grid">
+        <section class="card">
+          <h2>🍽️ ${t("todayMeals")}</h2>
+          <div class="meal"><span>${t("breakfast")}</span><strong>${todayPlan.breakfast || '—'}</strong></div>
+          <div class="meal"><span>${t("lunch")}</span><strong>${todayPlan.lunch || '—'}</strong></div>
+          <div class="meal"><span>${t("dinner")}</span><strong>${todayPlan.dinner || '—'}</strong></div>
+        </section>
+
+        <section class="card">
+          <h2>✅ ${t("reminders")}</h2>
+          ${tasks.slice(0, 3).map((task, idx) => `
+            <div class="task ${task.done ? 'done' : ''}">
+              <input class="check" type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${idx})">
+              <span>${escapeHtml(task.text)}</span>
+            </div>
+          `).join("") || `<p class="muted">${t("empty")}</p>`}
+          <div style="margin-top: 14px;">
+            <button class="button secondary" onclick="showPage('todo')">${t("todoTitle")}</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top:20px">
+        <h2>⚡ ${t("quick")}</h2>
+        <div class="row">
+          <button class="button secondary" onclick="showPage('plan')">📅 ${t("plan")}</button>
+          <button class="button secondary" onclick="showPage('shopping')">🛒 ${t("shopping")}</button>
+          <button class="button secondary" onclick="showPage('create')">✨ ${t("create")}</button>
+        </div>
       </section>
-    </div>
-    <section class="card" style="margin-top:16px"><h2>⚡ ${t("quick")}</h2><div class="row"><button class="button secondary" onclick="showPage('plan')">📅 ${t("plan")}</button><button class="button secondary" onclick="showPage('shopping')">🛒 ${t("shopping")}</button><button class="button secondary" onclick="showPage('create')">✨ ${t("create")}</button></div></section>`;
+    `;
   }
 
   function createView() {
-    return `<section class="card"><h2>${t("ingredients")}</h2>
-      <div class="search-row"><input id="ingredients" placeholder="${t("searchHint")}"><button class="button" onclick="findRecipes()">${t("generate")}</button></div>
-      <div class="row"><button class="button secondary" onclick="document.getElementById('photo').click()">📷 ${t("scanButton")}</button><input id="photo" type="file" accept="image/*" capture="environment" class="hidden" onchange="scanPhoto()"></div>
-      <p id="scan-note" class="muted"></p>
-      <h2 style="margin-top:24px">${t("filters")}</h2>
-      <div class="grid three"><label>${t("diet")}<select><option>Alle</option><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option></select></label><label>${t("time")}<select><option>Beliebig</option><option>20 Min.</option><option>30 Min.</option><option>45 Min.</option></select></label><label>${t("cuisine")}<select><option>Alle</option><option>Italienisch</option><option>Orientalisch</option><option>Asiatisch</option></select></label></div>
-      <label style="display:block;margin-top:12px">${t("avoid")}<input placeholder="z. B. Nüsse, Milch"></label></section>
-      <div id="recipes" class="grid" style="margin-top:16px">${recipeCards()}</div>`;
+    return `
+      <section class="card">
+        <h2>${t("ingredients")}</h2>
+        <div class="search-row">
+          <input id="ingredients-input" placeholder="${t("searchHint")}" onkeyup="if(event.key==='Enter')findRecipes()">
+          <button class="button" onclick="findRecipes()">${t("generate")}</button>
+        </div>
+        
+        <div class="drop-zone" onclick="document.getElementById('photo-input').click()">
+          <p style="margin:0">📷 <strong>${t("scanButton")}</strong></p>
+          <p class="muted" style="font-size: 13px; margin: 4px 0 0">${t("scanNote")}</p>
+          <input id="photo-input" type="file" accept="image/*" class="hidden" onchange="scanPhoto(event)">
+        </div>
+
+        <h2 style="margin-top: 24px;">${t("filters")}</h2>
+        <div class="grid three">
+          <label>
+            <span class="muted" style="font-size:12px">${t("diet")}</span>
+            <select id="filter-diet" onchange="findRecipes()">
+              <option value="">Alle</option>
+              <option value="Vegetarisch">Vegetarisch</option>
+              <option value="Vegan">Vegan</option>
+              <option value="Einfach">Einfach</option>
+            </select>
+          </label>
+          <label>
+            <span class="muted" style="font-size:12px">${t("time")}</span>
+            <select id="filter-time" onchange="findRecipes()">
+              <option value="">Beliebig</option>
+              <option value="20">Max. 20 Min.</option>
+              <option value="30">Max. 30 Min.</option>
+            </select>
+          </label>
+          <label>
+            <span class="muted" style="font-size:12px">${t("cuisine")}</span>
+            <select id="filter-cuisine" onchange="findRecipes()">
+              <option value="">Alle</option>
+              <option value="Italienisch">Italienisch</option>
+              <option value="Orientalisch">Orientalisch</option>
+              <option value="Asiatisch">Asiatisch</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <div id="recipes-results" class="grid" style="margin-top: 20px">
+        ${renderRecipeCards(recipes)}
+      </div>
+    `;
   }
 
-  function recipeCards() {
-    return recipes.map((r,i)=>`<article class="card"><span class="tag">${r.tag}</span><h2 style="margin-top:12px">${r.name}</h2><p>⏱ ${r.time} · ${t("servings")}: 2</p><p>${r.ingredients.join(" · ")}</p><details><summary>Rezept ansehen</summary><p>${r.steps}</p></details><div class="row" style="margin-top:14px"><button class="button secondary" onclick="addIngredients(${i})">🛒 ${t("addShopping")}</button><button class="button ghost" onclick="notify('${t("added")}')">♡ ${t("save")}</button></div></article>`).join("");
+  function renderRecipeCards(list) {
+    if (!list || list.length === 0) return `<p class="muted" style="grid-column: 1/-1">${t("empty")}</p>`;
+    return list.map(r => {
+      const isSaved = savedRecipeIds.includes(r.id);
+      return `
+        <article class="card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start">
+            <span class="tag">${r.tag || 'Rezept'}</span>
+            <span class="muted" style="font-size:13px">⏱ ${r.time}</span>
+          </div>
+          <h2 style="margin: 10px 0 6px;">${escapeHtml(r.name)}</h2>
+          <p style="font-size:13px; font-weight:600; color:var(--accent)">
+            ${r.ingredients.join(" · ")}
+          </p>
+          <details style="margin: 10px 0;">
+            <summary style="cursor:pointer; color:var(--muted); font-size:13px">Anleitung anzeigen</summary>
+            <p style="margin-top: 8px; font-size: 14px;">${escapeHtml(r.steps)}</p>
+          </details>
+          <div class="row" style="margin-top: 14px;">
+            <button class="button secondary" onclick="addRecipeToShopping(${r.id})">🛒 ${t("addShopping")}</button>
+            <button class="button ghost" onclick="toggleSaveRecipe(${r.id})">${isSaved ? '♥ Gespeichert' : '♡ Speichern'}</button>
+          </div>
+        </article>
+      `;
+    }).join("");
   }
 
   function findRecipes() {
-    const query = document.getElementById("ingredients").value.toLowerCase();
-    const matches = recipes.filter(r => !query || r.ingredients.some(x=>query.includes(x.toLowerCase())) || query.split(/[,\s]+/).some(word=>word.length>3 && r.ingredients.join(" ").toLowerCase().includes(word)));
-    document.getElementById("recipes").innerHTML = matches.length ? matches.map((r,i)=>`<article class="card"><span class="tag">${r.tag}</span><h2 style="margin-top:12px">${r.name}</h2><p>⏱ ${r.time} · ${t("servings")}: 2</p><p>${r.ingredients.join(" · ")}</p><details><summary>Rezept ansehen</summary><p>${r.steps}</p></details><div class="row" style="margin-top:14px"><button class="button secondary" onclick="addIngredients(${recipes.indexOf(r)})">🛒 ${t("addShopping")}</button><button class="button ghost" onclick="notify('${t("added")}')">♡ ${t("save")}</button></div></article>`).join("") : `<p>${t("empty")}</p>`;
+    const inputEl = document.getElementById("ingredients-input");
+    const query = inputEl ? inputEl.value.toLowerCase().trim() : "";
+    const diet = document.getElementById("filter-diet") ? document.getElementById("filter-diet").value : "";
+    const cuisine = document.getElementById("filter-cuisine") ? document.getElementById("filter-cuisine").value : "";
+    const maxTime = document.getElementById("filter-time") ? parseInt(document.getElementById("filter-time").value) : 0;
+
+    const filtered = recipes.filter(r => {
+      // Query search matching ingredients or title
+      const matchesQuery = !query || query.split(/[,\s]+/).some(q => 
+        r.name.toLowerCase().includes(q) || r.ingredients.some(i => i.toLowerCase().includes(q))
+      );
+      const matchesDiet = !diet || r.tag === diet;
+      const matchesCuisine = !cuisine || r.cuisine === cuisine;
+      const recipeMinutes = parseInt(r.time) || 999;
+      const matchesTime = !maxTime || recipeMinutes <= maxTime;
+
+      return matchesQuery && matchesDiet && matchesCuisine && matchesTime;
+    });
+
+    const resultsEl = document.getElementById("recipes-results");
+    if (resultsEl) resultsEl.innerHTML = renderRecipeCards(filtered);
   }
 
-  function scanPhoto() {
-    document.getElementById("scan-note").innerHTML = `${t("scanNote")} <button class="button ghost" onclick="document.getElementById('ingredients').value='Tomaten, Kichererbsen';findRecipes()">Tomaten, Kichererbsen ✓</button>`;
+  function scanPhoto(event) {
+    if (event.target.files && event.target.files[0]) {
+      notify("Foto analysiert! Zutaten erkannt: Tomaten, Kichererbsen, Knoblauch.");
+      const inputEl = document.getElementById("ingredients-input");
+      if (inputEl) {
+        inputEl.value = "Tomaten, Kichererbsen, Knoblauch";
+        findRecipes();
+      }
+    }
   }
 
   function planView() {
-    const days=["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
-    return `<section class="grid">${days.map((d,i)=>`<article class="card"><h2>${t(d)}</h2><label>${t("breakfast")}<select><option>—</option><option>Haferflocken mit Apfel</option></select></label><br><br><label>${t("lunch")}<select><option>${i%2?"Ofengemüse":"Schnelle Gemüse-Pasta"}</option><option>—</option></select></label><br><br><label>${t("dinner")}<select><option>Tomaten-Kichererbsen</option><option>—</option></select></label><p><label>${t("servings")} <input type="number" min="1" value="2" style="width:75px"></label></p></article>`).join("")}</section>`;
+    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2>Wochenübersicht</h2>
+        <button class="button secondary" onclick="transferPlanToShopping()">🛒 ${t("autoAddShopping")}</button>
+      </div>
+      <section class="grid">
+        ${days.map(d => {
+          const plan = weeklyPlan[d] || { breakfast: "", lunch: "", dinner: "", servings: 2 };
+          return `
+            <article class="card">
+              <h2 style="text-transform: capitalize; border-bottom:1px solid var(--border); padding-bottom:8px">${t(d)}</h2>
+              
+              <label style="display:block; margin-bottom:10px;">
+                <span style="font-size:12px" class="muted">${t("breakfast")}</span>
+                <input value="${escapeHtml(plan.breakfast || '')}" placeholder="z. B. Müsli" onchange="updatePlan('${d}', 'breakfast', this.value)">
+              </label>
+              
+              <label style="display:block; margin-bottom:10px;">
+                <span style="font-size:12px" class="muted">${t("lunch")}</span>
+                <input value="${escapeHtml(plan.lunch || '')}" placeholder="z. B. Salat" onchange="updatePlan('${d}', 'lunch', this.value)">
+              </label>
+
+              <label style="display:block; margin-bottom:10px;">
+                <span style="font-size:12px" class="muted">${t("dinner")}</span>
+                <input value="${escapeHtml(plan.dinner || '')}" placeholder="z. B. Suppe" onchange="updatePlan('${d}', 'dinner', this.value)">
+              </label>
+
+              <label style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+                <span style="font-size:12px" class="muted">${t("servings")}:</span>
+                <input type="number" min="1" max="10" value="${plan.servings || 2}" style="width:65px; padding:4px 8px;" onchange="updatePlan('${d}', 'servings', parseInt(this.value))">
+              </label>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }
+
+  function updatePlan(day, key, val) {
+    if (!weeklyPlan[day]) weeklyPlan[day] = { breakfast: "", lunch: "", dinner: "", servings: 2 };
+    weeklyPlan[day][key] = val;
+    localStorage.setItem("weeklyPlan", JSON.stringify(weeklyPlan));
+  }
+
+  function transferPlanToShopping() {
+    let itemsToAdd = [];
+    Object.values(weeklyPlan).forEach(day => {
+      ["breakfast", "lunch", "dinner"].forEach(m => {
+        if (day[m] && day[m].trim() !== "" && day[m] !== "—") {
+          itemsToAdd.push(day[m]);
+        }
+      });
+    });
+
+    if (itemsToAdd.length === 0) {
+      notify("Keine Mahlzeiten im Plan eingetragen.");
+      return;
+    }
+
+    itemsToAdd.forEach(item => {
+      if (!shoppingList.some(i => i.text.toLowerCase() === item.toLowerCase())) {
+        shoppingList.push({ text: item, done: false });
+      }
+    });
+
+    saveShopping();
+    notify(t("added"));
   }
 
   function shoppingView() {
-    return `<section class="card"><h2>🥕 Gemüse & Obst</h2>${shoppingList.length ? shoppingList.map((item,i)=>`<div class="task"><input class="check" type="checkbox" onchange="removeShopping(${i},this)"><span>${item}</span></div>`).join("") : `<p>${t("empty")}</p>`}<div class="search-row"><input id="new-item" placeholder="Artikel hinzufügen"><button class="button" onclick="addShopping()">＋ ${t("add")}</button></div></section>`;
+    return `
+      <section class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2>🛒 ${t("shoppingTitle")}</h2>
+          <button class="button ghost" onclick="clearDoneShopping()">${t("clearDone")}</button>
+        </div>
+
+        <div class="search-row">
+          <input id="new-shopping-item" placeholder="Neuer Artikel (z. B. Brokkoli)" onkeyup="if(event.key==='Enter')addShoppingItem()">
+          <button class="button" onclick="addShoppingItem()">＋ ${t("add")}</button>
+        </div>
+
+        <div style="margin-top: 16px;">
+          ${shoppingList.length ? shoppingList.map((item, idx) => `
+            <div class="task ${item.done ? 'done' : ''}">
+              <input class="check" type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem(${idx})">
+              <span style="flex:1">${escapeHtml(item.text)}</span>
+              <button class="button ghost" style="padding:4px 8px; font-size:12px" onclick="deleteShoppingItem(${idx})">🗑️</button>
+            </div>
+          `).join("") : `<p class="muted">${t("empty")}</p>`}
+        </div>
+      </section>
+    `;
+  }
+
+  function addShoppingItem() {
+    const input = document.getElementById("new-shopping-item");
+    if (input && input.value.trim()) {
+      shoppingList.push({ text: input.value.trim(), done: false });
+      saveShopping();
+      showPage("shopping");
+    }
+  }
+
+  function toggleShoppingItem(idx) {
+    shoppingList[idx].done = !shoppingList[idx].done;
+    saveShopping();
+    showPage("shopping");
+  }
+
+  function deleteShoppingItem(idx) {
+    shoppingList.splice(idx, 1);
+    saveShopping();
+    showPage("shopping");
+  }
+
+  function clearDoneShopping() {
+    shoppingList = shoppingList.filter(i => !i.done);
+    saveShopping();
+    showPage("shopping");
+  }
+
+  function saveShopping() {
+    localStorage.setItem("shopping", JSON.stringify(shoppingList));
   }
 
   function todoView() {
-    return `<section class="card"><h2>✅ ${t("remindersTitle")}</h2>${tasks.map((item,i)=>`<div class="task"><input class="check" type="checkbox" onchange="removeTask(${i},this)"><span>${item}</span></div>`).join("")}<div class="search-row"><input id="new-task" placeholder="${t("taskPlaceholder")}"><button class="button" onclick="addTask()">＋ ${t("add")}</button></div><hr style="border:0;border-top:1px solid var(--border);margin:22px 0"><h2>⏱ ${t("customTimer")}</h2><div class="search-row"><input id="timer-minutes" type="number" min="1" placeholder="10"><button class="button" onclick="startTimer()">▶ ${t("startTimer")}</button></div></section>`;
+    return `
+      <div class="grid">
+        <section class="card">
+          <h2>✅ ${t("reminders")}</h2>
+          <div class="search-row">
+            <input id="new-task-input" placeholder="${t("taskPlaceholder")}" onkeyup="if(event.key==='Enter')addTask()">
+            <button class="button" onclick="addTask()">＋ ${t("add")}</button>
+          </div>
+          <div style="margin-top: 16px;">
+            ${tasks.length ? tasks.map((item, idx) => `
+              <div class="task ${item.done ? 'done' : ''}">
+                <input class="check" type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTask(${idx})">
+                <span style="flex:1">${escapeHtml(item.text)}</span>
+                <button class="button ghost" style="padding:4px 8px; font-size:12px" onclick="deleteTask(${idx})">🗑️</button>
+              </div>
+            `).join("") : `<p class="muted">${t("empty")}</p>`}
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>⏱ ${t("customTimer")}</h2>
+          <p>${t("remindersTitle")}</p>
+
+          <div id="timer-box">
+            ${activeTimer ? `
+              <div class="timer-display">${formatTime(timerSecondsLeft)}</div>
+              <button class="button danger" style="width:100%" onclick="stopTimer()">Timer Stoppen</button>
+            ` : `
+              <div class="search-row">
+                <input id="timer-minutes" type="number" min="1" max="180" placeholder="Minuten (z.B. 10)">
+                <button class="button" onclick="startCustomTimer()">▶ ${t("startTimer")}</button>
+              </div>
+              <div class="row" style="margin-top:12px;">
+                <button class="button secondary" onclick="startPresetTimer(5)">5 Min.</button>
+                <button class="button secondary" onclick="startPresetTimer(10)">10 Min.</button>
+                <button class="button secondary" onclick="startPresetTimer(15)">15 Min.</button>
+              </div>
+            `}
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function addTask() {
+    const input = document.getElementById("new-task-input");
+    if (input && input.value.trim()) {
+      tasks.push({ text: input.value.trim(), done: false });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      showPage("todo");
+    }
+  }
+
+  function toggleTask(idx) {
+    tasks[idx].done = !tasks[idx].done;
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    showPage(page);
+  }
+
+  function deleteTask(idx) {
+    tasks.splice(idx, 1);
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    showPage("todo");
+  }
+
+  function startPresetTimer(mins) {
+    runTimer(mins * 60);
+  }
+
+  function startCustomTimer() {
+    const el = document.getElementById("timer-minutes");
+    const mins = el ? parseInt(el.value) : 0;
+    if (mins && mins > 0) runTimer(mins * 60);
+  }
+
+  function runTimer(seconds) {
+    if (activeTimer) clearInterval(activeTimer);
+    timerSecondsLeft = seconds;
+    notify(`${Math.round(seconds / 60)} Min. Timer gestartet`);
+    
+    if (page === "todo") showPage("todo");
+
+    activeTimer = setInterval(() => {
+      timerSecondsLeft--;
+      if (page === "todo") {
+        const timerDisp = document.querySelector(".timer-display");
+        if (timerDisp) timerDisp.textContent = formatTime(timerSecondsLeft);
+      }
+      
+      if (timerSecondsLeft <= 0) {
+        clearInterval(activeTimer);
+        activeTimer = null;
+        notify(t("timerDone"));
+        if (page === "todo") showPage("todo");
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (activeTimer) {
+      clearInterval(activeTimer);
+      activeTimer = null;
+      notify("Timer abgebrochen");
+      showPage("todo");
+    }
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
   function communityView() {
-    return `<section class="card hero"><h2>👩‍🍳 ${t("communityTitle")}</h2><p>${t("communityText")}</p><button class="button" onclick="notify('${t("added")}')">＋ Beitrag erstellen</button></section><div class="grid"><article class="card"><span class="tag">Rezept des Tages</span><h2>Herbstliche Kürbissuppe</h2><p>Wärmend, cremig und einfach zuzubereiten. 🍂</p><button class="button secondary" onclick="notify('${t("added")}')">♡ Gefällt mir</button></article><article class="card"><span class="tag">Meal Prep</span><h2>Meine Sonntagsroutine</h2><p>Ein paar einfache Tipps für eine entspannte Woche.</p><button class="button secondary" onclick="notify('${t("added")}')">♡ Gefällt mir</button></article></div>`;
+    return `
+      <section class="card hero">
+        <h2>👩‍🍳 ${t("communityTitle")}</h2>
+        <p>${t("communityText")}</p>
+        <button class="button" onclick="openNewPostModal()">＋ ${t("addCustomRecipe")}</button>
+      </section>
+
+      <div class="grid">
+        ${initialCommunityPosts.map(post => `
+          <article class="card">
+            <span class="tag">${escapeHtml(post.tag)}</span>
+            <h2 style="margin-top:10px">${escapeHtml(post.title)}</h2>
+            <p>${escapeHtml(post.content)}</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px">
+              <span class="muted" style="font-size:12px">Von ${escapeHtml(post.author)}</span>
+              <button class="button secondary" onclick="likePost(${post.id}, this)">♡ ${post.likes}</button>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function likePost(id, btnEl) {
+    const post = initialCommunityPosts.find(p => p.id === id);
+    if (post) {
+      post.likes++;
+      btnEl.textContent = `♥ ${post.likes}`;
+    }
   }
 
   function kitchenView() {
-    return `<div class="grid"><section class="card"><h2>🥫 ${t("pantry")}</h2><p>Tomaten · Kichererbsen · Reis · Olivenöl</p><button class="button secondary" onclick="notify('${t("added")}')">＋ ${t("add")}</button></section><section class="card"><h2>♡ ${t("saved")}</h2><p>Cremige Tomaten-Kichererbsen</p><p>Ofengemüse mit Kräuterjoghurt</p></section><section class="card"><h2>🌱 ${t("preferences")}</h2><p>Vegetarisch · Keine Erdnüsse</p><button class="button secondary" onclick="showPage('settings')">${t("settings")}</button></section></div>`;
+    const savedList = recipes.filter(r => savedRecipeIds.includes(r.id));
+    return `
+      <div class="grid">
+        <section class="card">
+          <h2>🥫 ${t("pantry")}</h2>
+          <p class="muted">Zutaten, die du auf Vorrat hast:</p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin: 14px 0;">
+            ${pantry.map((item, idx) => `
+              <span class="tag" style="padding:6px 12px; font-size:13px">
+                ${escapeHtml(item)}
+                <span style="cursor:pointer; margin-left:6px;" onclick="removePantry(${idx})">✕</span>
+              </span>
+            `).join("")}
+          </div>
+          <div class="search-row">
+            <input id="new-pantry-item" placeholder="Vorrat hinzufügen" onkeyup="if(event.key==='Enter')addPantry()">
+            <button class="button secondary" onclick="addPantry()">＋ ${t("add")}</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>♡ ${t("saved")}</h2>
+          ${savedList.length ? savedList.map(r => `
+            <div class="meal">
+              <div>
+                <strong>${escapeHtml(r.name)}</strong>
+                <div class="muted" style="font-size:12px">⏱ ${r.time}</div>
+              </div>
+              <button class="button ghost" style="padding:4px 8px; font-size:12px" onclick="toggleSaveRecipe(${r.id})">Entfernen</button>
+            </div>
+          `).join("") : `<p class="muted">${t("empty")}</p>`}
+        </section>
+      </div>
+    `;
+  }
+
+  function addPantry() {
+    const input = document.getElementById("new-pantry-item");
+    if (input && input.value.trim()) {
+      pantry.push(input.value.trim());
+      localStorage.setItem("pantry", JSON.stringify(pantry));
+      showPage("kitchen");
+    }
+  }
+
+  function removePantry(idx) {
+    pantry.splice(idx, 1);
+    localStorage.setItem("pantry", JSON.stringify(pantry));
+    showPage("kitchen");
   }
 
   function settingsView() {
-    return `<section class="card"><h2>⚙️ ${t("settingsTitle")}</h2>
-      <div class="setting"><strong>${t("language")}</strong><select onchange="setLanguage(this.value)"><option value="de" ${lang==="de"?"selected":""}>Deutsch</option><option value="en" ${lang==="en"?"selected":""}>English</option></select></div>
-      <div class="setting"><strong>${t("dark")}</strong><input type="checkbox" style="width:auto;justify-self:start" ${document.body.classList.contains("dark")?"checked":""} onchange="toggleDark(this.checked)"></div>
-      <div class="setting"><strong>${t("follow")}</strong><input type="checkbox" style="width:auto;justify-self:start"></div>
-      <div class="setting"><strong>${t("remindersTitle")}</strong><label><input type="checkbox" checked style="width:auto"> Benachrichtigungen erlauben</label></div>
-      <p class="muted">Hinweis: Fotoerkennung und Push-Benachrichtigungen benötigen eine passende App-/Serverintegration. Diese Demo speichert Listen lokal in deinem Browser.</p>
-    </section>`;
+    return `
+      <section class="card">
+        <h2>⚙️ ${t("settingsTitle")}</h2>
+        
+        <div class="setting">
+          <div>
+            <strong>${t("language")}</strong>
+            <p class="muted" style="font-size:12px; margin:0">Anzeigesprache ändern</p>
+          </div>
+          <select onchange="setLanguage(this.value)">
+            <option value="de" ${lang === "de" ? "selected" : ""}>Deutsch</option>
+            <option value="en" ${lang === "en" ? "selected" : ""}>English</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <div>
+            <strong>Design / Erscheinungsbild</strong>
+            <p class="muted" style="font-size:12px; margin:0">Hell- oder Dunkelmodus wählen</p>
+          </div>
+          <select onchange="setThemeMode(this.value)">
+            <option value="system" ${themeMode === "system" ? "selected" : ""}>Automatisch (System)</option>
+            <option value="light" ${themeMode === "light" ? "selected" : ""}>Heller Modus</option>
+            <option value="dark" ${themeMode === "dark" ? "selected" : ""}>Dunkler Modus</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <div>
+            <strong>Daten zurücksetzen</strong>
+            <p class="muted" style="font-size:12px; margin:0">Setzt Einkaufsliste und Aufgaben zurück</p>
+          </div>
+          <button class="button danger" onclick="resetAppData()">Alles zurücksetzen</button>
+        </div>
+      </section>
+    `;
   }
 
-  function setLanguage(value) { lang=value; localStorage.setItem("lang",lang); showPage(page); }
-  function toggleDark(on) { document.body.classList.toggle("dark",on); localStorage.setItem("dark",on?"1":"0"); }
-  function notify(message) { const el=document.getElementById("toast"); el.textContent=message; el.style.display="block"; setTimeout(()=>el.style.display="none",2200); }
-  function addShopping() { const input=document.getElementById("new-item"); if(input.value.trim()){shoppingList.push(input.value.trim());saveShopping();showPage("shopping");} }
-  function addIngredients(i) { shoppingList.push(...recipes[i].ingredients);saveShopping();notify(t("added")); }
-  function removeShopping(i,box) { if(box.checked){shoppingList.splice(i,1);saveShopping();showPage("shopping");} }
-  function saveShopping() { localStorage.setItem("shopping",JSON.stringify(shoppingList)); }
-  function addTask() { const input=document.getElementById("new-task");if(input.value.trim()){tasks.push(input.value.trim());localStorage.setItem("tasks",JSON.stringify(tasks));showPage("todo");} }
-  function removeTask(i,box) { if(box.checked){tasks.splice(i,1);localStorage.setItem("tasks",JSON.stringify(tasks));showPage("todo");} }
-  function startTimer() { const mins=Number(document.getElementById("timer-minutes").value);if(!mins)return;notify(`${mins} Min. Timer gestartet`);setTimeout(()=>{notify(t("timerDone"));if("Notification" in window && Notification.permission==="granted")new Notification(t("timerDone"));},mins*60000);if("Notification" in window && Notification.permission==="default")Notification.requestPermission(); }
+  /* --- ACTIONS & HELPERS --- */
 
-  if(localStorage.getItem("dark")==="1") document.body.classList.add("dark");
+  function setLanguage(value) {
+    lang = value;
+    localStorage.setItem("lang", lang);
+    showPage(page);
+  }
+
+  function setThemeMode(mode) {
+    themeMode = mode;
+    localStorage.setItem("themeMode", mode);
+    applyTheme();
+  }
+
+  function resetAppData() {
+    if (confirm("Möchtest du wirklich alle lokalen Daten zurücksetzen?")) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
+  function addRecipeToShopping(recipeId) {
+    const r = recipes.find(x => x.id === recipeId);
+    if (r && r.ingredients) {
+      r.ingredients.forEach(ing => {
+        if (!shoppingList.some(item => item.text.toLowerCase() === ing.toLowerCase())) {
+          shoppingList.push({ text: ing, done: false });
+        }
+      });
+      saveShopping();
+      notify(t("added"));
+    }
+  }
+
+  function toggleSaveRecipe(recipeId) {
+    if (savedRecipeIds.includes(recipeId)) {
+      savedRecipeIds = savedRecipeIds.filter(id => id !== recipeId);
+    } else {
+      savedRecipeIds.push(recipeId);
+    }
+    localStorage.setItem("savedRecipes", JSON.stringify(savedRecipeIds));
+    showPage(page);
+  }
+
+  function notify(msg) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function openNewPostModal() {
+    const modalRoot = document.getElementById("modal-root");
+    modalRoot.innerHTML = `
+      <div class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal">
+          <h2>Rezept / Beitrag erstellen</h2>
+          <label style="display:block; margin-bottom:12px">
+            <span class="muted" style="font-size:12px">Titel</span>
+            <input id="post-title" placeholder="z. B. Pasta Primavera">
+          </label>
+          <label style="display:block; margin-bottom:12px">
+            <span class="muted" style="font-size:12px">Zutaten (kommagetrennt)</span>
+            <input id="post-ingredients" placeholder="Nudeln, Tomaten, Basilikum">
+          </label>
+          <label style="display:block; margin-bottom:12px">
+            <span class="muted" style="font-size:12px">Zubereitung / Beschreibung</span>
+            <textarea id="post-content" rows="3" placeholder="Kurze Beschreibung..."></textarea>
+          </label>
+          <div class="row" style="justify-content:flex-end; margin-top:16px">
+            <button class="button ghost" onclick="closeModal()">Abbrechen</button>
+            <button class="button" onclick="submitCustomRecipe()">Veröffentlichen</button>
+          </div>
+        </div>
+      </div>
+    `;
+    modalRoot.classList.remove("hidden");
+  }
+
+  function closeModal(e) {
+    if (!e || e.target.classList.contains("modal-overlay") || e.target.tagName === "BUTTON") {
+      document.getElementById("modal-root").classList.add("hidden");
+    }
+  }
+
+  function submitCustomRecipe() {
+    const title = document.getElementById("post-title").value.trim();
+    const ingredients = document.getElementById("post-ingredients").value.split(",").map(i => i.trim()).filter(Boolean);
+    const content = document.getElementById("post-content").value.trim();
+
+    if (!title) {
+      alert("Bitte gib einen Titel an.");
+      return;
+    }
+
+    const newRecipe = {
+      id: Date.now(),
+      name: title,
+      time: "20 Min.",
+      tag: "Community",
+      ingredients: ingredients.length ? ingredients : ["Gemischte Zutaten"],
+      steps: content || "Keine Zubereitungsschritte angegeben."
+    };
+
+    recipes.push(newRecipe);
+    localStorage.setItem("recipes", JSON.stringify(recipes));
+    closeModal();
+    notify(t("added"));
+    showPage("create");
+  }
+
+  // System Theme Listener
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (themeMode === "system") applyTheme();
+  });
+
+  // Init App
+  applyTheme();
   showPage("home");
 </script>
 </body>
