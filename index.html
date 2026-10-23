@@ -1,784 +1,980 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Küchenplaner Deluxe</title>
-<style>
-:root {
-  --bg:#f6f7f2; --card:#fff; --ink:#17231e; --muted:#68766f;
-  --green:#087a55; --green2:#e4f4ec; --coral:#f26049;
-  --line:#e3e9e4; --shadow:0 12px 32px #183a2910;
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useRef, useEffect, useId } from 'react';
+import {
+  ChefHat,
+  Plus,
+  X,
+  Sparkles,
+  Clock,
+  Users,
+  Flame,
+  Copy,
+  Check,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Timer,
+  UtensilsCrossed,
+  FileText,
+  LayoutGrid,
+  CheckCircle2,
+  AlertCircle,
+  Lightbulb,
+} from 'lucide-react';
+
+interface ParsedRecipe {
+  id: string;
+  title: string;
+  prepTime?: string;
+  cookTime?: string;
+  servings?: string;
+  ingredients: string[];
+  steps: string[];
+  notes?: string;
+  rawText: string;
 }
-.dark {
-  --bg:#101815; --card:#19241f; --ink:#eef5f0; --muted:#a3b2a9;
-  --green:#67d6a7; --green2:#20392e; --line:#304039; --shadow:0 12px 32px #0004;
-}
-* { box-sizing:border-box }
-body { margin:0; background:var(--bg); color:var(--ink); font:15px system-ui,sans-serif }
-button,input,select,textarea { font:inherit }
-button { cursor:pointer; border:0 }
-header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line) }
-.top { max-width:1180px; margin:auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px }
-.brand { font-size:20px; font-weight:850; color:var(--green) }
-.brand small { font-size:11px; color:var(--coral) }
-nav,.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
-.navbtn,.iconbtn { background:transparent; color:var(--muted); padding:9px 12px; border-radius:12px; font-weight:700 }
-.navbtn.active,.navbtn:hover,.iconbtn:hover { background:var(--green2); color:var(--green) }
-main { max-width:1180px; margin:24px auto; padding:0 20px 80px }
-.tab { display:none }
-.tab.active { display:block }
-.hero { background:linear-gradient(125deg,#07583f,#10251e); color:white; border-radius:26px; padding:30px; margin-bottom:20px }
-.hero h1 { font-size:clamp(28px,5vw,46px); margin:12px 0 }
-.hero p { color:#d1e1d8; max-width:700px }
-.inputrow { background:#ffffff18; border:1px solid #ffffff35; padding:8px; border-radius:16px }
-.inputrow input { flex:1; min-width:180px; color:white; background:transparent; border:0; outline:0; padding:10px }
-.inputrow input::placeholder { color:#c5d5cc }
-.primary,.accent,.soft,.danger { padding:10px 14px; border-radius:11px; font-weight:750 }
-.primary { background:var(--green); color:white }
-.accent { background:var(--coral); color:white }
-.soft { background:var(--green2); color:var(--green) }
-.danger { background:#ffe8e6; color:#a52b24 }
-.chips { display:flex; gap:7px; flex-wrap:wrap; margin:10px 0 }
-.chip { background:var(--green2); color:var(--green); border-radius:999px; padding:6px 10px; font-size:13px }
-.hero .chip { background:#ffffff1c; color:white; border:1px solid #ffffff25 }
-.card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:18px; box-shadow:var(--shadow) }
-.filters { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0 }
-.filters label,.field label { display:grid; gap:6px; color:var(--muted); font-size:12px; font-weight:750 }
-input,select,textarea { background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:11px; padding:10px }
-h2 { margin:0 0 6px }
-h3 { margin:0 0 12px }
-.sectionhead { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:22px 0 12px }
-.grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
-.recipe { padding:0; overflow:hidden }
-.recipe img { width:100%; height:175px; object-fit:cover; background:var(--green2) }
-.recipebody { padding:16px }
-.recipebody h3 { margin:0 0 8px }
-.muted { color:var(--muted); font-size:13px }
-.recipe .chip { font-size:11px }
-.daygrid { display:grid; grid-template-columns:repeat(7,1fr); gap:10px }
-.slot { border:1px dashed var(--line); padding:9px; border-radius:11px; margin:8px 0; font-size:12px }
-.slot button { display:block; margin-top:6px }
-.list { display:grid; gap:8px }
-.listitem { display:flex; align-items:center; gap:10px; padding:11px; background:var(--bg); border-radius:12px }
-.listitem span { flex:1 }
-.checked { text-decoration:line-through; color:var(--muted) }
-table { width:100%; border-collapse:collapse }
-th,td { text-align:left; padding:12px; border-bottom:1px solid var(--line) }
-th { color:var(--muted); font-size:12px }
-.post { margin:12px auto; max-width:720px }
-.modal { position:fixed; inset:0; background:#0009; z-index:10; display:none; align-items:center; justify-content:center; padding:16px }
-.modal.open { display:flex }
-.modalbox { background:var(--card); border-radius:20px; padding:22px; width:min(650px,100%); max-height:90vh; overflow:auto }
-.modalhead { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px }
-.field { display:grid; gap:12px }
-.field input,.field textarea,.field select { width:100% }
-.step { display:block; padding:10px; background:var(--bg); border-radius:10px; margin:7px 0 }
-.timer { font:700 48px ui-monospace,monospace; text-align:center; background:#101815; color:#67d6a7; padding:20px; border-radius:16px }
-.toast { position:fixed; bottom:22px; right:20px; background:#17231e; color:white; padding:12px 16px; border-radius:12px; z-index:20 }
-@media(max-width:850px) {
-  .grid { grid-template-columns:repeat(2,1fr) }
-  .daygrid { grid-template-columns:repeat(2,1fr) }
-  .filters { grid-template-columns:repeat(2,1fr) }
-}
-@media(max-width:600px) {
-  .top { padding:10px 12px; flex-wrap:wrap }
-  .top nav { order:3; width:100%; overflow:auto; flex-wrap:nowrap }
-  .navbtn { white-space:nowrap; padding:8px }
-  .grid,.filters { grid-template-columns:1fr }
-  .daygrid { grid-template-columns:1fr 1fr }
-  main { padding:0 12px 70px }
-  .hero { padding:22px }
-}
-</style>
-</head>
-<body>
-<header>
-  <div class="top">
-    <div class="brand">🍴 Küchenplaner <small>DELUXE</small></div>
-    <nav id="nav"></nav>
-    <div class="row">
-      <button class="iconbtn" onclick="openTimer()" title="Timer">⏱</button>
-      <button class="iconbtn" onclick="toggleTheme()" title="Theme">🌙</button>
-    </div>
-  </div>
-</header>
 
-<main>
-  <section class="tab active" id="tab-recipes">
-    <div class="hero">
-      <div>✨ REZEPTSTUDIO · ZUTATEN-SCAN</div>
-      <h1>Was möchtest du heute kochen?</h1>
-      <p>Gib Zutaten ein oder wähle sie aus. Die Rezepte werden sofort passend aktualisiert.</p>
-
-      <div class="row inputrow">
-        <input id="ingredientInput" placeholder="z. B. Tomaten, Nudeln, Knoblauch"
-               onkeydown="if(event.key==='Enter') addIngredients()">
-        <button class="accent" onclick="addIngredients()">＋ Hinzufügen</button>
-        <label class="soft" style="cursor:pointer">
-          📷 Foto auswählen
-          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden onchange="scanPhoto(event)">
-        </label>
-      </div>
-
-      <div class="chips" id="quickTags"></div>
-      <div class="row" style="justify-content:space-between">
-        <b>Gewählte Zutaten</b>
-        <button class="iconbtn" onclick="clearIngredients()">Alle löschen</button>
-      </div>
-      <div class="chips" id="selectedTags"></div>
-    </div>
-
-    <div class="card">
-      <div class="sectionhead">
-        <h3>Filter & Vorlieben</h3>
-        <button class="primary" onclick="renderRecipes()">✨ Rezepte anzeigen</button>
-      </div>
-      <div class="filters">
-        <label>Ernährung
-          <select id="diet" onchange="renderRecipes()">
-            <option value="all">Alle</option>
-            <option>Vegetarisch</option><option>Vegan</option>
-            <option>Glutenfrei</option><option>Low-Carb</option>
-          </select>
-        </label>
-        <label>Max. Zeit
-          <select id="time" onchange="renderRecipes()">
-            <option value="all">Egal</option>
-            <option value="15">15 Min</option><option value="30">30 Min</option>
-            <option value="45">45 Min</option>
-          </select>
-        </label>
-        <label>Küche
-          <select id="cuisine" onchange="renderRecipes()">
-            <option value="all">Alle</option>
-            <option>Italienisch</option><option>Mediterran</option>
-            <option>Asiatisch</option><option>Klassisch</option>
-          </select>
-        </label>
-        <label>Suche
-          <input id="search" placeholder="Rezeptname…" oninput="renderRecipes()">
-        </label>
-      </div>
-    </div>
-
-    <div class="sectionhead"><h2>Rezepte</h2>
-      <button class="soft" onclick="openRecipeForm()">＋ Eigenes Rezept</button>
-    </div>
-    <div class="grid" id="recipes"></div>
-  </section>
-
-  <section class="tab" id="tab-weekly">
-    <div class="card">
-      <div class="sectionhead">
-        <div><h2>Wochenplaner</h2><div class="muted">Plane Mahlzeiten für deine Woche.</div></div>
-        <div class="row">
-          <button class="soft" onclick="clearPlan()">Plan leeren</button>
-          <button class="accent" onclick="planToShopping()">🛒 Einkaufsliste erstellen</button>
-        </div>
-      </div>
-      <div class="daygrid" id="week"></div>
-    </div>
-  </section>
-
-  <section class="tab" id="tab-shopping">
-    <div class="card">
-      <div class="sectionhead">
-        <div><h2>Einkaufsliste</h2><div class="muted">Artikel abhaken oder ergänzen.</div></div>
-        <div class="row">
-          <button class="soft" onclick="copyList()">Kopieren</button>
-          <button class="danger" onclick="clearChecked()">Erledigte löschen</button>
-        </div>
-      </div>
-      <div class="row">
-        <input id="shopInput" placeholder="Artikel hinzufügen…" style="flex:1"
-               onkeydown="if(event.key==='Enter') addShop()">
-        <select id="shopCat">
-          <option>Gemüse & Obst</option><option>Kühlregal & Milch</option>
-          <option>Vorratskammer</option><option>Gewürze & Öl</option><option>Sonstiges</option>
-        </select>
-        <button class="primary" onclick="addShop()">＋</button>
-      </div>
-      <div id="shoppingList" style="margin-top:16px"></div>
-    </div>
-  </section>
-
-  <section class="tab" id="tab-pantry">
-    <div class="card">
-      <div class="sectionhead">
-        <div><h2>Vorratskammer</h2><div class="muted">Menge und Mindesthaltbarkeit verwalten.</div></div>
-        <button class="primary" onclick="openPantryForm()">＋ Vorrat hinzufügen</button>
-      </div>
-      <div style="overflow:auto">
-        <table><thead><tr><th>Artikel</th><th>Menge</th><th>MHD</th><th></th></tr></thead>
-          <tbody id="pantryList"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="tab" id="tab-community">
-    <div class="card sectionhead">
-      <div><h2>Community</h2><div class="muted">Teile Kochtipps und Rezeptideen.</div></div>
-      <button class="accent" onclick="openPostForm()">＋ Beitrag erstellen</button>
-    </div>
-    <div id="posts"></div>
-  </section>
-</main>
-
-<div class="modal" id="modal" onclick="if(event.target===this) closeModal()">
-  <div class="modalbox">
-    <div class="modalhead"><h2 id="modalTitle"></h2><button class="iconbtn" onclick="closeModal()">✕</button></div>
-    <div id="modalBody"></div>
-  </div>
-</div>
-<div id="toast" class="toast" style="display:none"></div>
-
-<script>
-const $ = id => document.getElementById(id);
-const read = (key, fallback) => {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-  catch { return fallback; }
-};
-
-const dayNames = {Mon:"Montag",Tue:"Dienstag",Wed:"Mittwoch",Thu:"Donnerstag",Fri:"Freitag",Sat:"Samstag",Sun:"Sonntag"};
-const mealNames = {breakfast:"Frühstück",lunch:"Mittagessen",dinner:"Abendessen"};
-
-const state = {
-  dark: localStorage.getItem("kp_dark") === "true",
-  ingredients: [],
-  custom: read("kp_custom", []),
-  plan: read("kp_plan", Object.fromEntries(
-    ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => [d,{breakfast:null,lunch:null,dinner:null}])
-  )),
-  shopping: read("kp_shop", []),
-  pantry: read("kp_pantry", []),
-  posts: read("kp_posts", [])
-};
-
-const recipes = [
-  {
-    id:"r1", title:"Cremige Knoblauch-Pasta", time:20, calories:520,
-    diet:"Vegetarisch", cuisine:"Italienisch",
-    ingredients:["Pasta","Knoblauch","Sahne","Parmesan","Butter","Petersilie"],
-    steps:["Pasta in Salzwasser al dente kochen.","Knoblauch in Butter sanft anbraten.","Sahne und etwas Nudelwasser zugeben.","Parmesan einrühren und abschmecken.","Pasta mit der Sauce vermengen und servieren."]
-  },
-  {
-    id:"r2", title:"Mediterrane Gemüsepfanne", time:25, calories:380,
-    diet:"Vegan", cuisine:"Mediterran",
-    ingredients:["Paprika","Zucchini","Tomaten","Knoblauch","Olivenöl","Kräuter"],
-    steps:["Gemüse in Stücke schneiden.","Öl erhitzen und Knoblauch kurz anbraten.","Gemüse 10–12 Minuten braten.","Kräuter zugeben und abschmecken."]
-  },
-  {
-    id:"r3", title:"Tofu-Reis-Bowl", time:30, calories:460,
-    diet:"Vegan", cuisine:"Asiatisch",
-    ingredients:["Tofu","Reis","Paprika","Sojasauce","Ingwer","Sesam"],
-    steps:["Reis garen.","Tofu würfeln und knusprig braten.","Paprika und Ingwer zugeben.","Mit Sojasauce würzen und mit Reis servieren."]
-  },
-  {
-    id:"r4", title:"Würziges Hähnchen-Curry", time:35, calories:580,
-    diet:"Low-Carb", cuisine:"Asiatisch",
-    ingredients:["Hähnchen","Kokosmilch","Paprika","Currypaste","Knoblauch"],
-    steps:["Hähnchen in Streifen schneiden und anbraten.","Currypaste und Knoblauch kurz mitbraten.","Kokosmilch zugießen und köcheln lassen.","Paprika zugeben und garen."]
-  },
-  {
-    id:"r5", title:"Tomaten-Eier-Pfanne", time:15, calories:310,
-    diet:"Vegetarisch", cuisine:"Klassisch",
-    ingredients:["Tomaten","Eier","Zwiebel","Paprika","Kräuter"],
-    steps:["Zwiebel und Paprika anbraten.","Tomaten zugeben und weich köcheln.","Eier hineinschlagen und stocken lassen.","Mit Kräutern servieren."]
-  }
+const COMMON_PANTRY_ITEMS = [
+  'Tomatoes',
+  'Eggs',
+  'Garlic',
+  'Onion',
+  'Pasta',
+  'Rice',
+  'Olive oil',
+  'Cheese',
+  'Chicken breast',
+  'Potatoes',
+  'Butter',
+  'Bell pepper',
 ];
 
-const quickIngredients = ["Tomaten","Pasta","Knoblauch","Hähnchen","Paprika","Zucchini","Käse","Reis","Eier","Tofu","Pilze"];
+const PREFERENCE_TAGS = [
+  'Any Style',
+  'Quick (< 30 min)',
+  'Vegetarian',
+  'High Protein',
+  'Comfort Food',
+  'One-Pot Meal',
+];
 
-function save() {
-  localStorage.setItem("kp_custom", JSON.stringify(state.custom));
-  localStorage.setItem("kp_plan", JSON.stringify(state.plan));
-  localStorage.setItem("kp_shop", JSON.stringify(state.shopping));
-  localStorage.setItem("kp_pantry", JSON.stringify(state.pantry));
-  localStorage.setItem("kp_posts", JSON.stringify(state.posts));
-}
+export default function App() {
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [status, setStatus] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [recipesText, setRecipesText] = useState('');
+  const [parsedRecipes, setParsedRecipes] = useState<ParsedRecipe[]>([]);
+  const [viewMode, setViewMode] = useState<'cards' | 'raw'>('cards');
+  const [selectedPreference, setSelectedPreference] = useState('Any Style');
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
+  const [checkedSteps, setCheckedSteps] = useState<Record<string, boolean>>({});
+  
+  // Audio narration state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingRecipeId, setSpeakingRecipeId] = useState<string | null>(null);
 
-function esc(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }[char]));
-}
+  // Kitchen Timer state
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerModalOpen, setTimerModalOpen] = useState(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-function toast(message) {
-  $("toast").textContent = message;
-  $("toast").style.display = "block";
-  setTimeout(() => $("toast").style.display = "none", 2400);
-}
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsCardRef = useRef<HTMLDivElement>(null);
+  const statusId = useId();
 
-function init() {
-  document.documentElement.classList.toggle("dark", state.dark);
+  // Parse markdown recipes into structured cards
+  const parseRecipesFromMarkdown = (text: string): ParsedRecipe[] => {
+    if (!text || !text.trim()) return [];
 
-  $("nav").innerHTML = [
-    ["recipes","🍳 Rezepte"],["weekly","📅 Planer"],["shopping","🛒 Einkauf"],
-    ["pantry","📦 Vorrat"],["community","👥 Community"]
-  ].map(([id,label], index) =>
-    `<button class="navbtn ${index===0?"active":""}" onclick="showTab('${id}',this)">${label}</button>`
-  ).join("");
+    // Split roughly by recipe headers (### Recipe or ## Recipe or numbers)
+    const sections = text.split(/(?=###?\s+\d+[\.\:]|###?\s+Recipe\s+\d+|###?\s+[A-Z][^\n]+(?:\n\s*[-*]|\n\s*\*\*Prep))/i);
+    const validSections = sections.filter((s) => s.trim().length > 30);
 
-  $("quickTags").innerHTML = quickIngredients.map(item =>
-    `<button class="chip" onclick="toggleIngredient('${esc(item)}')">＋ ${esc(item)}</button>`
-  ).join("");
+    if (validSections.length >= 2) {
+      return validSections.map((section, idx) => {
+        const lines = section.trim().split('\n');
+        let title = `Recipe ${idx + 1}`;
+        const firstLine = lines[0].replace(/^#+\s*/, '').replace(/^\d+[\.\:\-]\s*/, '').trim();
+        if (firstLine) {
+          title = firstLine.replace(/\*\*/g, '');
+        }
 
-  renderSelectedIngredients();
-  renderRecipes();
-  renderWeek();
-  renderShopping();
-  renderPantry();
-  renderPosts();
-}
+        let prepTime: string | undefined;
+        let cookTime: string | undefined;
+        let servings: string | undefined;
+        const ingredientsList: string[] = [];
+        const stepsList: string[] = [];
+        const notesList: string[] = [];
 
-function showTab(id, button) {
-  document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
-  $("tab-" + id).classList.add("active");
-  document.querySelectorAll(".navbtn").forEach(el => el.classList.remove("active"));
-  if (button) button.classList.add("active");
-}
+        let currentSection: 'meta' | 'ingredients' | 'steps' | 'notes' = 'meta';
 
-function toggleTheme() {
-  state.dark = !state.dark;
-  localStorage.setItem("kp_dark", state.dark);
-  document.documentElement.classList.toggle("dark", state.dark);
-}
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
 
-function addIngredients() {
-  const value = $("ingredientInput").value.trim();
-  if (!value) return;
+          // Time & Servings regex
+          const prepMatch = line.match(/(?:prep(?:aration)?\s*time|prep):\s*([^\*,\n]+)/i);
+          if (prepMatch && !prepTime) prepTime = prepMatch[1].trim();
 
-  value.split(",").map(item => item.trim()).filter(Boolean).forEach(item => {
-    if (!state.ingredients.some(existing => existing.toLowerCase() === item.toLowerCase())) {
-      state.ingredients.push(item);
+          const cookMatch = line.match(/(?:cook(?:ing)?\s*time|cook):\s*([^\*,\n]+)/i);
+          if (cookMatch && !cookTime) cookTime = cookMatch[1].trim();
+
+          const servingsMatch = line.match(/(?:servings|yield|serves):\s*([^\*,\n]+)/i);
+          if (servingsMatch && !servings) servings = servingsMatch[1].trim();
+
+          // Section headers or inline lines
+          const inlineIngMatch = line.match(/^\*?\s*\*\*ingredients:?\*\*\s*(.+)/i);
+          if (inlineIngMatch) {
+            currentSection = 'ingredients';
+            const rawItems = inlineIngMatch[1].split(/,(?![^(]*\))/); // split commas not inside parentheses
+            rawItems.forEach((it) => {
+              const trimmed = it.trim().replace(/\.$/, '');
+              if (trimmed) ingredientsList.push(trimmed);
+            });
+            continue;
+          } else if (/^#*\s*\**ingredients:?/i.test(line)) {
+            currentSection = 'ingredients';
+            continue;
+          } else if (/^#*\s*\**(?:preparation(?:\s*steps)?|instructions|steps|directions|method):?/i.test(line)) {
+            currentSection = 'steps';
+            continue;
+          } else if (/^#*\s*\**(?:notes|tips|chef's\s*notes|variations):?/i.test(line)) {
+            currentSection = 'notes';
+            continue;
+          }
+
+          // Items
+          if (currentSection === 'ingredients') {
+            const cleanIng = line.replace(/^[-*•]\s*/, '').replace(/^\d+[\.\)]\s*/, '').replace(/^\*\*Ingredients:?\*\*\s*/i, '').trim();
+            if (cleanIng && !cleanIng.startsWith('**Prep') && !cleanIng.startsWith('**Cook')) {
+              ingredientsList.push(cleanIng);
+            }
+          } else if (currentSection === 'steps') {
+            const cleanStep = line.replace(/^\d+[\.\)]\s*/, '').replace(/^[-*•]\s*/, '').trim();
+            if (cleanStep) stepsList.push(cleanStep);
+          } else if (currentSection === 'notes') {
+            notesList.push(line.replace(/^[-*•]\s*/, ''));
+          }
+        }
+
+        return {
+          id: `recipe-${idx}`,
+          title,
+          prepTime,
+          cookTime,
+          servings,
+          ingredients: ingredientsList.length > 0 ? ingredientsList : ['Ingredients as detailed in recipe steps'],
+          steps: stepsList.length > 0 ? stepsList : lines.slice(1).filter((l) => l.trim().length > 10),
+          notes: notesList.join(' '),
+          rawText: section.trim(),
+        };
+      });
     }
-  });
 
-  $("ingredientInput").value = "";
-  renderSelectedIngredients();
-  renderRecipes();
-}
-
-function toggleIngredient(item) {
-  const exists = state.ingredients.some(x => x.toLowerCase() === item.toLowerCase());
-  state.ingredients = exists
-    ? state.ingredients.filter(x => x.toLowerCase() !== item.toLowerCase())
-    : [...state.ingredients, item];
-
-  renderSelectedIngredients();
-  renderRecipes();
-}
-
-function clearIngredients() {
-  state.ingredients = [];
-  renderSelectedIngredients();
-  renderRecipes();
-}
-
-function renderSelectedIngredients() {
-  $("selectedTags").innerHTML = state.ingredients.length
-    ? state.ingredients.map(item =>
-        `<button class="chip" onclick="toggleIngredient('${esc(item)}')">${esc(item)} ✕</button>`
-      ).join("")
-    : '<span class="muted">Noch keine Zutaten gewählt.</span>';
-}
-
-function ingredientMatches(recipeIngredient, selectedIngredient) {
-  const recipe = recipeIngredient.toLocaleLowerCase("de").trim();
-  const selected = selectedIngredient.toLocaleLowerCase("de").trim();
-  return recipe.includes(selected) || selected.includes(recipe);
-}
-
-function makeGeneratedRecipe() {
-  const ingredients = [...state.ingredients];
-  const extras = ["Olivenöl","Salz","Pfeffer","Kräuter"];
-  const fullIngredients = [...ingredients];
-
-  extras.forEach(extra => {
-    if (!fullIngredients.some(item => item.toLowerCase() === extra.toLowerCase())) {
-      fullIngredients.push(extra);
-    }
-  });
-
-  return {
-    id:"generated",
-    title: ingredients.length
-      ? `Kreative ${ingredients.slice(0,2).join(" & ")}-Pfanne`
-      : "Kreative Gemüsepfanne",
-    time:25,
-    calories:420,
-    diet:"Vegetarisch",
-    cuisine:"Kreativ",
-    ingredients:fullIngredients,
-    steps:[
-      "Wasche und schneide deine ausgewählten Zutaten in mundgerechte Stücke.",
-      "Erhitze etwas Öl in einer Pfanne und brate zuerst die festeren Zutaten an.",
-      "Gib die übrigen Zutaten dazu und gare alles, bis es weich und heiß ist.",
-      "Würze mit Salz, Pfeffer und Kräutern. Serviere das Gericht warm."
-    ]
+    // Fallback if parsing didn't detect multiple sections
+    return [
+      {
+        id: 'recipe-all',
+        title: 'Suggested Recipes',
+        ingredients: [],
+        steps: [],
+        rawText: text.trim(),
+      },
+    ];
   };
-}
 
-function renderRecipes() {
-  const diet = $("diet").value;
-  const maxTime = $("time").value;
-  const cuisine = $("cuisine").value;
-  const search = $("search").value.trim().toLocaleLowerCase("de");
+  // Handle adding an ingredient
+  const handleAddIngredient = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const value = inputValue.trim();
 
-  const allRecipes = [...recipes, ...state.custom];
+    if (!value) return;
 
-  let filtered = allRecipes.filter(recipe =>
-    (diet === "all" || recipe.diet === diet) &&
-    (maxTime === "all" || recipe.time <= Number(maxTime)) &&
-    (cuisine === "all" || recipe.cuisine === cuisine) &&
-    (!search || recipe.title.toLocaleLowerCase("de").includes(search))
-  );
-
-  if (state.ingredients.length) {
-    const matches = filtered.filter(recipe =>
-      recipe.ingredients.some(recipeIngredient =>
-        state.ingredients.some(selected =>
-          ingredientMatches(recipeIngredient, selected)
-        )
-      )
-    );
-
-    // Important: show a generated recipe if no saved recipe matches.
-    filtered = matches.length ? matches : [makeGeneratedRecipe()];
-  }
-
-  $("recipes").innerHTML = filtered.length
-    ? filtered.map(recipe => `
-      <article class="card recipe">
-        <div class="recipebody">
-          <h3>${esc(recipe.title)}</h3>
-          <div class="muted">⏱ ${recipe.time} min · 🔥 ${recipe.calories} kcal · ${esc(recipe.cuisine)}</div>
-          <div class="chips">
-            ${recipe.ingredients.map(item => `<span class="chip">${esc(item)}</span>`).join("")}
-          </div>
-          <button class="primary" onclick="showRecipe('${esc(recipe.id)}')">Kochmodus & Details</button>
-        </div>
-      </article>
-    `).join("")
-    : '<div class="card">Keine Rezepte gefunden. Ändere deine Filter.</div>';
-}
-
-function findRecipe(id) {
-  return [...recipes, ...state.custom].find(recipe => recipe.id === id)
-    || (id === "generated" ? makeGeneratedRecipe() : null);
-}
-
-function showRecipe(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-
-  openModal(recipe.title, `
-    <p class="muted">⏱ ${recipe.time} Minuten · ${recipe.calories} kcal · ${esc(recipe.diet)}</p>
-    <h3>Zutaten</h3>
-    <ul>${recipe.ingredients.map(item => `<li>${esc(item)}</li>`).join("")}</ul>
-    <div class="row">
-      <button class="accent" onclick="recipeToShopping('${esc(recipe.id)}')">Zutaten zur Einkaufsliste</button>
-      <button class="primary" onclick="recipeToPlan('${esc(recipe.id)}')">Zum Wochenplan</button>
-    </div>
-    <h3 style="margin-top:18px">Zubereitung</h3>
-    ${recipe.steps.map((step,index) =>
-      `<label class="step"><input type="checkbox"> Schritt ${index+1}: ${esc(step)}</label>`
-    ).join("")}
-  `);
-}
-
-function recipeToShopping(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-  recipe.ingredients.forEach(name => state.shopping.push({
-    id:String(Date.now() + Math.random()), name, category:"Vorratskammer", checked:false
-  }));
-  save(); renderShopping(); closeModal(); toast("Zutaten zur Einkaufsliste hinzugefügt");
-}
-
-function recipeToPlan(id) {
-  const recipe = findRecipe(id);
-  if (!recipe) return;
-  state.plan.Mon.dinner = {title:recipe.title, ingredients:recipe.ingredients};
-  save(); renderWeek(); closeModal();
-  showTab("weekly", document.querySelectorAll(".navbtn")[1]);
-}
-
-function renderWeek() {
-  $("week").innerHTML = Object.entries(dayNames).map(([key,label]) => `
-    <div class="card">
-      <b>${label}</b>
-      ${Object.entries(mealNames).map(([meal,name]) => {
-        const item = state.plan[key]?.[meal];
-        return `<div class="slot">
-          <b>${name}</b><br>${item ? esc(item.title) : "—"}
-          <button class="soft" onclick="chooseMeal('${key}','${meal}')">${item ? "Ändern" : "＋ Hinzufügen"}</button>
-          ${item ? `<button class="iconbtn" onclick="removeMeal('${key}','${meal}')">Entfernen</button>` : ""}
-        </div>`;
-      }).join("")}
-    </div>
-  `).join("");
-}
-
-function chooseMeal(day, meal) {
-  const available = [...recipes, ...state.custom];
-  const choice = prompt("Rezeptnummer wählen:\n" + available.map((r,i) => `${i+1}. ${r.title}`).join("\n"));
-  const recipe = available[Number(choice)-1];
-  if (!recipe) return;
-  state.plan[day][meal] = {title:recipe.title, ingredients:recipe.ingredients};
-  save(); renderWeek();
-}
-
-function removeMeal(day, meal) {
-  state.plan[day][meal] = null;
-  save(); renderWeek();
-}
-
-function clearPlan() {
-  Object.keys(state.plan).forEach(day => {
-    state.plan[day] = {breakfast:null,lunch:null,dinner:null};
-  });
-  save(); renderWeek();
-}
-
-function planToShopping() {
-  let count = 0;
-  Object.values(state.plan).forEach(day =>
-    Object.values(day).forEach(meal =>
-      meal?.ingredients?.forEach(name => {
-        state.shopping.push({id:String(Date.now()+Math.random()),name,category:"Vorratskammer",checked:false});
-        count++;
-      })
-    )
-  );
-  save(); renderShopping(); toast(`${count} Zutaten übertragen`);
-}
-
-function renderShopping() {
-  const categories = ["Gemüse & Obst","Kühlregal & Milch","Vorratskammer","Gewürze & Öl","Sonstiges"];
-  $("shoppingList").innerHTML = categories.map(category => {
-    const items = state.shopping.filter(item => item.category === category);
-    if (!items.length) return "";
-    return `<h3 style="margin-top:18px">${category}</h3><div class="list">
-      ${items.map(item => `<div class="listitem">
-        <input type="checkbox" ${item.checked ? "checked" : ""} onchange="toggleShop('${esc(item.id)}')">
-        <span class="${item.checked ? "checked" : ""}">${esc(item.name)}</span>
-        <button class="iconbtn" onclick="deleteShop('${esc(item.id)}')">✕</button>
-      </div>`).join("")}
-    </div>`;
-  }).join("") || '<p class="muted">Deine Einkaufsliste ist leer.</p>';
-}
-
-function addShop() {
-  const name = $("shopInput").value.trim();
-  if (!name) return;
-  state.shopping.push({id:String(Date.now()),name,category:$("shopCat").value,checked:false});
-  $("shopInput").value = "";
-  save(); renderShopping();
-}
-
-function toggleShop(id) {
-  const item = state.shopping.find(x => x.id === id);
-  if (item) item.checked = !item.checked;
-  save(); renderShopping();
-}
-
-function deleteShop(id) {
-  state.shopping = state.shopping.filter(x => x.id !== id);
-  save(); renderShopping();
-}
-
-function clearChecked() {
-  state.shopping = state.shopping.filter(item => !item.checked);
-  save(); renderShopping();
-}
-
-async function copyList() {
-  const text = state.shopping.map(item => `${item.checked ? "[x]" : "[ ]"} ${item.name}`).join("\n");
-  try { await navigator.clipboard.writeText(text); toast("Liste kopiert"); }
-  catch { prompt("Liste kopieren:", text); }
-}
-
-function renderPantry() {
-  $("pantryList").innerHTML = state.pantry.map(item => `
-    <tr><td>${esc(item.name)}</td><td>${esc(item.qty)}</td><td>${esc(item.expiry || "—")}</td>
-    <td><button class="danger" onclick="deletePantry('${esc(item.id)}')">Löschen</button></td></tr>
-  `).join("") || '<tr><td colspan="4" class="muted">Noch keine Vorräte eingetragen.</td></tr>';
-}
-
-function openPantryForm() {
-  openModal("Vorrat hinzufügen", `
-    <div class="field">
-      <label>Artikel<input id="pname"></label>
-      <label>Menge<input id="pqty" placeholder="z. B. 500 g"></label>
-      <label>Mindesthaltbarkeit<input id="pexp" type="date"></label>
-      <button class="primary" onclick="savePantry()">Speichern</button>
-    </div>
-  `);
-}
-
-function savePantry() {
-  const name = $("pname").value.trim();
-  if (!name) return;
-  state.pantry.push({id:String(Date.now()),name,qty:$("pqty").value || "1 Stück",expiry:$("pexp").value});
-  save(); renderPantry(); closeModal();
-}
-
-function deletePantry(id) {
-  state.pantry = state.pantry.filter(item => item.id !== id);
-  save(); renderPantry();
-}
-
-function renderPosts() {
-  $("posts").innerHTML = state.posts.map((post,index) => `
-    <article class="card post">
-      <div class="muted">👩‍🍳 ${esc(post.author)}</div>
-      <h3>${esc(post.title)}</h3><p>${esc(post.text)}</p>
-      <button class="soft" onclick="likePost(${index})">♥ ${post.likes || 0}</button>
-    </article>
-  `).join("") || '<div class="card muted">Noch keine Beiträge. Teile den ersten Kochtipp!</div>';
-}
-
-function openPostForm() {
-  openModal("Beitrag erstellen", `
-    <div class="field">
-      <label>Name<input id="pauthor" value="Küchenfreund"></label>
-      <label>Titel<input id="ptitle"></label>
-      <label>Beitrag<textarea id="ptext" rows="4"></textarea></label>
-      <button class="accent" onclick="savePost()">Veröffentlichen</button>
-    </div>
-  `);
-}
-
-function savePost() {
-  const title = $("ptitle").value.trim();
-  const text = $("ptext").value.trim();
-  if (!title || !text) return;
-  state.posts.unshift({author:$("pauthor").value || "Küchenfreund",title,text,likes:0});
-  save(); renderPosts(); closeModal();
-}
-
-function likePost(index) {
-  state.posts[index].likes = (state.posts[index].likes || 0) + 1;
-  save(); renderPosts();
-}
-
-function openRecipeForm() {
-  openModal("Eigenes Rezept", `
-    <div class="field">
-      <label>Name<input id="rtitle"></label>
-      <label>Zeit in Minuten<input id="rtime" type="number" value="25"></label>
-      <label>Ernährung<select id="rdiet"><option>Vegetarisch</option><option>Vegan</option><option>Glutenfrei</option><option>Low-Carb</option></select></label>
-      <label>Küche<input id="rcuisine" value="Klassisch"></label>
-      <label>Zutaten, durch Kommas getrennt<input id="rings"></label>
-      <label>Zubereitung, ein Schritt pro Zeile<textarea id="rsteps" rows="4"></textarea></label>
-      <button class="primary" onclick="saveRecipe()">Rezept speichern</button>
-    </div>
-  `);
-}
-
-function saveRecipe() {
-  const title = $("rtitle").value.trim();
-  if (!title) return;
-  state.custom.push({
-    id:"c"+Date.now(), title, time:Number($("rtime").value)||25, calories:400,
-    diet:$("rdiet").value, cuisine:$("rcuisine").value||"Klassisch",
-    ingredients:$("rings").value.split(",").map(x=>x.trim()).filter(Boolean),
-    steps:$("rsteps").value.split("\n").map(x=>x.trim()).filter(Boolean)
-  });
-  save(); renderRecipes(); closeModal();
-}
-
-function openModal(title, html) {
-  $("modalTitle").textContent = title;
-  $("modalBody").innerHTML = html;
-  $("modal").classList.add("open");
-}
-
-function closeModal() {
-  $("modal").classList.remove("open");
-}
-
-let timerSeconds = 0;
-let timerInterval = null;
-
-function openTimer() {
-  openModal("Küchentimer", `
-    <div class="timer" id="timerDisplay">00:00</div>
-    <div class="row" style="margin:12px 0">
-      <button class="soft" onclick="setTimer(6)">Eier 6m</button>
-      <button class="soft" onclick="setTimer(8)">Pasta 8m</button>
-      <button class="soft" onclick="setTimer(25)">25m</button>
-    </div>
-    <div class="row">
-      <input id="timerMins" type="number" min="1" placeholder="Minuten">
-      <button class="soft" onclick="setTimer(Number($('timerMins').value))">Setzen</button>
-      <button class="primary" onclick="startTimer()">Start</button>
-      <button class="danger" onclick="resetTimer()">Reset</button>
-    </div>
-  `);
-}
-
-function setTimer(minutes) {
-  clearInterval(timerInterval);
-  timerSeconds = Math.max(0, minutes * 60);
-  updateTimer();
-}
-
-function updateTimer() {
-  const display = $("timerDisplay");
-  if (display) {
-    display.textContent =
-      `${String(Math.floor(timerSeconds/60)).padStart(2,"0")}:${String(timerSeconds%60).padStart(2,"0")}`;
-  }
-}
-
-function startTimer() {
-  if (!timerSeconds || timerInterval) return;
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    updateTimer();
-    if (timerSeconds <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      toast("Timer abgelaufen!");
-      alert("Timer abgelaufen!");
+    if (ingredients.length >= 30) {
+      setStatus('You can add up to 30 ingredients.');
+      return;
     }
-  }, 1000);
-}
 
-function resetTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timerSeconds = 0;
-  updateTimer();
-}
+    if (ingredients.some((item) => item.toLowerCase() === value.toLowerCase())) {
+      setStatus('That ingredient is already on your list.');
+      return;
+    }
 
-function scanPhoto(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    setIngredients((prev) => [...prev, value]);
+    setInputValue('');
+    setStatus('');
+    inputRef.current?.focus();
+  };
 
-  const imageUrl = URL.createObjectURL(file);
-  openModal("Foto deiner Zutaten", `
-    <img src="${imageUrl}" alt="Zutatenfoto" style="width:100%;max-height:300px;object-fit:contain;border-radius:12px">
-    <p class="muted">Diese Offline-Version erkennt Zutaten nicht automatisch. Tippe die Zutaten aus dem Foto ein.</p>
-    <div class="row">
-      <input id="photoIngredients" placeholder="z. B. Tomaten, Paprika" style="flex:1">
-      <button class="primary" onclick="usePhotoIngredients()">Zutaten übernehmen</button>
+  // Add quick pantry staple
+  const handleAddStaple = (staple: string) => {
+    if (ingredients.length >= 30) {
+      setStatus('You can add up to 30 ingredients.');
+      return;
+    }
+    if (ingredients.some((item) => item.toLowerCase() === staple.toLowerCase())) {
+      setStatus('That ingredient is already on your list.');
+      return;
+    }
+    setIngredients((prev) => [...prev, staple]);
+    setStatus('');
+  };
+
+  // Remove single ingredient
+  const handleRemoveIngredient = (indexToRemove: number) => {
+    setIngredients((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    setStatus('');
+  };
+
+  // Clear all
+  const handleClearAll = () => {
+    setIngredients([]);
+    setStatus('');
+  };
+
+  // Suggest recipes (POST /api/recipes)
+  const handleGenerate = async () => {
+    if (!ingredients.length) {
+      setStatus('Add at least one ingredient first.');
+      return;
+    }
+
+    setIsGenerating(true);
+    setStatus('Creating recipe ideas…');
+    setRecipesText('');
+    setParsedRecipes([]);
+
+    try {
+      const response = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ingredients,
+          preferences: selectedPreference !== 'Any Style' ? selectedPreference : undefined,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Request failed.');
+      }
+
+      const returnedRecipes = data.recipes || 'No recipes were returned.';
+      setRecipesText(returnedRecipes);
+      const parsed = parseRecipesFromMarkdown(returnedRecipes);
+      setParsedRecipes(parsed);
+      setStatus('');
+
+      // Smooth scroll to results
+      setTimeout(() => {
+        resultsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setStatus(msg);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Copy to clipboard
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  // Text to speech narration
+  const handleToggleSpeak = (recipe: ParsedRecipe) => {
+    if (!('speechSynthesis' in window)) {
+      alert('Speech synthesis is not supported in this browser.');
+      return;
+    }
+
+    if (isSpeaking && speakingRecipeId === recipe.id) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSpeakingRecipeId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const cleanReadText = `${recipe.title}. Ingredients: ${recipe.ingredients.join(', ')}. Instructions: ${recipe.steps.join('. ')}`;
+    const utterance = new SpeechSynthesisUtterance(cleanReadText);
+    utterance.rate = 0.95;
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setSpeakingRecipeId(null);
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setSpeakingRecipeId(null);
+    };
+
+    setSpeakingRecipeId(recipe.id);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Cooking Timer handlers
+  useEffect(() => {
+    if (timerRunning) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerIntervalRef.current!);
+            setTimerRunning(false);
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification('Timer Finished!', { body: 'Your cooking timer is complete.' });
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [timerRunning]);
+
+  const startTimerWithMinutes = (mins: number) => {
+    setTimerSeconds(mins * 60);
+    setTimerRunning(true);
+    setTimerModalOpen(true);
+  };
+
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f7f7f2] text-[#20251f] flex flex-col font-sans">
+      {/* Top Navigation Bar */}
+      <header className="border-b border-[#e6e8df] bg-white/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-[#286b45] text-white flex items-center justify-center shadow-sm">
+              <ChefHat className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="font-serif font-bold text-xl tracking-tight text-[#1a4a2f]">
+                Pantry Chef
+              </span>
+              <span className="hidden sm:inline-block ml-2 text-xs font-medium px-2 py-0.5 bg-[#edf3ed] text-[#286b45] rounded-full">
+                AI Recipe Assistant
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTimerModalOpen(!timerModalOpen)}
+              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                timerRunning
+                  ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse'
+                  : 'bg-white border-[#e6e8df] text-[#525a4e] hover:border-[#cdd2c7]'
+              }`}
+              title="Kitchen Timer"
+            >
+              <Timer className="w-3.5 h-3.5" />
+              <span>{timerSeconds > 0 ? formatTimer(timerSeconds) : 'Timer'}</span>
+            </button>
+
+            {ingredients.length > 0 && (
+              <span className="text-xs font-medium px-2.5 py-1 bg-[#edf3ed] text-[#286b45] rounded-full">
+                {ingredients.length}/30 items
+              </span>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Floating Kitchen Timer Widget / Modal */}
+      {timerModalOpen && (
+        <div className="max-w-4xl mx-auto px-4 w-full mt-3">
+          <div className="bg-white border border-[#e6e8df] rounded-xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-200">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                <Timer className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#7a8376] uppercase tracking-wider">Kitchen Timer</p>
+                <p className="text-2xl font-mono font-bold text-[#20251f]">{formatTimer(timerSeconds)}</p>
+              </div>
+            </div>
+
+            {/* Quick minute pills */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[3, 5, 10, 15, 20, 30].map((mins) => (
+                <button
+                  key={mins}
+                  type="button"
+                  onClick={() => startTimerWithMinutes(mins)}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#edf3ed] text-[#286b45] hover:bg-[#286b45] hover:text-white transition-colors"
+                >
+                  +{mins}m
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTimerRunning(!timerRunning)}
+                className={`p-2 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors ${
+                  timerRunning
+                    ? 'bg-amber-600 text-white hover:bg-amber-700'
+                    : 'bg-[#286b45] text-white hover:bg-[#1a4a2f]'
+                }`}
+              >
+                {timerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {timerRunning ? 'Pause' : 'Start'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setTimerRunning(false);
+                  setTimerSeconds(0);
+                }}
+                className="p-2 rounded-lg border border-[#cdd2c7] text-[#525a4e] hover:bg-gray-100 text-xs font-semibold"
+                title="Reset timer"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTimerModalOpen(false)}
+                className="p-2 text-[#7a8376] hover:text-black text-xs"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Container matching the user's max-width 720px */}
+      <main className="flex-1 max-w-[760px] w-full mx-auto px-4 py-8 sm:py-12">
+        {/* Hero Title */}
+        <div className="text-center sm:text-left mb-6">
+          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#1a4a2f] tracking-tight">
+            Pantry Chef
+          </h1>
+          <p className="mt-1.5 text-base sm:text-lg text-[#525a4e]">
+            Enter ingredients you have, and get recipe ideas.
+          </p>
+        </div>
+
+        {/* Input Card Container */}
+        <section className="bg-white border border-[#e6e8df] rounded-2xl p-5 sm:p-7 shadow-sm transition-shadow hover:shadow-md">
+          {/* Ingredient Form */}
+          <form id="ingredient-form" onSubmit={handleAddIngredient} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label htmlFor="ingredient-input" className="block text-sm font-bold text-[#20251f]">
+                Add an ingredient
+              </label>
+              <span className="text-xs text-[#7a8376]">
+                {ingredients.length}/30 items added
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <div className="relative flex-1">
+                <input
+                  id="ingredient-input"
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  maxLength={80}
+                  placeholder="e.g. tomatoes, garlic, pasta..."
+                  className="w-full px-4 py-3 bg-[#fafafa] focus:bg-white border border-[#cdd2c7] focus:border-[#286b45] focus:ring-2 focus:ring-[#286b45]/20 rounded-xl text-base text-[#20251f] placeholder-[#8f9888] outline-none transition-all"
+                />
+                {inputValue && (
+                  <button
+                    type="button"
+                    onClick={() => setInputValue('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-xl bg-[#e9eee8] hover:bg-[#d8e2d7] text-[#20251f] font-semibold text-base transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+              >
+                <Plus className="w-4 h-4 text-[#286b45]" />
+                <span>Add</span>
+              </button>
+            </div>
+          </form>
+
+          {/* Quick pantry suggestions */}
+          <div className="mt-4 pt-3 border-t border-[#f0f2eb]">
+            <p className="text-xs font-semibold text-[#7a8376] uppercase tracking-wider mb-2 flex items-center gap-1">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
+              Popular pantry items (tap to add):
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {COMMON_PANTRY_ITEMS.map((item) => {
+                const isAdded = ingredients.some((i) => i.toLowerCase() === item.toLowerCase());
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    disabled={isAdded}
+                    onClick={() => handleAddStaple(item)}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                      isAdded
+                        ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed line-through'
+                        : 'bg-[#fafbfa] border-[#e2e6dc] text-[#3a4237] hover:border-[#286b45] hover:bg-[#edf3ed] hover:text-[#286b45] cursor-pointer'
+                    }`}
+                  >
+                    + {item}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Added Ingredients Chips list */}
+          <div
+            id="ingredients"
+            className="flex flex-wrap gap-2 my-5 min-h-[40px] items-center"
+            aria-live="polite"
+          >
+            {ingredients.length === 0 ? (
+              <div className="w-full py-4 text-center rounded-xl border border-dashed border-[#d8ded4] bg-[#fbfcfb]">
+                <UtensilsCrossed className="w-6 h-6 mx-auto text-[#9eab99] mb-1.5" />
+                <p className="text-xs text-[#7a8376]">
+                  No ingredients added yet. Add items above or pick from common staples!
+                </p>
+              </div>
+            ) : (
+              ingredients.map((ingredient, index) => (
+                <span
+                  key={`${ingredient}-${index}`}
+                  className="chip inline-flex items-center gap-2 pl-3.5 pr-2 py-1.5 bg-[#edf3ed] border border-[#d6e3d5] text-[#1e4830] font-medium text-sm rounded-full shadow-xs animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <span>{ingredient}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveIngredient(index)}
+                    aria-label={`Remove ${ingredient}`}
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[#40614f] hover:text-[#dc2626] hover:bg-white/80 transition-colors cursor-pointer text-base leading-none font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
+
+          {/* Meal Style & Dietary Filter Tags */}
+          <div className="mb-5 pt-3 border-t border-[#f0f2eb]">
+            <label className="block text-xs font-semibold text-[#7a8376] uppercase tracking-wider mb-2">
+              Style / Preference (Optional):
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {PREFERENCE_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setSelectedPreference(tag)}
+                  className={`text-xs px-3 py-1 rounded-full font-medium transition-all ${
+                    selectedPreference === tag
+                      ? 'bg-[#286b45] text-white shadow-xs'
+                      : 'bg-[#edf3ed] text-[#3a4237] hover:bg-[#dde6dc]'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+            <button
+              id="generate-button"
+              type="button"
+              disabled={isGenerating || ingredients.length === 0}
+              onClick={handleGenerate}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#286b45] hover:bg-[#1f5636] text-white font-semibold text-base transition-all shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Creating recipe ideas…</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 text-amber-300" />
+                  <span>Suggest recipes</span>
+                </>
+              )}
+            </button>
+
+            {ingredients.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="text-xs text-[#7a8376] hover:text-[#dc2626] px-3 py-2 font-medium transition-colors flex items-center justify-center gap-1"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Clear list
+              </button>
+            )}
+          </div>
+
+          {/* Status Message */}
+          <div
+            id="status"
+            role="status"
+            aria-live="polite"
+            className="min-h-[24px] mt-3.5 text-sm font-medium flex items-center gap-2 transition-opacity"
+          >
+            {status && (
+              <div
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg w-full ${
+                  status.includes('Creating')
+                    ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                    : status.includes('valid') || status.includes('least') || status.includes('already') || status.includes('error') || status.includes('wrong')
+                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                    : 'text-[#525a4e]'
+                }`}
+              >
+                {status.includes('already') || status.includes('valid') ? (
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                ) : null}
+                <span>{status}</span>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Results Section (#result-card & #results) */}
+        {recipesText && (
+          <section
+            id="result-card"
+            ref={resultsCardRef}
+            className="mt-8 bg-white border border-[#e6e8df] rounded-2xl p-5 sm:p-7 shadow-sm transition-all animate-in fade-in slide-in-from-bottom-4 duration-300"
+          >
+            {/* Header with Switch View & Copy All */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#f0f2eb] gap-3">
+              <div>
+                <h2 className="font-serif text-2xl font-bold text-[#1a4a2f]">
+                  Recipe ideas
+                </h2>
+                <p className="text-xs text-[#7a8376] mt-0.5">
+                  Tailored to your {ingredients.length} pantry items
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                {/* View switcher */}
+                <div className="flex items-center bg-[#edf3ed] p-1 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('cards')}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      viewMode === 'cards'
+                        ? 'bg-white text-[#286b45] shadow-xs'
+                        : 'text-[#525a4e] hover:text-[#286b45]'
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Cards</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('raw')}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      viewMode === 'raw'
+                        ? 'bg-white text-[#286b45] shadow-xs'
+                        : 'text-[#525a4e] hover:text-[#286b45]'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Plain Text</span>
+                  </button>
+                </div>
+
+                {/* Copy All */}
+                <button
+                  type="button"
+                  onClick={() => handleCopy(recipesText, 999)}
+                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-[#f0f3ee] hover:bg-[#e2e9df] text-[#286b45] rounded-lg border border-[#dce3d9] transition-colors"
+                  title="Copy full recipe text"
+                >
+                  {copiedIndex === 999 ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-green-600" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy All</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Results Display */}
+            <div id="results" className="mt-6">
+              {viewMode === 'raw' ? (
+                /* Raw text view preserving the exact pre-wrap styling from user's template */
+                <div className="bg-[#fafafa] p-5 rounded-xl border border-[#e8ebe3] font-mono text-sm leading-relaxed whitespace-pre-wrap text-[#20251f] selection:bg-[#286b45]/20">
+                  {recipesText}
+                </div>
+              ) : (
+                /* Card view for delightful interactive cooking */
+                <div className="space-y-6">
+                  {parsedRecipes.map((recipe, idx) => (
+                    <article
+                      key={recipe.id}
+                      className="border border-[#e6e8df] rounded-xl overflow-hidden bg-[#fafbfa] hover:border-[#c5d1bf] transition-all"
+                    >
+                      {/* Recipe Card Header */}
+                      <div className="p-5 sm:p-6 bg-white border-b border-[#eef1ea]">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="w-6 h-6 rounded-full bg-[#edf3ed] text-[#286b45] text-xs font-bold flex items-center justify-center">
+                                {idx + 1}
+                              </span>
+                              <span className="text-xs font-semibold tracking-wider uppercase text-[#7a8376]">
+                                Recipe Option
+                              </span>
+                            </div>
+                            <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#1a4a2f]">
+                              {recipe.title}
+                            </h3>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Read Aloud button */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSpeak(recipe)}
+                              className={`p-2 rounded-lg border text-xs font-semibold flex items-center gap-1 transition-colors ${
+                                isSpeaking && speakingRecipeId === recipe.id
+                                  ? 'bg-[#286b45] text-white border-[#286b45]'
+                                  : 'bg-white border-[#dce3d9] text-[#525a4e] hover:bg-[#edf3ed]'
+                              }`}
+                              title={
+                                isSpeaking && speakingRecipeId === recipe.id
+                                  ? 'Stop reading'
+                                  : 'Read aloud (hands-free cooking)'
+                              }
+                            >
+                              {isSpeaking && speakingRecipeId === recipe.id ? (
+                                <>
+                                  <VolumeX className="w-4 h-4" />
+                                  <span className="hidden sm:inline">Stop</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Volume2 className="w-4 h-4" />
+                                  <span className="hidden sm:inline">Listen</span>
+                                </>
+                              )}
+                            </button>
+
+                            {/* Copy single recipe */}
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(recipe.rawText, idx)}
+                              className="p-2 rounded-lg bg-white border border-[#dce3d9] text-[#525a4e] hover:bg-[#edf3ed] text-xs font-semibold flex items-center gap-1 transition-colors"
+                              title="Copy this recipe"
+                            >
+                              {copiedIndex === idx ? (
+                                <Check className="w-4 h-4 text-green-600" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Metadata Pills: Prep Time, Cook Time, Servings */}
+                        {(recipe.prepTime || recipe.cookTime || recipe.servings) && (
+                          <div className="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-[#f4f6f1]">
+                            {recipe.prepTime && (
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
+                                <Clock className="w-3.5 h-3.5 text-[#286b45]" />
+                                <span>Prep: {recipe.prepTime}</span>
+                              </div>
+                            )}
+
+                            {recipe.cookTime && (
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
+                                <Flame className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Cook: {recipe.cookTime}</span>
+                              </div>
+                            )}
+
+                            {recipe.servings && (
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#525a4e] bg-[#f2f5ef] px-3 py-1.5 rounded-lg">
+                                <Users className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Servings: {recipe.servings}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Ingredients Checklist & Steps */}
+                      <div className="p-5 sm:p-6 space-y-6">
+                        {/* Ingredients */}
+                        {recipe.ingredients.length > 0 && (
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-bold text-sm text-[#20251f] uppercase tracking-wider flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-[#286b45]" />
+                                Ingredients
+                              </h4>
+                              <span className="text-xs text-[#7a8376]">
+                                Click items to check off
+                              </span>
+                            </div>
+
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {recipe.ingredients.map((ing, iIdx) => {
+                                const key = `${recipe.id}-ing-${iIdx}`;
+                                const isChecked = !!checkedIngredients[key];
+                                return (
+                                  <li
+                                    key={key}
+                                    onClick={() =>
+                                      setCheckedIngredients((prev) => ({
+                                        ...prev,
+                                        [key]: !prev[key],
+                                      }))
+                                    }
+                                    className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-xs sm:text-sm cursor-pointer transition-all ${
+                                      isChecked
+                                        ? 'bg-[#edf3ed]/60 border-[#d6e3d5] text-[#7a8376] line-through'
+                                        : 'bg-white border-[#e6e8df] text-[#20251f] hover:border-[#c5d1bf]'
+                                    }`}
+                                  >
+                                    <div
+                                      className={`w-4 h-4 mt-0.5 rounded flex items-center justify-center shrink-0 border ${
+                                        isChecked
+                                          ? 'bg-[#286b45] border-[#286b45] text-white'
+                                          : 'border-[#cdd2c7] bg-white'
+                                      }`}
+                                    >
+                                      {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                                    </div>
+                                    <span className="leading-tight">{ing}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Preparation Steps */}
+                        {recipe.steps.length > 0 && (
+                          <div>
+                            <h4 className="font-bold text-sm text-[#20251f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-[#286b45]" />
+                              Preparation Steps
+                            </h4>
+
+                            <ol className="space-y-3">
+                              {recipe.steps.map((step, sIdx) => {
+                                const key = `${recipe.id}-step-${sIdx}`;
+                                const isDone = !!checkedSteps[key];
+                                return (
+                                  <li
+                                    key={key}
+                                    onClick={() =>
+                                      setCheckedSteps((prev) => ({
+                                        ...prev,
+                                        [key]: !prev[key],
+                                      }))
+                                    }
+                                    className={`flex items-start gap-3 p-3 rounded-xl border text-sm transition-all cursor-pointer ${
+                                      isDone
+                                        ? 'bg-[#edf3ed]/50 border-[#d6e3d5] text-[#7a8376]'
+                                        : 'bg-white border-[#e6e8df] text-[#20251f] hover:border-[#c5d1bf]'
+                                    }`}
+                                  >
+                                    <span
+                                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                                        isDone
+                                          ? 'bg-[#286b45] text-white'
+                                          : 'bg-[#edf3ed] text-[#286b45]'
+                                      }`}
+                                    >
+                                      {isDone ? <Check className="w-3.5 h-3.5" /> : sIdx + 1}
+                                    </span>
+                                    <p
+                                      className={`leading-relaxed flex-1 ${
+                                        isDone ? 'line-through text-gray-400' : ''
+                                      }`}
+                                    >
+                                      {step}
+                                    </p>
+                                  </li>
+                                );
+                              })}
+                            </ol>
+                          </div>
+                        )}
+
+                        {/* Notes / Tips */}
+                        {recipe.notes && (
+                          <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200/60 text-xs text-amber-900 leading-relaxed flex items-start gap-2">
+                            <Lightbulb className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                            <div>
+                              <span className="font-bold">Chef's Tip: </span>
+                              {recipe.notes}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-12 py-6 border-t border-[#e6e8df] bg-white text-center text-xs text-[#7a8376]">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>© {new Date().getFullYear()} Pantry Chef. Cook with what you have.</p>
+          <p className="flex items-center gap-1.5 text-[#525a4e]">
+            Powered by Google Gemini 3.8 Flash
+          </p>
+        </div>
+      </footer>
     </div>
-  `);
-  event.target.value = "";
+  );
 }
-
-function usePhotoIngredients() {
-  $("ingredientInput").value = $("photoIngredients").value;
-  addIngredients();
-  closeModal();
-}
-
-init();
-</script>
-</body>
-</html>
