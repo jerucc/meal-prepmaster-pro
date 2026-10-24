@@ -243,7 +243,7 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
 }
-.recipe-card img { width: 100%; height: 160px; object-fit: cover; background: var(--line); }
+.recipe-card img { width: 100%; height: 165px; object-fit: cover; background: var(--line); }
 .recipe-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
 .recipe-body h3 { margin: 0 0 6px; font-size: 17px; }
 .recipe-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
@@ -262,6 +262,7 @@ input, select, textarea {
   background: var(--bg);
 }
 
+/* Modal with Scrolling Fix */
 .modal {
   position: fixed;
   inset: 0;
@@ -280,7 +281,13 @@ input, select, textarea {
   padding: 24px;
   width: min(550px, 100%);
   max-height: 85vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#modalBody {
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .modalbox ol, .modalbox ul {
@@ -598,16 +605,29 @@ document.addEventListener("DOMContentLoaded", () => {
     posts: read("kp_posts", [{title:"Tipp für knusprigen Tofu", body:"Vor dem Braten mit Stärke anstäuben!", author:"ChefLena"}]),
   };
 
-  function getRecipeImageUrl(cuisine, title) {
-    const categoryImages = {
-      "Nachtisch": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80",
-      "Italienisch": "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80",
-      "Mediterran": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80",
-      "Asiatisch": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80",
-      "Klassisch": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80",
-      "Schnell & Einfach": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
-    };
-    return categoryImages[cuisine] || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+  // Ingredient & Dish-Specific Exact Image Resolver
+  function getRecipeImageUrl(title, ingredients, cuisine) {
+    let text = `${title} ${(ingredients || []).join(" ")} ${cuisine}`.toLowerCase();
+
+    if (text.includes("pasta") || text.includes("nudeln") || text.includes("spaghetti")) {
+      return "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"; // Authentic Pasta
+    }
+    if (text.includes("suppe") || text.includes("stew") || text.includes("eintopf")) {
+      return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"; // Warm Creamy Soup
+    }
+    if (text.includes("auflauf") || text.includes("gratin") || text.includes("überbacken")) {
+      return "https://images.unsplash.com/photo-1584278860011-633215267ff6?auto=format&fit=crop&w=800&q=80"; // Baked Casserole
+    }
+    if (text.includes("tofu") || text.includes("bowl") || text.includes("reis")) {
+      return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"; // Tofu Bowl
+    }
+    if (text.includes("gemüse") || text.includes("mediterran") || text.includes("pfanne")) {
+      return "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"; // Sautéed Veggies
+    }
+    if (text.includes("dessert") || text.includes("nachtisch") || text.includes("parfait") || text.includes("frucht") || text.includes("schoko")) {
+      return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"; // Dessert Parfait
+    }
+    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"; // Generic Healthy Dish
   }
 
   const baseRecipes = [
@@ -626,8 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Die Sahne angießen, aufkochen lassen und bei geringer Hitze ca. 3-4 Minuten leicht einköcheln lassen.",
         "Frisch geriebenen Parmesan unterrühren, bis eine cremige Sauce entsteht. Mit Salz und Pfeffer abschmecken.",
         "Pasta abgießen, direkt in die Pfanne zur Sauce geben, gut vermengen und heiß servieren."
-      ],
-      image: getRecipeImageUrl("Italienisch")
+      ]
     },
     {
       id: "r2",
@@ -643,8 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paprika und Zucchini ca. 5-7 Minuten kross anbraten.",
         "Knoblauch und Tomaten hinzufügen, weitere 3 Minuten mitbraten.",
         "Mit Kräutern der Provence, Meersalz und Pfeffer kräftig würzen und servieren."
-      ],
-      image: getRecipeImageUrl("Mediterran")
+      ]
     },
     {
       id: "r3",
@@ -660,8 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Tofu in einer Pfanne mit Sesamöl von allen Seiten 8-10 Minuten goldbraun anbraten.",
         "Ingwer reiben und zusammen mit Paprikastreifen kurz mitbraten. Mit Sojasauce ablöschen.",
         "Gekochten Reis in Schüsseln füllen, Gemüse und knusprigen Tofu darauf anrichten."
-      ],
-      image: getRecipeImageUrl("Asiatisch")
+      ]
     },
     {
       id: "r4",
@@ -675,8 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Die frischen Beeren gründlich waschen und trocken tupfen.",
         "In einem Dessertglas abwechselnd Joghurt, Müsli und Beeren schichten.",
         "Mit flüssigem Honig beträufeln und sofort servieren."
-      ],
-      image: getRecipeImageUrl("Nachtisch")
+      ]
     }
   ];
 
@@ -790,6 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toast("✨ Rezepte erfolgreich generiert!");
   }
 
+  // Generates 6+ distinct recipe variations from selected ingredients
   function generateDynamicMenuSet(ings, currentCuisine, currentDiet) {
     if (!ings.length && currentCuisine !== "Nachtisch") return [];
     
@@ -800,66 +817,89 @@ document.addEventListener("DOMContentLoaded", () => {
     return [
       {
         id: "gen_1",
-        title: `${main} & ${second} Pfanne`,
+        title: `Cremiges ${main} & ${second} Pfannengericht`,
         time: 20,
-        calories: 410,
+        calories: 420,
         diet: currentDiet === "all" ? "Vegetarisch" : currentDiet,
         cuisine: "Schnell & Einfach",
         ingredients: deduplicate([...cleanIngs, "Olivenöl", "Knoblauch", "Salz & Pfeffer"]),
         steps: [
-          `Die Zutaten (${cleanIngs.join(", ")}) säubern und in Scheiben/Würfel schneiden.`,
-          "2 EL Olivenöl in einer Pfanne erhitzen und Knoblauch andünsten.",
-          "Restliche Zutaten dazugeben und ca. 8 Minuten kross anbraten.",
-          "Mit Salz und Pfeffer abschmecken und warm servieren."
-        ],
-        image: getRecipeImageUrl("Schnell & Einfach")
+          `Die Zutaten (${cleanIngs.join(", ")}) vorbereiten und in mundgerechte Stücke schneiden.`,
+          "Olivenöl in einer Pfanne erhitzen und Knoblauch andünsten.",
+          "Restliche Zutaten dazugeben und ca. 8 Minuten anbraten.",
+          "Mit Salz und Pfeffer kräftig abschmecken und servieren."
+        ]
       },
       {
         id: "gen_2",
-        title: `Cremiges ${main}-Gericht`,
-        time: 25,
-        calories: 450,
+        title: `Überbackener ${main}-Auflauf`,
+        time: 30,
+        calories: 480,
         diet: "Vegetarisch",
-        cuisine: "Mediterran",
-        ingredients: deduplicate([...cleanIngs, "Sahne / Pflanzensahne", "Knoblauch", "Butter"]),
+        cuisine: "Italienisch",
+        ingredients: deduplicate([...cleanIngs, "Geriebener Käse", "Sahne", "Muskatnuss"]),
         steps: [
-          `Zutaten (${cleanIngs.join(", ")}) klein schneiden.`,
-          "Butter schmelzen und Knoblauch darin anbraten.",
-          "Mit Sahne ablöschen und 5-7 Minuten cremig einköcheln lassen.",
-          "Mit Salz und Pfeffer verfeinern."
-        ],
-        image: getRecipeImageUrl("Mediterran")
+          "Ofen auf 200 °C Vorheizen.",
+          `Die Zutaten (${cleanIngs.join(", ")}) in eine Auflaufform schichten.`,
+          "Mit Sahne gießen und Käse drüberstreuen.",
+          "20 Min. im Ofen goldbraun überbacken."
+        ]
       },
       {
         id: "gen_3",
-        title: `Überbackener ${main}-Auflauf`,
-        time: 35,
-        calories: 490,
-        diet: "Vegetarisch",
-        cuisine: "Italienisch",
-        ingredients: deduplicate([...cleanIngs, "Geriebener Käse", "Tomatensauce", "Oregano"]),
+        title: `Wärmende ${main}-Suppe`,
+        time: 25,
+        calories: 310,
+        diet: "Vegan",
+        cuisine: "Klassisch",
+        ingredients: deduplicate([...cleanIngs, "Gemüsebrühe", "Kräuter"]),
         steps: [
-          "Backofen auf 200 °C vorheizen.",
-          `Zutaten (${cleanIngs.join(", ")}) in eine Auflaufform schichten.`,
-          "Mit Tomatensauce bedecken und Käse darüberstreuen.",
-          "20 Minuten im Ofen goldbraun überbacken."
-        ],
-        image: getRecipeImageUrl("Italienisch")
+          `Zutaten (${cleanIngs.join(", ")}) im Topf kurz dünsten.`,
+          "Mit Gemüsebrühe auffüllen und 15 Minuten köcheln lassen.",
+          "Fein pürieren und mit frischen Kräutern servieren."
+        ]
       },
       {
         id: "gen_4",
-        title: `🍨 ${main}-Frucht-Traum`,
+        title: `Frische ${main}-${second} Bowl`,
+        time: 15,
+        calories: 340,
+        diet: "Vegetarisch",
+        cuisine: "Mediterran",
+        ingredients: deduplicate([...cleanIngs, "Zitrone", "Olivenöl", "Feta"]),
+        steps: [
+          `Die Frischen Zutaten (${cleanIngs.join(", ")}) schneiden.`,
+          "In einer Schüssel anrichten.",
+          "Mit Olivenöl, Zitrone und Feta verfeinern."
+        ]
+      },
+      {
+        id: "gen_5",
+        title: `Krosse ${main}-Bratpfanne`,
+        time: 20,
+        calories: 390,
+        diet: "Vegetarisch",
+        cuisine: "Asiatisch",
+        ingredients: deduplicate([...cleanIngs, "Sojasauce", "Sesamöl"]),
+        steps: [
+          `Zutaten (${cleanIngs.join(", ")}) in Streifen schneiden.`,
+          "In einer heißen Pfanne mit Sesamöl kross anbraten.",
+          "Mit Sojasauce ablöschen und warm genießen."
+        ]
+      },
+      {
+        id: "gen_6",
+        title: `🍨 ${main}-Frucht Parfait`,
         time: 10,
         calories: 230,
         diet: "Vegetarisch",
         cuisine: "Nachtisch",
-        ingredients: deduplicate([...cleanIngs, "Joghurt", "Honig", "Nüsse"]),
+        ingredients: deduplicate([...cleanIngs, "Joghurt", "Honig", "Müsli"]),
         steps: [
           "Joghurt in Dessertgläser schichten.",
-          `Frische Zutaten (${cleanIngs.join(", ")}) hinzufügen.`,
-          "Mit Honig beträufeln und Nüssen garnieren."
-        ],
-        image: getRecipeImageUrl("Nachtisch")
+          `Frische Zutaten (${cleanIngs.join(", ")}) schichten.`,
+          "Mit Honig beträufeln und sofort servieren."
+        ]
       }
     ];
   }
@@ -893,7 +933,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     $("recipes").innerHTML = finalDisplayList.length ? finalDisplayList.map(r => {
       let cleanList = deduplicate(r.ingredients || []);
-      let photoUrl = r.image || getRecipeImageUrl(r.cuisine, r.title);
+      let photoUrl = r.image || getRecipeImageUrl(r.title, cleanList, r.cuisine);
       return `
       <div class="recipe-card">
         <img src="${photoUrl}" alt="${esc(r.title)}">
@@ -1096,6 +1136,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function saveCustomRecipe() {
     let title = $("rTitle").value.trim(), ings = $("rIngs").value.split(",").map(x => x.trim()).filter(Boolean);
     if (title) {
+      let clean = deduplicate(ings);
       state.custom.push({
         id: "c_" + Date.now(),
         title,
@@ -1103,13 +1144,13 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 400,
         diet: "Vegetarisch",
         cuisine: "Kreativ",
-        ingredients: deduplicate(ings),
+        ingredients: clean,
         steps: [
           "Zutaten gründlich waschen und in Stücke schneiden.",
           "In einer Pfanne mit etwas Öl anbraten.",
           "Würzen und servieren."
         ],
-        image: getRecipeImageUrl("Schnell & Einfach")
+        image: getRecipeImageUrl(title, clean, "Kreativ")
       });
       save(); renderRecipes(); closeModal(); toast("Rezept gespeichert!");
     }
