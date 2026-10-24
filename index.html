@@ -262,7 +262,6 @@ input, select, textarea {
   background: var(--bg);
 }
 
-/* Modal with Flex Layout and Full Inner Scrolling */
 .modal {
   position: fixed;
   inset: 0;
@@ -565,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
       heroTitle: "Bugün ne pişirmek istersiniz?",
       quickSelect: "HIZLI MALZEME SEÇİMİ:",
       generateBtn: "Tarifleri Oluştur",
-      dietLabel: "Diyet", optAllDiyet: "Tüm Diyetler", optVeg: "Vejetaryen", optVegan: "Vegan", optGluten: "Glutensiz", optLowCarb: "Düşük Karbonhidrat",
+      dietLabel: "Diyet", optAllDiets: "Tüm Diyetler", optVeg: "Vejetaryen", optVegan: "Vegan", optGluten: "Glutensiz", optLowCarb: "Düşük Karbonhidrat",
       timeLabel: "Maks Süre", optAnyTime: "Farketmez",
       catLabel: "Kategori", optAllCats: "Tüm Kategoriler",
       recipesTitle: "Tarifler ve Tatlılar", addCustomRecipe: "＋ Özel Tarif",
@@ -604,31 +603,6 @@ document.addEventListener("DOMContentLoaded", () => {
     pantry: read("kp_pantry", [{id:"p1", name:"Mehl", qty:"1 kg", cat:"Vorratskammer"}]),
     posts: read("kp_posts", [{title:"Tipp für knusprigen Tofu", body:"Vor dem Braten mit Stärke anstäuben!", author:"ChefLena"}]),
   };
-
-  // Robust, Direct Image Resolver matching Dish Types
-  function getRecipeImageUrl(title, ingredients, cuisine) {
-    let text = `${title} ${(ingredients || []).join(" ")} ${cuisine}`.toLowerCase();
-
-    if (text.includes("auflauf") || text.includes("gratin") || text.includes("überbacken")) {
-      return "https://images.unsplash.com/photo-1584278860011-633215267ff6?auto=format&fit=crop&w=800&q=80"; // Casserole
-    }
-    if (text.includes("suppe") || text.includes("stew") || text.includes("eintopf")) {
-      return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"; // Soup
-    }
-    if (text.includes("pasta") || text.includes("nudeln") || text.includes("spaghetti")) {
-      return "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"; // Pasta
-    }
-    if (text.includes("bowl") || text.includes("schüssel")) {
-      return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"; // Bowl
-    }
-    if (text.includes("dessert") || text.includes("nachtisch") || text.includes("parfait") || text.includes("frucht")) {
-      return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"; // Dessert
-    }
-    if (text.includes("gemüse") || text.includes("pfanne")) {
-      return "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"; // Veggies
-    }
-    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"; // Default
-  }
 
   const baseRecipes = [
     {
@@ -810,7 +784,6 @@ document.addEventListener("DOMContentLoaded", () => {
     toast("✨ Rezepte erfolgreich generiert!");
   }
 
-  // Generates 6 distinct recipes with tailored ingredient sets
   function generateDynamicMenuSet(ings, currentCuisine, currentDiet) {
     if (!ings.length && currentCuisine !== "Nachtisch") return [];
     
@@ -946,10 +919,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     $("recipes").innerHTML = finalDisplayList.length ? finalDisplayList.map(r => {
       let cleanList = deduplicate(r.ingredients || []);
-      let photoUrl = r.image || getRecipeImageUrl(r.title, cleanList, r.cuisine);
       return `
       <div class="recipe-card">
-        <img src="${photoUrl}" alt="${esc(r.title)}">
+        <img src="${r.image}" alt="${esc(r.title)}">
         <div class="recipe-body">
           <h3>${esc(r.title)}</h3>
           <div class="recipe-meta">⏱ ${r.time} Min · 🔥 ${r.calories || 420} kcal · ${esc(r.cuisine || "Kreativ")}</div>
@@ -1163,7 +1135,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "In einer Pfanne mit etwas Öl anbraten.",
           "Würzen und servieren."
         ],
-        image: getRecipeImageUrl(title, clean, "Kreativ")
+        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
       });
       save(); renderRecipes(); closeModal(); toast("Rezept gespeichert!");
     }
