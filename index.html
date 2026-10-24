@@ -262,7 +262,7 @@ input, select, textarea {
   background: var(--bg);
 }
 
-/* Modal with Scrolling Fix */
+/* Modal with Flex Layout and Full Inner Scrolling */
 .modal {
   position: fixed;
   inset: 0;
@@ -565,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
       heroTitle: "Bugün ne pişirmek istersiniz?",
       quickSelect: "HIZLI MALZEME SEÇİMİ:",
       generateBtn: "Tarifleri Oluştur",
-      dietLabel: "Diyet", optAllDiets: "Tüm Diyetler", optVeg: "Vejetaryen", optVegan: "Vegan", optGluten: "Glutensiz", optLowCarb: "Düşük Karbonhidrat",
+      dietLabel: "Diyet", optAllDiyet: "Tüm Diyetler", optVeg: "Vejetaryen", optVegan: "Vegan", optGluten: "Glutensiz", optLowCarb: "Düşük Karbonhidrat",
       timeLabel: "Maks Süre", optAnyTime: "Farketmez",
       catLabel: "Kategori", optAllCats: "Tüm Kategoriler",
       recipesTitle: "Tarifler ve Tatlılar", addCustomRecipe: "＋ Özel Tarif",
@@ -605,29 +605,29 @@ document.addEventListener("DOMContentLoaded", () => {
     posts: read("kp_posts", [{title:"Tipp für knusprigen Tofu", body:"Vor dem Braten mit Stärke anstäuben!", author:"ChefLena"}]),
   };
 
-  // Ingredient & Dish-Specific Exact Image Resolver
+  // Robust, Direct Image Resolver matching Dish Types
   function getRecipeImageUrl(title, ingredients, cuisine) {
     let text = `${title} ${(ingredients || []).join(" ")} ${cuisine}`.toLowerCase();
 
-    if (text.includes("pasta") || text.includes("nudeln") || text.includes("spaghetti")) {
-      return "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"; // Authentic Pasta
+    if (text.includes("auflauf") || text.includes("gratin") || text.includes("überbacken")) {
+      return "https://images.unsplash.com/photo-1584278860011-633215267ff6?auto=format&fit=crop&w=800&q=80"; // Casserole
     }
     if (text.includes("suppe") || text.includes("stew") || text.includes("eintopf")) {
-      return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"; // Warm Creamy Soup
+      return "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"; // Soup
     }
-    if (text.includes("auflauf") || text.includes("gratin") || text.includes("überbacken")) {
-      return "https://images.unsplash.com/photo-1584278860011-633215267ff6?auto=format&fit=crop&w=800&q=80"; // Baked Casserole
+    if (text.includes("pasta") || text.includes("nudeln") || text.includes("spaghetti")) {
+      return "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"; // Pasta
     }
-    if (text.includes("tofu") || text.includes("bowl") || text.includes("reis")) {
-      return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"; // Tofu Bowl
+    if (text.includes("bowl") || text.includes("schüssel")) {
+      return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"; // Bowl
     }
-    if (text.includes("gemüse") || text.includes("mediterran") || text.includes("pfanne")) {
-      return "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"; // Sautéed Veggies
+    if (text.includes("dessert") || text.includes("nachtisch") || text.includes("parfait") || text.includes("frucht")) {
+      return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"; // Dessert
     }
-    if (text.includes("dessert") || text.includes("nachtisch") || text.includes("parfait") || text.includes("frucht") || text.includes("schoko")) {
-      return "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"; // Dessert Parfait
+    if (text.includes("gemüse") || text.includes("pfanne")) {
+      return "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"; // Veggies
     }
-    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"; // Generic Healthy Dish
+    return "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"; // Default
   }
 
   const baseRecipes = [
@@ -646,7 +646,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Die Sahne angießen, aufkochen lassen und bei geringer Hitze ca. 3-4 Minuten leicht einköcheln lassen.",
         "Frisch geriebenen Parmesan unterrühren, bis eine cremige Sauce entsteht. Mit Salz und Pfeffer abschmecken.",
         "Pasta abgießen, direkt in die Pfanne zur Sauce geben, gut vermengen und heiß servieren."
-      ]
+      ],
+      image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "r2",
@@ -662,7 +663,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Paprika und Zucchini ca. 5-7 Minuten kross anbraten.",
         "Knoblauch und Tomaten hinzufügen, weitere 3 Minuten mitbraten.",
         "Mit Kräutern der Provence, Meersalz und Pfeffer kräftig würzen und servieren."
-      ]
+      ],
+      image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "r3",
@@ -678,7 +680,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Tofu in einer Pfanne mit Sesamöl von allen Seiten 8-10 Minuten goldbraun anbraten.",
         "Ingwer reiben und zusammen mit Paprikastreifen kurz mitbraten. Mit Sojasauce ablöschen.",
         "Gekochten Reis in Schüsseln füllen, Gemüse und knusprigen Tofu darauf anrichten."
-      ]
+      ],
+      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"
     },
     {
       id: "r4",
@@ -692,7 +695,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Die frischen Beeren gründlich waschen und trocken tupfen.",
         "In einem Dessertglas abwechselnd Joghurt, Müsli und Beeren schichten.",
         "Mit flüssigem Honig beträufeln und sofort servieren."
-      ]
+      ],
+      image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"
     }
   ];
 
@@ -806,13 +810,16 @@ document.addEventListener("DOMContentLoaded", () => {
     toast("✨ Rezepte erfolgreich generiert!");
   }
 
-  // Generates 6+ distinct recipe variations from selected ingredients
+  // Generates 6 distinct recipes with tailored ingredient sets
   function generateDynamicMenuSet(ings, currentCuisine, currentDiet) {
     if (!ings.length && currentCuisine !== "Nachtisch") return [];
     
     let cleanIngs = deduplicate(ings);
-    let main = cleanIngs[0] ? (cleanIngs[0].charAt(0).toUpperCase() + cleanIngs[0].slice(1)) : "Spezial";
-    let second = cleanIngs[1] ? (cleanIngs[1].charAt(0).toUpperCase() + cleanIngs[1].slice(1)) : "Kräuter";
+    let savoryIngs = cleanIngs.filter(x => !["schokolade", "beeren", "zucker"].includes(x.toLowerCase()));
+    let sweetIngs = cleanIngs.filter(x => ["sahne", "beeren", "schokolade", "avocado"].includes(x.toLowerCase()));
+
+    let main = savoryIngs[0] ? (savoryIngs[0].charAt(0).toUpperCase() + savoryIngs[0].slice(1)) : "Spezial";
+    let second = savoryIngs[1] ? (savoryIngs[1].charAt(0).toUpperCase() + savoryIngs[1].slice(1)) : "Kräuter";
 
     return [
       {
@@ -822,13 +829,14 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 420,
         diet: currentDiet === "all" ? "Vegetarisch" : currentDiet,
         cuisine: "Schnell & Einfach",
-        ingredients: deduplicate([...cleanIngs, "Olivenöl", "Knoblauch", "Salz & Pfeffer"]),
+        ingredients: deduplicate([...savoryIngs, "Olivenöl", "Knoblauch", "Salz & Pfeffer"]),
         steps: [
-          `Die Zutaten (${cleanIngs.join(", ")}) vorbereiten und in mundgerechte Stücke schneiden.`,
+          `Die Zutaten (${savoryIngs.join(", ")}) vorbereiten und in mundgerechte Stücke schneiden.`,
           "Olivenöl in einer Pfanne erhitzen und Knoblauch andünsten.",
           "Restliche Zutaten dazugeben und ca. 8 Minuten anbraten.",
           "Mit Salz und Pfeffer kräftig abschmecken und servieren."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?auto=format&fit=crop&w=800&q=80"
       },
       {
         id: "gen_2",
@@ -837,13 +845,14 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 480,
         diet: "Vegetarisch",
         cuisine: "Italienisch",
-        ingredients: deduplicate([...cleanIngs, "Geriebener Käse", "Sahne", "Muskatnuss"]),
+        ingredients: deduplicate([...savoryIngs, "Geriebener Käse", "Sahne", "Muskatnuss"]),
         steps: [
           "Ofen auf 200 °C Vorheizen.",
-          `Die Zutaten (${cleanIngs.join(", ")}) in eine Auflaufform schichten.`,
+          `Die Zutaten (${savoryIngs.join(", ")}) in eine Auflaufform schichten.`,
           "Mit Sahne gießen und Käse drüberstreuen.",
           "20 Min. im Ofen goldbraun überbacken."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1584278860011-633215267ff6?auto=format&fit=crop&w=800&q=80"
       },
       {
         id: "gen_3",
@@ -852,12 +861,13 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 310,
         diet: "Vegan",
         cuisine: "Klassisch",
-        ingredients: deduplicate([...cleanIngs, "Gemüsebrühe", "Kräuter"]),
+        ingredients: deduplicate([...savoryIngs, "Gemüsebrühe", "Kräuter"]),
         steps: [
-          `Zutaten (${cleanIngs.join(", ")}) im Topf kurz dünsten.`,
+          `Zutaten (${savoryIngs.join(", ")}) im Topf kurz dünsten.`,
           "Mit Gemüsebrühe auffüllen und 15 Minuten köcheln lassen.",
           "Fein pürieren und mit frischen Kräutern servieren."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80"
       },
       {
         id: "gen_4",
@@ -866,12 +876,13 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 340,
         diet: "Vegetarisch",
         cuisine: "Mediterran",
-        ingredients: deduplicate([...cleanIngs, "Zitrone", "Olivenöl", "Feta"]),
+        ingredients: deduplicate([...savoryIngs, "Zitrone", "Olivenöl", "Feta"]),
         steps: [
-          `Die Frischen Zutaten (${cleanIngs.join(", ")}) schneiden.`,
+          `Die frischen Zutaten (${savoryIngs.join(", ")}) schneiden.`,
           "In einer Schüssel anrichten.",
           "Mit Olivenöl, Zitrone und Feta verfeinern."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80"
       },
       {
         id: "gen_5",
@@ -880,26 +891,28 @@ document.addEventListener("DOMContentLoaded", () => {
         calories: 390,
         diet: "Vegetarisch",
         cuisine: "Asiatisch",
-        ingredients: deduplicate([...cleanIngs, "Sojasauce", "Sesamöl"]),
+        ingredients: deduplicate([...savoryIngs, "Sojasauce", "Sesamöl"]),
         steps: [
-          `Zutaten (${cleanIngs.join(", ")}) in Streifen schneiden.`,
+          `Zutaten (${savoryIngs.join(", ")}) in Streifen schneiden.`,
           "In einer heißen Pfanne mit Sesamöl kross anbraten.",
           "Mit Sojasauce ablöschen und warm genießen."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"
       },
       {
         id: "gen_6",
-        title: `🍨 ${main}-Frucht Parfait`,
+        title: `🍨 Süßes Dessert-Parfait`,
         time: 10,
         calories: 230,
         diet: "Vegetarisch",
         cuisine: "Nachtisch",
-        ingredients: deduplicate([...cleanIngs, "Joghurt", "Honig", "Müsli"]),
+        ingredients: deduplicate([...(sweetIngs.length ? sweetIngs : ["Sahne"]), "Joghurt", "Honig", "Müsli"]),
         steps: [
           "Joghurt in Dessertgläser schichten.",
-          `Frische Zutaten (${cleanIngs.join(", ")}) schichten.`,
+          "Zutaten schichten.",
           "Mit Honig beträufeln und sofort servieren."
-        ]
+        ],
+        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80"
       }
     ];
   }
